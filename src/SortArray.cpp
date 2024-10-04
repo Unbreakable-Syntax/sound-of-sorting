@@ -110,6 +110,8 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Shuffled Cubic"));
     list.Add(_("Shuffled Quintic"));
     list.Add(_("Shuffled n-2 Equal"));
+    list.Add(_("Pipe Organ"));
+    list.Add(_("Mirrored Organ"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -179,6 +181,33 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         m_array[m_array.size()-1] = ArrayItem(arraysize);
 
         std::random_shuffle(m_array.begin(), m_array.end());
+    }
+    else if (schema == 6) // Pipe organ (1, 1, 2, 2, 1, 1)
+    {
+        int val = 1;
+        for (size_t i = 0; i < m_array.size() / 2; ++i)
+        {
+            m_array[i] = ArrayItem(val); ++val;
+        }
+        val = m_array.size() / 2;
+        for (size_t i = m_array.size() / 2; i <= m_array.size() - 1; ++i)
+        {
+            m_array[i] = ArrayItem(val); --val;
+        }
+    }
+    else if (schema == 7) // Mirrored organ (3, 2, 1, 1, 2, 3)
+    {
+        int val = m_array.size() / 2;
+        for (size_t i = 0; i < m_array.size() / 2; ++i)
+        {
+            m_array[i] = ArrayItem(val); --val;
+        }
+        val = 1;
+        for (size_t i = m_array.size() / 2; i <= m_array.size() - 1; ++i)
+        {
+            m_array[i] = ArrayItem(val); ++val;
+        }
+
     }
     else // fallback
     {
