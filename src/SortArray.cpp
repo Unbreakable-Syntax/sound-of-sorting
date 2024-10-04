@@ -154,18 +154,22 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     else if (schema == 4) // 25% Sorted
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
-        for (size_t i = 0; i <= (m_array.size() / 4) - 1; ++i)
+        for (size_t i = 0; i < m_array.size(); ++i)
         {
-            m_array[i] = ArrayItem(i + 1); ++it;
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= (m_array.size() / 4) - 1)
+            { ++it; }
         }
         std::random_shuffle(it, m_array.end());
     }
     else if (schema == 5) // 50% Sorted
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
-        for (size_t i = 0; i <= (m_array.size() / 2) - 1; ++i)
+        for (size_t i = 0; i < m_array.size(); ++i)
         {
-            m_array[i] = ArrayItem(i + 1); ++it;
+            m_array[i] = ArrayItem(i + 1); 
+            if (i <= (m_array.size() / 2) - 1)
+            { ++it; }
         }
         std::random_shuffle(it, m_array.end());
     }
@@ -173,9 +177,11 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
         size_t half = m_array.size() / 2;
-        for (size_t i = 0; i < half + (half / 2); ++i)
+        for (size_t i = 0; i < m_array.size(); ++i)
         {
-            m_array[i] = ArrayItem(i + 1); ++it;
+            m_array[i] = ArrayItem(i + 1); 
+            if (i < half + (half / 2))
+            { ++it; }
         }
         std::random_shuffle(it, m_array.end());
     }
