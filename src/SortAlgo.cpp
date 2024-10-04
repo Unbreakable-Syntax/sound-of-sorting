@@ -47,6 +47,8 @@ const struct AlgoEntry g_algolist[] =
 {
     { _("Selection Sort"), &SelectionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Sandpaper Sort"), &SandpaperSort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Insertion Sort"), &InsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
@@ -151,6 +153,20 @@ void SelectionSort(SortArray& A)
         A.mark(i);
     }
     A.unwatch_all();
+}
+
+void SandpaperSort(SortArray& A)
+{
+    size_t n = A.size();
+    for (size_t i = 0; i < n; ++i)
+    {
+        for (size_t j = i + 1; j < n; ++j)
+        {
+            if (A[i] > A[j]) {
+                A.swap(i, j);
+            }
+        }
+    }
 }
 
 // ****************************************************************************

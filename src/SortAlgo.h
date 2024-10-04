@@ -53,6 +53,7 @@ extern const struct AlgoEntry* g_algolist_end;
 // *** Sorting Algorithms
 
 void SelectionSort(class SortArray& a);
+void SandpaperSort(class SortArray& a);
 void InsertionSort(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
 
