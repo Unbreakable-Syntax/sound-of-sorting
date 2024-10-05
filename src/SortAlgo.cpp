@@ -1062,7 +1062,6 @@ bool BogoCheckSorted(SortArray& A)
     A.mark(0);
     for (i = 1; i < A.size(); ++i)
     {
-        value_type val = A[i];
         if (A[i - 1] > A[i]) break;
         A.mark(i);
     }
