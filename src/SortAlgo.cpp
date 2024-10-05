@@ -199,11 +199,10 @@ void InsertionSort2(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); ++i)
     {
-        value_type tmp, key = A[i];
         A.mark(i);
-
         ssize_t j = i - 1;
-        while (j >= 0 && (tmp = A[j]) > key)
+        value_type tmp = A[j], key = A[i];
+        while (j >= 0 && tmp > key)
         {
             A.set(j + 1, tmp);
             j--;
