@@ -37,6 +37,7 @@
 #include <numeric>
 #include <limits>
 #include <inttypes.h>
+#include <random>
 
 typedef ArrayItem value_type;
 
@@ -1058,13 +1059,11 @@ void StlHeapSort(SortArray& A)
 bool BogoCheckSorted(SortArray& A)
 {
     size_t i;
-    value_type prev = A[0];
     A.mark(0);
     for (i = 1; i < A.size(); ++i)
     {
         value_type val = A[i];
-        if (prev > val) break;
-        prev = val;
+        if (A[i - 1] > A[i]) break;
         A.mark(i);
     }
 
@@ -1094,7 +1093,9 @@ void BogoSort(SortArray& A)
         if (BogoCheckSorted(A)) break;
 
         // pick a random permutation of indexes
-        std::random_shuffle(perm.begin(), perm.end());
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(perm.begin(), perm.end(), g);
 
         // permute array in-place
         std::vector<char> pmark(A.size(), 0);

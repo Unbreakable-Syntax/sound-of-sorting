@@ -25,6 +25,7 @@
 #include "SortAlgo.h"
 
 #include <algorithm>
+#include <random>
 
 extern void SoundAccess(size_t i);
 
@@ -121,15 +122,15 @@ void SortArray::FillInputlist(wxArrayString& list)
 void SortArray::FillData(unsigned int schema, size_t arraysize)
 {
     if (arraysize == 0) arraysize = 1;
-
-    ResetArray(arraysize);
-
+    { ResetArray(arraysize); }
+    std::random_device rd;
+    std::mt19937 g(rd());
     if (schema == 0) // Shuffle of [1,n]
     {
         for (size_t i = 0; i < m_array.size(); ++i)
             m_array[i] = ArrayItem(i+1);
-
-        std::random_shuffle(m_array.begin(), m_array.end());
+        
+        std::shuffle(m_array.begin(), m_array.end(), g);
     }
     else if (schema == 1) // Ascending [1,n]
     {
@@ -160,7 +161,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             if (i <= (m_array.size() / 4) - 1)
             { ++it; }
         }
-        std::random_shuffle(it, m_array.end());
+        std::shuffle(it, m_array.end(), g);
     }
     else if (schema == 5) // 50% Sorted
     {
@@ -171,7 +172,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             if (i <= (m_array.size() / 2) - 1)
             { ++it; }
         }
-        std::random_shuffle(it, m_array.end());
+        std::shuffle(it, m_array.end(), g);
     }
     else if (schema == 6) // 75% Sorted
     {
@@ -183,7 +184,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             if (i < half + (half / 2))
             { ++it; }
         }
-        std::random_shuffle(it, m_array.end());
+        std::shuffle(it, m_array.end(), g);
     }
     else if (schema == 7) // Cubic skew of [1,n]
     {
@@ -200,7 +201,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[i] = ArrayItem(w + 1);
         }
 
-        std::random_shuffle(m_array.begin(), m_array.end());
+        std::shuffle(m_array.begin(), m_array.end(), g);
     }
     else if (schema == 8) // Quintic skew of [1,n]
     {
@@ -217,7 +218,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[i] = ArrayItem(w + 1);
         }
 
-        std::random_shuffle(m_array.begin(), m_array.end());
+        std::shuffle(m_array.begin(), m_array.end(), g);
     }
     else if (schema == 9) // shuffled n-2 equal values in [1,n]
     {
@@ -228,7 +229,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         m_array[m_array.size()-1] = ArrayItem(arraysize);
 
-        std::random_shuffle(m_array.begin(), m_array.end());
+        std::shuffle(m_array.begin(), m_array.end(), g);
     }
     else if (schema == 10) // Pipe organ (1, 1, 2, 2, 1, 1)
     {
