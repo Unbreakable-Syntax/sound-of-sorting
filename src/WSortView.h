@@ -37,7 +37,7 @@ extern bool g_sound_on;
 extern double g_sound_sustain;
 
 /// the SDL sound callback
-void SoundCallback(void *udata, unsigned char *stream, int len);
+void SoundCallback(void* udata, Uint8* stream, int len);
 
 /// reset internal state of sound generator
 void SoundReset();
@@ -106,14 +106,13 @@ public:
 
 class SortAlgoThread : public wxThread {
 protected:
-    class WMain*        m_wmain;
-    class WSortView&    m_sortview;
-
-    size_t              m_algo;
+    WMain*        m_wmain;
+    WSortView&    m_sortview;
+    size_t        m_algo;
 
 public:
 
-    SortAlgoThread(class WMain* wmain, class WSortView& sortview, size_t algo);
+    SortAlgoThread(WMain* wmain, WSortView& sortview, size_t algo);
 
     virtual ExitCode Entry();
 

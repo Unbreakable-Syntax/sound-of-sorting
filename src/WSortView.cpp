@@ -249,11 +249,11 @@ END_EVENT_TABLE()
 // ****************************************************************************
 // *** Threading
 
-SortAlgoThread::SortAlgoThread(WMain* wmain, class WSortView& sortview, size_t algo)
+SortAlgoThread::SortAlgoThread(WMain* wmain, WSortView& sortview, size_t algo)
     : wxThread(wxTHREAD_JOINABLE),
-      m_wmain(wmain),
-      m_sortview(sortview),
-      m_algo(algo)
+    m_wmain(wmain),
+    m_sortview(sortview),
+    m_algo(algo)
 {
 }
 
