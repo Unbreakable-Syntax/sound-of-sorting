@@ -1259,9 +1259,7 @@ void flip(SortArray& A, size_t high)
 size_t find_max(SortArray& A, size_t n)  // Optimized find_max method, the original method performs the search in linear time
 {
     size_t max = 0;
-    size_t low = 1;
-    size_t hi = n;
-    while (low <= hi)
+    for (size_t low = 1, hi = n; low <= hi; ++low, --hi)
     {
         if (A[low] > A[max])
         { 
@@ -1271,7 +1269,6 @@ size_t find_max(SortArray& A, size_t n)  // Optimized find_max method, the origi
         {
             max = hi;
         }
-        ++low; --hi;
     }
     return max;
 }
