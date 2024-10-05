@@ -74,7 +74,9 @@ void QuickSortTernaryLL(class SortArray& a);
 void QuickSortDualPivot(class SortArray& a);
 
 void BubbleSort(class SortArray& a);
+void OptimizedBubbleSort(class SortArray& a);
 void CocktailShakerSort(class SortArray& a);
+void OptimizedCocktailShakerSort(class SortArray& a);
 void DualCocktailShakerSort(class SortArray& a);
 void CombSort(class SortArray& a);
 void GnomeSort(class SortArray& a);
