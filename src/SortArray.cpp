@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <random>
+#include <cmath>
 
 extern void SoundAccess(size_t i);
 
@@ -117,6 +118,7 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Shuffled n-2 Equal"));
     list.Add(_("Pipe Organ"));
     list.Add(_("Mirrored Organ"));
+    list.Add(_("Wave"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -255,6 +257,18 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         for (size_t i = m_array.size() / 2; i <= m_array.size() - 1; ++i)
         {
             m_array[i] = ArrayItem(val); ++val;
+        }
+    }
+    else if (schema == 12) // Wave
+    {
+        double n = double(m_array.size());
+        double pi = 3.14159265358979323846;
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            double x = i / n * 3 * pi * 5;
+            double sineVal = sin(x);
+            int val = std::round((sineVal + 1) * 100);
+            m_array[i] = ArrayItem(val + 1);
         }
     }
     else // fallback
