@@ -200,15 +200,19 @@ void DoubleSandpaperSort(SortArray& A)
 {
     for (size_t left = 0, right = A.size() - 1; left < right; ++left, --right)
     {
-        for (size_t i = left + 1, j = right; i <= right; ++i, --j)
+        if (A[left] > A[right])
+        { 
+            A.swap(left, right); 
+        }
+        for (size_t i = left + 1; i <= right; ++i)
         {
             if (A[left] > A[i])
             {
-                A.swap(i, left);
+               A.swap(i, left);
             }
-            if (A[right] < A[j])
+            else if (A[i] > A[right])
             {
-                A.swap(j, right);
+               A.swap(i, right);
             }
         }
     }
