@@ -53,7 +53,9 @@ extern const struct AlgoEntry* g_algolist_end;
 // *** Sorting Algorithms
 
 void SelectionSort(class SortArray& a);
+void DoubleSelectionSort(class SortArray& a);
 void SandpaperSort(class SortArray& a);
+void DoubleSandpaperSort(class SortArray& a);
 void InsertionSort(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
 
@@ -73,8 +75,10 @@ void QuickSortDualPivot(class SortArray& a);
 
 void BubbleSort(class SortArray& a);
 void CocktailShakerSort(class SortArray& a);
+void DualCocktailShakerSort(class SortArray& a);
 void CombSort(class SortArray& a);
 void GnomeSort(class SortArray& a);
+void OptimizedGnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
 
 void ShellSort(SortArray& a);

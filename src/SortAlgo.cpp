@@ -48,8 +48,12 @@ const struct AlgoEntry g_algolist[] =
 {
     { _("Selection Sort"), &SelectionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
-    { _("Sandpaper Sort"), &SandpaperSort, UINT_MAX, UINT_MAX,
+    { _("Double Selection Sort"), &DoubleSelectionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Sandpaper Sort"), &SandpaperSort, UINT_MAX, UINT_MAX,
+      _("Also known as Exchange Sort.") },
+    { _("Double Sandpaper Sort"), &DoubleSandpaperSort, UINT_MAX, UINT_MAX,
+      _("A variant of Exchange Sort that sorts the array bidirectionally.") },
     { _("Insertion Sort"), &InsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
@@ -78,8 +82,12 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Dual Cocktail Shaker Sort"), &DualCocktailShakerSort, UINT_MAX, UINT_MAX,
+      _("This variant sorts from both directions of the array simultaneously.") },
     { _("Gnome Sort"), &GnomeSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Optimized Gnome Sort"), &OptimizedGnomeSort, UINT_MAX, UINT_MAX,
+      _("This variant avoids scanning through sorted portions of the array after a number has been placed in its correct spot") },
     { _("Comb Sort"), &CombSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Shell Sort"), &ShellSort, UINT_MAX, 1024,
@@ -132,6 +140,36 @@ const struct AlgoEntry* g_algolist_end = g_algolist + g_algolist_size;
 // ****************************************************************************
 // *** Selection Sort
 
+void DoubleSelectionSort(SortArray& A)
+{
+    size_t left = 0;
+    size_t right = A.size() - 1;
+    volatile size_t max_idx = 0;
+    volatile size_t low_idx = 0;
+    while (left < right)
+    {
+        max_idx = right;
+        low_idx = left;
+        for (size_t i = left; i <= right; ++i)
+        {
+            if (A[i] < A[low_idx])
+            { 
+                A.mark_swap(i, low_idx); 
+                low_idx = i; 
+            }
+            else if (A[i] > A[max_idx])
+            { 
+                A.mark_swap(i, max_idx);
+                max_idx = i;
+            }
+        }
+        A.swap(left, low_idx);
+        if (max_idx == left) { max_idx = low_idx; }
+        A.swap(right, max_idx);
+        ++left; --right;
+    }
+}
+
 void SelectionSort(SortArray& A)
 {
     volatile ssize_t jMin = 0;
@@ -156,6 +194,24 @@ void SelectionSort(SortArray& A)
         A.mark(i);
     }
     A.unwatch_all();
+}
+
+void DoubleSandpaperSort(SortArray& A)
+{
+    for (size_t left = 0, right = A.size() - 1; left < right; ++left, --right)
+    {
+        for (size_t i = left + 1, j = right; i <= right; ++i, --j)
+        {
+            if (A[left] > A[i])
+            {
+                A.swap(i, left);
+            }
+            if (A[right] < A[j])
+            {
+                A.swap(j, right);
+            }
+        }
+    }
 }
 
 void SandpaperSort(SortArray& A)
@@ -728,6 +784,31 @@ void CocktailShakerSort(SortArray& A)
     }
 }
 
+void DualCocktailShakerSort(SortArray& A)
+{
+    size_t lo = 0, hi = A.size() - 1;
+    bool swapped = true;
+    while (swapped)
+    {
+        swapped = false;
+        for (size_t i = lo, j = hi; i < hi; ++i, --j)
+        {
+            if (A[i] > A[i + 1])
+            {
+                A.swap(i + 1, i);
+                swapped = true;
+            }
+            if (A[j] < A[j - 1])
+            {
+                A.swap(j - 1, j);
+                swapped = true;
+            }
+        }
+        ++lo;
+        --hi;
+    }
+}
+
 // ****************************************************************************
 // *** Gnome Sort
 
@@ -745,6 +826,24 @@ void GnomeSort(SortArray& A)
         {
             A.swap(i, i-1);
             if (i > 1) --i;
+        }
+    }
+}
+
+void OptimizedGnomeSort(SortArray& A)
+{
+    size_t prev = 0;
+    for (size_t i = 1; i < A.size(); )
+    {
+        if (i == 0 || A[i] >= A[i - 1])
+        {
+            if (prev != 0) { i += prev; prev = 0; }
+            ++i;
+        }
+        else
+        {
+            A.swap(i, i - 1);
+            --i; ++prev;
         }
     }
 }
@@ -1148,7 +1247,6 @@ void flip(SortArray& A, size_t high)
     size_t low = 0;
     while (low < high)
     {
-        A.mark_swap(low, high);
         A.swap(low, high);
         ++low; --high;
     }
