@@ -1251,6 +1251,7 @@ void flip(SortArray& A, size_t high)
     size_t low = 0;
     while (low < high)
     {
+        A[low].get();
         A.swap(low, high);
         ++low; --high;
     }
