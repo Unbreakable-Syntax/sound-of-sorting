@@ -112,6 +112,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Block Merge Sort (WikiSort)"), &WikiSort, UINT_MAX, inversion_count_instrumented,
       _("An O(1) place O(n log n) time stable merge sort.") },
+    { _("Pancake Sort"), &PancakeSort, UINT_MAX, UINT_MAX,
+      _("Sorts the array by performing a series of 'flips' to push the maximum element to the correct spot.") },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
@@ -1139,6 +1141,51 @@ void BozoSort(SortArray& A)
 
         // swap two random items
         A.swap(rand() % A.size(), rand() % A.size());
+    }
+}
+
+void flip(SortArray& A, size_t high)
+{
+    size_t low = 0;
+    while (low < high)
+    {
+        A.mark_swap(low, high);
+        A.swap(low, high);
+        ++low; --high;
+    }
+}
+
+size_t find_max(SortArray& A, size_t n)  // Optimized find_max method, the original method performs the search in linear time
+{
+    size_t max = 0;
+    size_t low = 1;
+    size_t hi = n;
+    while (low <= hi)
+    {
+        if (A[low] > A[max])
+        { 
+            max = low; 
+        }
+        if (A[hi] > A[max])
+        {
+            max = hi;
+        }
+        ++low; --hi;
+    }
+    return max;
+}
+
+void PancakeSort(SortArray& A)
+{
+    size_t n = A.size() - 1;
+    for (size_t cur_size = n; cur_size >= 1; --cur_size)
+    {
+        size_t max_idx = find_max(A, cur_size);
+        if (max_idx != cur_size)
+        {
+            if (max_idx > 0) { flip(A, max_idx); }
+            flip(A, cur_size);
+        }
     }
 }
 
