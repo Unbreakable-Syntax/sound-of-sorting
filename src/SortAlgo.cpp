@@ -204,7 +204,7 @@ void DoubleSandpaperSort(SortArray& A)
         { 
             A.swap(left, right); 
         }
-        for (size_t i = left + 1; i <= right; ++i)
+        for (size_t i = left + 1; i < right; ++i)
         {
             if (A[left] > A[i])
             {
