@@ -84,8 +84,6 @@ const struct AlgoEntry g_algolist[] =
       _("This variant can detect if an array is sorted, if the array is sorted, the sorting process will stop.") },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
-    { _("Optimized Cocktail Shaker Sort"), &OptimizedCocktailShakerSort, UINT_MAX, UINT_MAX,
-     _("This variant can detect if the array is sorted, in which it will terminate early. This allows for better performance on pre-sorted data.") },
     { _("Dual Cocktail Shaker Sort"), &DualCocktailShakerSort, UINT_MAX, UINT_MAX,
       _("This variant sorts from both directions of the array simultaneously.") },
     { _("Gnome Sort"), &GnomeSort, UINT_MAX, UINT_MAX,
@@ -805,37 +803,6 @@ void CocktailShakerSort(SortArray& A)
             }
         }
 
-        hi = mov;
-    }
-}
-
-void OptimizedCocktailShakerSort(SortArray& A)
-{
-    size_t lo = 0, hi = A.size() - 1, mov = lo;
-    bool swapped = true;
-    while (swapped == true)
-    {
-        swapped = false;
-        for (size_t i = hi; i > lo; --i)
-        {
-            if (A[i - 1] > A[i])
-            {
-                A.swap(i - 1, i);
-                swapped = true;
-                mov = i;
-            }
-        }
-        if (swapped == false) { break; }
-        lo = mov;
-        for (size_t i = lo; i < hi; ++i)
-        {
-            if (A[i] > A[i + 1])
-            {
-                A.swap(i, i + 1);
-                swapped = true;
-                mov = i;
-            }
-        }
         hi = mov;
     }
 }
