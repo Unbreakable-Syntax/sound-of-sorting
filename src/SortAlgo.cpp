@@ -810,25 +810,24 @@ void CocktailShakerSort(SortArray& A)
 void DualCocktailShakerSort(SortArray& A)
 {
     size_t lo = 0, hi = A.size() - 1;
-    bool swapped = true;
-    while (swapped)
+    while (lo < hi)
     {
-        swapped = false;
+        size_t lo_mov = 0, hi_mov = 0;
         for (size_t i = lo, j = hi; i < hi; ++i, --j)
         {
             if (A[i] > A[i + 1])
             {
                 A.swap(i + 1, i);
-                swapped = true;
+                lo_mov = i;
             }
             if (A[j] < A[j - 1])
             {
                 A.swap(j - 1, j);
-                swapped = true;
+                hi_mov = j;
             }
         }
-        ++lo;
-        --hi;
+        lo = hi_mov;
+        hi = lo_mov;
     }
 }
 
