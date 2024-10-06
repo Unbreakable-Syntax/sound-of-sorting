@@ -113,80 +113,77 @@ void CycleSort(class SortArray& a);
 
 // iterator based on http://zotu.blogspot.de/2010/01/creating-random-access-iterator.html
 
-class MyIterator : public std::iterator<std::random_access_iterator_tag, ArrayItem>
-{
+class MyIterator {
 protected:
-    SortArray*  m_array;
-    size_t      m_pos;
+    SortArray* m_array;
+    size_t m_pos;
 
 public:
-    typedef std::iterator<std::random_access_iterator_tag, ArrayItem> base_type;
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = ArrayItem;
+    using difference_type = std::ptrdiff_t;
+    using reference = ArrayItem&;
+    using pointer = ArrayItem*;
 
-    typedef std::random_access_iterator_tag iterator_category;
-
-    typedef base_type::value_type value_type;
-    typedef base_type::difference_type difference_type;
-    typedef base_type::reference reference;
-    typedef base_type::pointer pointer;
-
-    MyIterator() : m_array(NULL), m_pos(0) {}
+    MyIterator() : m_array(nullptr), m_pos(0) {}
 
     MyIterator(SortArray* A, size_t p) : m_array(A), m_pos(p) {}
 
     MyIterator(const MyIterator& r) : m_array(r.m_array), m_pos(r.m_pos) {}
 
-    MyIterator& operator=(const MyIterator& r)
-    { m_array = r.m_array, m_pos = r.m_pos; return *this; }
+    MyIterator& operator=(const MyIterator& r) 
+    { m_array = r.m_array; m_pos = r.m_pos; return *this; }
 
-    MyIterator& operator++()
+    MyIterator& operator++() 
     { ++m_pos; return *this; }
 
-    MyIterator& operator--()
+    MyIterator& operator--() 
     { --m_pos; return *this; }
 
-    MyIterator operator++(int)
+    MyIterator operator++(int) 
     { return MyIterator(m_array, m_pos++); }
 
-    MyIterator operator--(int)
+    MyIterator operator--(int) 
     { return MyIterator(m_array, m_pos--); }
 
-    MyIterator operator+(const difference_type& n) const
+    MyIterator operator+(difference_type n) const 
     { return MyIterator(m_array, m_pos + n); }
 
-    MyIterator& operator+=(const difference_type& n)
+    MyIterator& operator+=(difference_type n) 
     { m_pos += n; return *this; }
 
-    MyIterator operator-(const difference_type& n) const
+    MyIterator operator-(difference_type n) const 
     { return MyIterator(m_array, m_pos - n); }
 
-    MyIterator& operator-=(const difference_type& n)
+    MyIterator& operator-=(difference_type n)
     { m_pos -= n; return *this; }
 
-    reference operator*() const
+    reference operator*() const 
     { return m_array->get_mutable(m_pos); }
 
-    pointer operator->() const
+    pointer operator->() const 
     { return &(m_array->get_mutable(m_pos)); }
 
-    reference operator[](const difference_type& n) const
+    reference operator[](difference_type n) const 
     { return m_array->get_mutable(m_pos + n); }
 
-    bool operator==(const MyIterator& r)
+    // Comparison operators
+    bool operator==(const MyIterator& r) const 
     { return (m_array == r.m_array) && (m_pos == r.m_pos); }
 
-    bool operator!=(const MyIterator& r)
+    bool operator!=(const MyIterator& r) const 
     { return (m_array != r.m_array) || (m_pos != r.m_pos); }
 
-    bool operator<(const MyIterator& r)
-    { return (m_array == r.m_array ? (m_pos < r.m_pos) : (m_array < r.m_array)); }
+    bool operator<(const MyIterator& r) const 
+    { return (m_array == r.m_array) ? (m_pos < r.m_pos) : (m_array < r.m_array); }
 
-    bool operator>(const MyIterator& r)
+    bool operator>(const MyIterator& r) const 
     { return (m_array == r.m_array ? (m_pos > r.m_pos) : (m_array > r.m_array)); }
 
-    bool operator<=(const MyIterator& r)
+    bool operator<=(const MyIterator& r) const 
     { return (m_array == r.m_array ? (m_pos <= r.m_pos) : (m_array <= r.m_array)); }
 
-    bool operator>=(const MyIterator& r)
+    bool operator>=(const MyIterator& r) const 
     { return (m_array == r.m_array ? (m_pos >= r.m_pos) : (m_array >= r.m_array)); }
 
     difference_type operator+(const MyIterator& r2) const
@@ -195,6 +192,5 @@ public:
     difference_type operator-(const MyIterator& r2) const
     { ASSERT(m_array == r2.m_array); return (m_pos - r2.m_pos); }
 };
-
 
 #endif // SORTALGO_H
