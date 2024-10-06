@@ -119,6 +119,7 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Pipe Organ"));
     list.Add(_("Mirrored Organ"));
     list.Add(_("Wave"));
+    list.Add(_("50% Sorted (Head)"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -271,6 +272,19 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[i] = ArrayItem(val + 1);
         }
     }
+    else if (schema == 13) // 50% Sorted, Head
+    {
+        std::vector<ArrayItem>::iterator it = m_array.begin();
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= (m_array.size() / 2) - 1)
+            {
+                ++it;
+            }
+        }
+        std::shuffle(m_array.begin(), it, g);
+    }
     else // fallback
     {
         return FillData(0, arraysize);
@@ -292,27 +306,21 @@ bool SortArray::CheckSorted()
     unmark_all();
     // needed because iterator instrumentated algorithms may have changed the array
     RecalcInversions();
-
-    ArrayItem prev = get_nocount(0);
     mark(0);
-
     bool is_sorted = true;
 
     for (size_t i = 1; i < size(); ++i)
     {
-        ArrayItem key = get_nocount(i);
         g_compare_count--; // dont count the following comparison
-        if (!(prev <= key)) {
+        if (get_nocount(i - 1) > get_nocount(i)) {
             wxLogError(_T("Result of sorting algorithm is incorrect!"));
             is_sorted = false;
             break;
         }
         mark(i);
-        prev = key;
     }
 
     unmark_all();
-
     return (m_is_sorted = is_sorted);
 }
 
