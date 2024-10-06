@@ -167,7 +167,6 @@ public:
     reference operator[](difference_type n) const 
     { return m_array->get_mutable(m_pos + n); }
 
-    // Comparison operators
     bool operator==(const MyIterator& r) const 
     { return (m_array == r.m_array) && (m_pos == r.m_pos); }
 
@@ -175,7 +174,7 @@ public:
     { return (m_array != r.m_array) || (m_pos != r.m_pos); }
 
     bool operator<(const MyIterator& r) const 
-    { return (m_array == r.m_array) ? (m_pos < r.m_pos) : (m_array < r.m_array); }
+    { return (m_array == r.m_array ? (m_pos < r.m_pos) : (m_array < r.m_array)); }
 
     bool operator>(const MyIterator& r) const 
     { return (m_array == r.m_array ? (m_pos > r.m_pos) : (m_array > r.m_array)); }
