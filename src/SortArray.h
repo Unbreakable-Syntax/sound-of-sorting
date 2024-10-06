@@ -78,7 +78,14 @@ public:
     const value_type& get_direct() const
     { return value; }
 
-    // *** comparisons
+    ArrayItem& operator= (const ArrayItem& other)
+    {
+        if (this != &other)
+        {
+            this->value = other.value;
+        }
+        return *this;
+    }
 
     bool operator== (const ArrayItem& v) const
     { OnComparison(*this,v); return (value == v.value); }
