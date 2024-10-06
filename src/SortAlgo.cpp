@@ -813,16 +813,16 @@ void DualCocktailShakerSort(SortArray& A)
     while (lo < hi)
     {
         size_t lo_mov = 0, hi_mov = 0;
-        for (size_t i = lo, j = hi; i < hi; ++i, --j)
+        for (size_t i = lo + 1, j = hi - 1; i <= hi; ++i, --j)
         {
-            if (A[i] > A[i + 1])
+            if (A[i - 1] > A[i])
             {
-                A.swap(i + 1, i);
+                A.swap(i - 1, i);
                 lo_mov = i;
             }
-            if (A[j] < A[j - 1])
+            if (A[j + 1] < A[j])
             {
-                A.swap(j - 1, j);
+                A.swap(j + 1, j);
                 hi_mov = j;
             }
         }
