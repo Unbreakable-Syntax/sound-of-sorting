@@ -122,6 +122,8 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Pipe Organ"));
     list.Add(_("Mirrored Organ"));
     list.Add(_("Wave"));
+    list.Add(_("Sawtooth"));
+    list.Add(_("Reverse Sawtooth"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -157,18 +159,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         m_array[0] = m_array[m_array.size() - 1];
         m_array[m_array.size() - 1] = temp;
     }
-    else if (schema == 4) // 25% Sorted
-    {
-        std::vector<ArrayItem>::iterator it = m_array.begin();
-        for (size_t i = 0; i < m_array.size(); ++i)
-        {
-            m_array[i] = ArrayItem(i + 1);
-            if (i <= (m_array.size() / 4))
-            { ++it; }
-        }
-        std::shuffle(it, m_array.end(), g);
-    }
-    else if (schema == 5) // 25% Sorted, Head
+    else if (schema == 4) // 25% Shuffled
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
         size_t half = m_array.size() / 2;
@@ -176,6 +167,17 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         {
             m_array[i] = ArrayItem(i + 1);
             if (i <= half + (half / 2))
+            { ++it; }
+        }
+        std::shuffle(it, m_array.end(), g);
+    }
+    else if (schema == 5) // 25% Sorted, Head
+    {
+        std::vector<ArrayItem>::iterator it = m_array.begin();
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= (m_array.size() / 4))
             { ++it; }
         }
         std::shuffle(m_array.begin(), it, g);
@@ -198,29 +200,29 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         {
             m_array[i] = ArrayItem(i + 1);
             if (i <= (m_array.size() / 2) - 1)
-            { ++it; }
+            { ++it;}
         }
         std::shuffle(m_array.begin(), it, g);
     }
-    else if (schema == 8) // 75% Sorted
-    {
-        std::vector<ArrayItem>::iterator it = m_array.begin();
-        size_t half = m_array.size() / 2;
-        for (size_t i = 0; i < m_array.size(); ++i)
-        {
-            m_array[i] = ArrayItem(i + 1); 
-            if (i <= half + (half / 2))
-            { ++it; }
-        }
-        std::shuffle(it, m_array.end(), g);
-    }
-    else if (schema == 9) // 75% Sorted, Head
+    else if (schema == 8) // 75% Shuffled
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
         for (size_t i = 0; i < m_array.size(); ++i)
         {
             m_array[i] = ArrayItem(i + 1);
             if (i <= (m_array.size() / 4))
+            { ++it; }
+        }
+        std::shuffle(it, m_array.end(), g);
+    }
+    else if (schema == 9) // 75% Shuffled, Head
+    {
+        std::vector<ArrayItem>::iterator it = m_array.begin();
+        size_t half = m_array.size() / 2;
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= half + (half / 2))
             { ++it; }
         }
         std::shuffle(m_array.begin(), it, g);
@@ -306,6 +308,32 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             double sineVal = sin(x);
             int val = std::round((sineVal + 1) * 100);
             m_array[i] = ArrayItem(val + 1);
+        }
+    }
+    else if (schema == 16)  // Sawtooth
+    {
+        int teeth = sqrt(m_array.size()) / 7;
+        if (teeth <= 1) { teeth = 2; }
+        int max = m_array.size() / teeth;
+        int count = 1;
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            if (count > max) { count = 1; }
+            m_array[i] = ArrayItem(count);
+            ++count;
+        }
+    }
+    else if (schema == 17)  // Reverse Sawtooth
+    {
+        int teeth = sqrt(m_array.size()) / 7;
+        if (teeth <= 1) { teeth = 2; }
+        int max = m_array.size() / teeth;
+        int count = max;
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            if (count <= 0) { count = max; }
+            m_array[i] = ArrayItem(count);
+            --count;
         }
     }
     else // fallback
