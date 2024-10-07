@@ -1311,29 +1311,22 @@ void PancakeSort(SortArray& A)
 
 void GravitySort(SortArray& A)
 {  
-    int max = 0;
+    int max = A[0];
     int len = A.size();
     for (int n = 1; n < len; ++n)
     {
         int m = A[n].get();
         if (m > max)
-        {
-            max = A[n];
-        }
+        { max = m; }
     }
 
-    std::vector<std::vector<int>> beads;
-    beads.resize(len);
-    for (int i = 0; i < len; ++i) {
-        beads[i].resize(max);
-        std::fill(beads[i].begin(), beads[i].end(), 0);
-    }
+    std::vector<std::vector<int>> beads(len, std::vector<int>(max, 0));;
 
-    for (int i = 0; i < len; ++i) {
+    for (int i = 0; i < len; ++i) 
+    {
         int n = A[i].get();
-        for (int j = 0; j < n; ++j) {
-            beads[i][j] = 1;
-        }
+        for (int j = 0; j < n; ++j) 
+        { beads[i][j] = 1; }
     }
 
     for (int j = 0; j < max; ++j) 
@@ -1344,7 +1337,8 @@ void GravitySort(SortArray& A)
             sum += beads[i][j];
             beads[i][j] = 0;
         }
-        for (int i = len - sum; i < len; ++i) {
+        for (int i = len - 1; i >= len - sum; --i) 
+        {
             size_t k = static_cast<size_t>(i);
             A.set(k, ArrayItem(j + 1));
             A[k].get();
