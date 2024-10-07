@@ -110,16 +110,18 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Ascending"));
     list.Add(_("Descending"));
     list.Add(_("Near Sorted"));
-    list.Add(_("25% Sorted"));
-    list.Add(_("50% Sorted"));
-    list.Add(_("75% Sorted"));
+    list.Add(_("25% Shuffled (Tail)"));
+    list.Add(_("25% Shuffled (Head)"));
+    list.Add(_("50% Shuffled (Tail)"));
+    list.Add(_("50% Shuffled (Head)"));
+    list.Add(_("75% Shuffled (Tail)"));
+    list.Add(_("75% Shuffled (Head)"));
     list.Add(_("Shuffled Cubic"));
     list.Add(_("Shuffled Quintic"));
     list.Add(_("Shuffled n-2 Equal"));
     list.Add(_("Pipe Organ"));
     list.Add(_("Mirrored Organ"));
     list.Add(_("Wave"));
-    list.Add(_("50% Sorted (Head)"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -161,12 +163,24 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         for (size_t i = 0; i < m_array.size(); ++i)
         {
             m_array[i] = ArrayItem(i + 1);
-            if (i <= (m_array.size() / 4) - 1)
+            if (i <= (m_array.size() / 4))
             { ++it; }
         }
         std::shuffle(it, m_array.end(), g);
     }
-    else if (schema == 5) // 50% Sorted
+    else if (schema == 5) // 25% Sorted, Head
+    {
+        std::vector<ArrayItem>::iterator it = m_array.begin();
+        size_t half = m_array.size() / 2;
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= half + (half / 2))
+            { ++it; }
+        }
+        std::shuffle(m_array.begin(), it, g);
+    }
+    else if (schema == 6) // 50% Sorted
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
         for (size_t i = 0; i < m_array.size(); ++i)
@@ -177,19 +191,41 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         std::shuffle(it, m_array.end(), g);
     }
-    else if (schema == 6) // 75% Sorted
+    else if (schema == 7) // 50% Sorted, Head
+    {
+        std::vector<ArrayItem>::iterator it = m_array.begin();
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= (m_array.size() / 2) - 1)
+            { ++it; }
+        }
+        std::shuffle(m_array.begin(), it, g);
+    }
+    else if (schema == 8) // 75% Sorted
     {
         std::vector<ArrayItem>::iterator it = m_array.begin();
         size_t half = m_array.size() / 2;
         for (size_t i = 0; i < m_array.size(); ++i)
         {
             m_array[i] = ArrayItem(i + 1); 
-            if (i < half + (half / 2))
+            if (i <= half + (half / 2))
             { ++it; }
         }
         std::shuffle(it, m_array.end(), g);
     }
-    else if (schema == 7) // Cubic skew of [1,n]
+    else if (schema == 9) // 75% Sorted, Head
+    {
+        std::vector<ArrayItem>::iterator it = m_array.begin();
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+            if (i <= (m_array.size() / 4))
+            { ++it; }
+        }
+        std::shuffle(m_array.begin(), it, g);
+    }
+    else if (schema == 10) // Cubic skew of [1,n]
     {
         for (size_t i = 0; i < m_array.size(); ++i)
         {
@@ -206,7 +242,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
 
         std::shuffle(m_array.begin(), m_array.end(), g);
     }
-    else if (schema == 8) // Quintic skew of [1,n]
+    else if (schema == 11) // Quintic skew of [1,n]
     {
         for (size_t i = 0; i < m_array.size(); ++i)
         {
@@ -223,7 +259,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
 
         std::shuffle(m_array.begin(), m_array.end(), g);
     }
-    else if (schema == 9) // shuffled n-2 equal values in [1,n]
+    else if (schema == 12) // shuffled n-2 equal values in [1,n]
     {
         m_array[0] = ArrayItem(1);
         for (size_t i = 1; i < m_array.size()-1; ++i)
@@ -234,7 +270,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
 
         std::shuffle(m_array.begin(), m_array.end(), g);
     }
-    else if (schema == 10) // Pipe organ (1, 1, 2, 2, 1, 1)
+    else if (schema == 13) // Pipe organ (1, 1, 2, 2, 1, 1)
     {
         int val = 1;
         for (size_t i = 0; i < m_array.size() / 2; ++i)
@@ -247,7 +283,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[i] = ArrayItem(val); --val;
         }
     }
-    else if (schema == 11) // Mirrored organ (3, 2, 1, 1, 2, 3)
+    else if (schema == 14) // Mirrored organ (3, 2, 1, 1, 2, 3)
     {
         int val = m_array.size() / 2;
         for (size_t i = 0; i < m_array.size() / 2; ++i)
@@ -260,7 +296,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[i] = ArrayItem(val); ++val;
         }
     }
-    else if (schema == 12) // Wave
+    else if (schema == 15) // Wave
     {
         double n = double(m_array.size());
         double pi = 3.14159265358979323846;
@@ -271,19 +307,6 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             int val = std::round((sineVal + 1) * 100);
             m_array[i] = ArrayItem(val + 1);
         }
-    }
-    else if (schema == 13) // 50% Sorted, Head
-    {
-        std::vector<ArrayItem>::iterator it = m_array.begin();
-        for (size_t i = 0; i < m_array.size(); ++i)
-        {
-            m_array[i] = ArrayItem(i + 1);
-            if (i <= (m_array.size() / 2) - 1)
-            {
-                ++it;
-            }
-        }
-        std::shuffle(m_array.begin(), it, g);
     }
     else // fallback
     {
