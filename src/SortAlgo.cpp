@@ -1315,7 +1315,7 @@ void GravitySort(SortArray& A)
     int len = A.size();
     for (int n = 1; n < len; ++n)
     {
-        int m = A[n];
+        int m = A[n].get();
         if (m > max)
         {
             max = A[n];
@@ -1330,7 +1330,7 @@ void GravitySort(SortArray& A)
     }
 
     for (int i = 0; i < len; i++) {
-        int n = A[i];
+        int n = A[i].get();
         for (int j = 0; j < n; j++) {
             beads[i][j] = 1;
         }
@@ -1347,6 +1347,7 @@ void GravitySort(SortArray& A)
         for (int i = len - 1; i >= len - sum; --i) {
             size_t k = static_cast<size_t>(i);
             A.set(k, ArrayItem(j + 1));
+            A[k].get();
         }
     }
 }
