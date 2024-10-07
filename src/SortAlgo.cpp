@@ -38,6 +38,7 @@
 #include <limits>
 #include <inttypes.h>
 #include <random>
+#include <vector>
 
 typedef ArrayItem value_type;
 
@@ -123,6 +124,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Block Merge Sort (WikiSort)"), &WikiSort, UINT_MAX, inversion_count_instrumented,
       _("An O(1) place O(n log n) time stable merge sort.") },
+    { _("Gravity Sort"), &GravitySort, UINT_MAX, UINT_MAX,
+      _("This is a non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
     { _("Pancake Sort"), &PancakeSort, UINT_MAX, UINT_MAX,
       _("Sorts the array by performing a series of 'flips' to push the maximum element to the correct spot.") },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
@@ -1302,6 +1305,51 @@ void PancakeSort(SortArray& A)
         {
             if (max_idx > 0) { flip(A, max_idx); }
             flip(A, cur_size);
+        }
+    }
+}
+
+void GravitySort(SortArray& A)
+{  
+    int max = 0;
+    int len = A.size();
+    for (int n = 1; n < len; ++n)
+    {
+        int m = A[n];
+        if (m > max)
+        {
+            max = A[n];
+        }
+    }
+
+    // allocating memory 
+    std::vector<std::vector<int>> beads;
+    beads.resize(len);
+    for (int i = 0; i < len; i++) {
+        beads[i].resize(max);
+        std::fill(beads[i].begin(), beads[i].end(), 0);
+    }
+
+    // mark the beads 
+    for (int i = 0; i < len; i++) {
+        int n = A[i];
+        for (int j = 0; j < n; j++) {
+            beads[i][j] = 1;
+        }
+    }
+
+    // move down the beads 
+    for (int j = 0; j < max; j++) 
+    {
+        int sum = 0;
+        for (int i = 0; i < len; i++) 
+        {
+            sum += beads[i][j];
+            beads[i][j] = 0;
+        }
+        for (int i = len - 1; i >= len - sum; --i) {
+            size_t k = static_cast<size_t>(i);
+            A.set(k, ArrayItem(j + 1));
         }
     }
 }

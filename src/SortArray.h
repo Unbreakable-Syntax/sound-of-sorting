@@ -87,6 +87,8 @@ public:
         return *this;
     }
 
+    operator int() const { return value; }
+
     bool operator== (const ArrayItem& v) const
     { OnComparison(*this,v); return (value == v.value); }
 
