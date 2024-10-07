@@ -124,8 +124,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Block Merge Sort (WikiSort)"), &WikiSort, UINT_MAX, inversion_count_instrumented,
       _("An O(1) place O(n log n) time stable merge sort.") },
-    { _("Gravity Sort"), &GravitySort, UINT_MAX, UINT_MAX,
-      _("This is a non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
+    { _("Bead Sort"), &GravitySort, UINT_MAX, UINT_MAX,
+      _("Also known as Gravity Sort. This is a non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
     { _("Pancake Sort"), &PancakeSort, UINT_MAX, UINT_MAX,
       _("Sorts the array by performing a series of 'flips' to push the maximum element to the correct spot.") },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
@@ -1322,7 +1322,6 @@ void GravitySort(SortArray& A)
         }
     }
 
-    // allocating memory 
     std::vector<std::vector<int>> beads;
     beads.resize(len);
     for (int i = 0; i < len; i++) {
@@ -1330,7 +1329,6 @@ void GravitySort(SortArray& A)
         std::fill(beads[i].begin(), beads[i].end(), 0);
     }
 
-    // mark the beads 
     for (int i = 0; i < len; i++) {
         int n = A[i];
         for (int j = 0; j < n; j++) {
@@ -1338,7 +1336,6 @@ void GravitySort(SortArray& A)
         }
     }
 
-    // move down the beads 
     for (int j = 0; j < max; j++) 
     {
         int sum = 0;
