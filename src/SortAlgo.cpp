@@ -87,6 +87,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Dual Cocktail Shaker Sort"), &DualCocktailShakerSort, UINT_MAX, UINT_MAX,
       _("This variant sorts from both directions of the array simultaneously.") },
+    { _("Circle Sort"), &CircleSort, UINT_MAX, UINT_MAX,
+      _("Circle Sort is a recursive sorting algorithm that works by comparing and swapping elements in a circular manner.") },
     { _("Gnome Sort"), &GnomeSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Optimized Gnome Sort"), &OptimizedGnomeSort, UINT_MAX, UINT_MAX,
@@ -832,6 +834,43 @@ void DualCocktailShakerSort(SortArray& A)
         lo = hi_mov;
         hi = lo_mov;
     }
+}
+
+// ****************************************************************************
+// *** Circle Sort
+
+bool CircleSortRec(SortArray& A, size_t low, size_t high)
+{
+    bool swapped = false;
+    if (low == high) { return false; }
+    size_t lo = low, hi = high;
+    while (lo < hi)
+    {
+        if (A[lo] > A[hi])
+        {
+            A.swap(lo, hi);
+            swapped = true;
+        }
+        ++lo; --hi;
+    }
+    if (lo == hi)
+    {
+        if (A[lo] > A[hi + 1])
+        {
+            A.swap(lo, hi + 1);
+            swapped = true;
+        }
+    }
+    size_t mid = (high - low) / 2;
+    bool firstHalf = CircleSortRec(A, low, low + mid);
+    bool secondHalf = CircleSortRec(A, low + mid + 1, high);
+    return swapped || firstHalf || secondHalf;
+}
+
+void CircleSort(SortArray& A)
+{
+    size_t n = A.size();
+    while (CircleSortRec(A, 0, n - 1)) {}
 }
 
 // ****************************************************************************

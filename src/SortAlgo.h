@@ -81,6 +81,7 @@ void CombSort(class SortArray& a);
 void GnomeSort(class SortArray& a);
 void OptimizedGnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
+void CircleSort(class SortArray& a);
 
 void ShellSort(SortArray& a);
 void HeapSort(class SortArray& a);
