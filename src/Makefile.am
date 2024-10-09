@@ -5,8 +5,10 @@ bin_PROGRAMS = sound-of-sorting
 COMMON = SortArray.cpp SortArray.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
+	algorithms/grailsort.cpp \
 	algorithms/timsort.cpp \
 	algorithms/wikisort.cpp
+	
 
 sound_of_sorting_SOURCES = \
 	WMain.cpp WMain.h \

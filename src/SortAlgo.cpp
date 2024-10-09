@@ -126,6 +126,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Block Merge Sort (WikiSort)"), &WikiSort, UINT_MAX, inversion_count_instrumented,
       _("An O(1) place O(n log n) time stable merge sort.") },
+    { _("Grail Sort"), &GrailSort, UINT_MAX, inversion_count_instrumented,
+      _("Grail Sort is a stable, in-place sorting algorithm that efficiently organizes an array by using a block-based merging technique.") },
     { _("Bead Sort"), &GravitySort, UINT_MAX, UINT_MAX,
       _("Also known as Gravity Sort. This is a non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
     { _("Pancake Sort"), &PancakeSort, UINT_MAX, UINT_MAX,
@@ -1940,5 +1942,3 @@ void CycleSort(SortArray& A)
 {
     CycleSort(A, A.size());
 }
-
-// ****************************************************************************
