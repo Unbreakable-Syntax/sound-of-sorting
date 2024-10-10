@@ -1225,7 +1225,7 @@ void shiftElement(SortArray& A, size_t start, size_t end)
 size_t maxLog(SortArray& A, size_t n, size_t base)
 {
     int max = A[0];
-    for (size_t i = 0, j = n - 1; i <= j; ++i, --j)
+    for (size_t i = 1, j = n - 1; i <= j; ++i, --j)
     {
         int ele1 = A[i].get(), ele2 = A[j];
         if (ele1 > max) { max = A[i]; }
@@ -1244,7 +1244,7 @@ int getDigit(int a, double power, int radix)
 void InPlaceRadixSortLSD(SortArray& A)
 {
     size_t pos = 0, n = A.size();
-    size_t bucket = 10;
+    int bucket = 20;
     std::vector<int> buckets(bucket - 1, 0);
     size_t maxPow = maxLog(A, n, bucket);
     for (size_t p = 0; p <= maxPow; ++p)
@@ -1254,7 +1254,7 @@ void InPlaceRadixSortLSD(SortArray& A)
         for (size_t i = 0; i < n; ++i)
         {
             int ele = A[pos].get();
-            int digit = getDigit((int)ele, (double)p, (int)bucket);
+            int digit = getDigit(ele, (double)p, bucket);
             if (digit == 0) { ++pos; }
             else
             {
