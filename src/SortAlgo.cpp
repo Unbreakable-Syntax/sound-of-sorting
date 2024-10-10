@@ -39,6 +39,7 @@
 #include <inttypes.h>
 #include <random>
 #include <vector>
+#include <cmath>
 
 typedef ArrayItem value_type;
 
@@ -113,6 +114,8 @@ const struct AlgoEntry g_algolist[] =
     { _("Radix Sort (LSD)"), &RadixSortLSD, UINT_MAX, 512,
       _("Least significant digit radix sort, which copies item into a shadow "
         "array during counting.") },
+    { _("In-Place Radix Sort (LSD)"), &InPlaceRadixSortLSD, UINT_MAX, UINT_MAX,
+      _("Least significant digit radix sort, performed in O(1) space.") },
     { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX, UINT_MAX,
       _("Most significant digit radix sort, which permutes items in-place by walking cycles.") },
     { _("std::sort (gcc)"), &StlSort, UINT_MAX, inversion_count_instrumented,
@@ -140,7 +143,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Slow Sort"), &SlowSort, 128, inversion_count_instrumented,
       wxEmptyString },
     { _("Bad Sort"), &BadSort, 128, inversion_count_instrumented,
-      _("A humorous sorting algorithm with the time complexity of O(n^3).") }
+      _("A humorous sorting algorithm with a time complexity of O(n^3).") }
 };
 
 const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]);
@@ -1197,6 +1200,74 @@ void RadixSortLSD(SortArray& A)
     }
 }
 
+void shiftElement(SortArray& A, size_t start, size_t end)
+{
+    if (start < end)
+    {
+        while (start < end)
+        {
+            A[start].get();
+            A.swap(start, start + 1);
+            ++start;
+        }
+    }
+    else
+    {
+        while (start > end)
+        {
+            A[start].get();
+            A.swap(start, start - 1);
+            --start;
+        }
+    }
+}
+
+size_t maxLog(SortArray& A, size_t n, size_t base)
+{
+    int max = A[0];
+    for (size_t i = 0, j = n - 1; i <= j; ++i, --j)
+    {
+        int ele1 = A[i].get(), ele2 = A[j];
+        if (ele1 > max) { max = A[i]; }
+        if (ele2 > max) { max = A[j]; }
+    }
+    size_t digit = static_cast<size_t>(log(max) / log(base));
+    return digit;
+}
+
+int getDigit(int a, double power, int radix)
+{
+    double digit = (a / static_cast<int>(pow(radix, power)) % radix);
+    return static_cast<int>(digit);
+}
+
+void InPlaceRadixSortLSD(SortArray& A)
+{
+    size_t pos = 0, n = A.size();
+    size_t bucket = 10;
+    std::vector<int> buckets(bucket - 1, 0);
+    size_t maxPow = maxLog(A, n, bucket);
+    for (size_t p = 0; p <= maxPow; ++p)
+    {
+        for (size_t i = 0; i < buckets.size(); ++i) { buckets[i] = n - 1; }
+        pos = 0;
+        for (size_t i = 0; i < n; ++i)
+        {
+            int ele = A[pos].get();
+            int digit = getDigit((int)ele, (double)p, (int)bucket);
+            if (digit == 0) { ++pos; }
+            else
+            {
+                shiftElement(A, pos, buckets[digit - 1]);
+                for (size_t j = digit - 1; j > 0; --j)
+                {
+                    buckets[j - 1] = buckets[j - 1] - 1;
+                }
+            }
+        }
+    }
+}
+
 // ****************************************************************************
 // *** Use STL Sorts via Iterator Adapters
 
@@ -1362,7 +1433,7 @@ void GravitySort(SortArray& A)
         { max = m; }
     }
 
-    std::vector<std::vector<int>> beads(len, std::vector<int>(max, 0));;
+    std::vector<std::vector<int>> beads(len, std::vector<int>(max, 0));
 
     for (int i = 0; i < len; ++i) 
     {

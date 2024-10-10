@@ -91,6 +91,7 @@ void BitonicSort(SortArray& a);
 void BitonicSortNetwork(SortArray& a);
 void BatcherSortNetwork(SortArray& a);
 
+void InPlaceRadixSortLSD(class SortArray& a);
 void RadixSortLSD(class SortArray& a);
 void RadixSortMSD(class SortArray& a);
 
