@@ -124,6 +124,8 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Wave"));
     list.Add(_("Sawtooth"));
     list.Add(_("Reverse Sawtooth"));
+    list.Add(_("Many Similar"));
+    list.Add(_("Quicksort Killer"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -312,9 +314,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     }
     else if (schema == 16)  // Sawtooth
     {
-        int teeth = sqrt(m_array.size()) / 7;
-        if (teeth <= 1) { teeth = 2; }
-        int max = m_array.size() / teeth;
+        int max = m_array.size() / 4;
         int count = 1;
         for (size_t i = 0; i < m_array.size(); ++i)
         {
@@ -325,9 +325,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     }
     else if (schema == 17)  // Reverse Sawtooth
     {
-        int teeth = sqrt(m_array.size()) / 7;
-        if (teeth <= 1) { teeth = 2; }
-        int max = m_array.size() / teeth;
+        int max = m_array.size() / 4;
         int count = max;
         for (size_t i = 0; i < m_array.size(); ++i)
         {
@@ -336,6 +334,46 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             --count;
         }
     }
+    else if (schema == 18)  // Many Similar
+    {
+        size_t group_count = 0;
+        size_t size = m_array.size();
+        if (size % 10 == 0) { group_count = 10; }
+        else if (size % 9 == 0) { group_count = 9; }
+        else if (size % 8 == 0) { group_count = 8; }
+        else if (size % 7 == 0) { group_count = 7; }
+        else if (size % 6 == 0) { group_count = 6; }
+        else if (size % 5 == 0) { group_count = 5; }
+        else if (size % 4 == 0) { group_count = 4; }
+        else if (size % 2 != 0) { group_count = 3; }
+        else { group_count = 2; }
+        
+        size_t repeat = 1;
+        int val = 1;
+        for (size_t i = 0; i < size; ++i)
+        {
+            if (repeat > group_count)
+            { ++val; repeat = 1; }
+            m_array[i] = ArrayItem(val);
+            ++repeat;
+        }
+        std::shuffle(m_array.begin(), m_array.end(), g);
+    }
+    else if (schema == 19)  // Quicksort Killer
+    {
+        int currentLen = m_array.size();
+        for (int i = 0; i < currentLen; ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+        }
+        for (int j = currentLen - currentLen % 2 - 2, i = j - 1; i >= 0; i -= 2, j--)
+        {
+            ArrayItem temp = m_array[i];
+            m_array[i] = m_array[j];
+            m_array[j] = temp;
+        }
+
+     }
     else // fallback
     {
         return FillData(0, arraysize);

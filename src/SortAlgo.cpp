@@ -60,8 +60,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Merge Sort"), &MergeSort, UINT_MAX, 512,
-      _("Merge sort which merges two sorted sequences into a shadow array,"
-        "and then copies it back to the shown array.") },
+      _("Merge sort which merges two sorted sequences into a shadow array, and then copies it back to the shown array.") },
     { _("Merge Sort (iterative)"), &MergeSortIterative, UINT_MAX, 512,
       _("Merge sort variant which iteratively merges "
         "subarrays of sizes of powers of two.") },
@@ -139,7 +138,9 @@ const struct AlgoEntry g_algolist[] =
     { _("Stooge Sort"), &StoogeSort, 256, inversion_count_instrumented,
       wxEmptyString },
     { _("Slow Sort"), &SlowSort, 128, inversion_count_instrumented,
-      wxEmptyString }
+      wxEmptyString },
+    { _("Bad Sort"), &BadSort, 128, inversion_count_instrumented,
+      _("A humorous sorting algorithm with the time complexity of O(n^3).") }
 };
 
 const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]);
@@ -1860,6 +1861,32 @@ void StoogeSort(SortArray& A, int i, int j)
 void StoogeSort(SortArray& A)
 {
     StoogeSort(A, 0, A.size()-1);
+}
+
+void BadSort(SortArray& A)
+{
+    for (size_t i = 0; i < A.size(); i++)
+    {
+        size_t shortest = i;
+        for (size_t j = i; j < A.size(); j++)
+        {
+            bool isShortest = true;
+            for (size_t k = j + 1; k < A.size(); k++)
+            {
+                if (A[j] > A[k])
+                {
+                    isShortest = false;
+                    break;
+                }
+            }
+            if (isShortest)
+            {
+                shortest = j;
+                break;
+            }
+        }
+        A.swap(i, shortest);
+    }
 }
 
 // ****************************************************************************

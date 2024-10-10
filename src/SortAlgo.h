@@ -102,6 +102,7 @@ void TimSort(class SortArray& a);
 void WikiSort(class SortArray& a);
 void GrailSort(class SortArray& a);
 
+void BadSort(class SortArray& a);
 void BogoSort(class SortArray& a);
 void BozoSort(class SortArray& a);
 void StoogeSort(class SortArray& a);
