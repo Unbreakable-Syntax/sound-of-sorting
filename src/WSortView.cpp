@@ -158,7 +158,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     size_t width = fwidth - 20;
     size_t height = fheight - 20;
 
-    dc.SetDeviceOrigin(10,10);
+    dc.SetDeviceOrigin(10, 10);
 
     // *** draw array element bars
 
@@ -179,7 +179,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
 
     // special case for bstep = 2 pixel -> draw 2 pixel bars instead of 1px
     // bar/1px gaps.
-    if ( fabs(wbar - 1.0) < 0.1 && fabs(bstep - 2.0) < 0.1 ) wbar = 2, bstep = 2;
+    if (fabs(wbar - 1.0) < 0.1 && fabs(bstep - 2.0) < 0.1) wbar = 2, bstep = 2;
 
     static const wxPen pens[] = {
         *wxWHITE_PEN,
@@ -229,29 +229,29 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         int clr = m_array.GetIndexColor(i);
 
         ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
-        dc.SetPen( pens[clr] );
-        dc.SetBrush( brushes[clr] );
+        dc.SetPen(pens[clr]);
+        dc.SetBrush(brushes[clr]);
 
-        dc.DrawRectangle(i*bstep, height,
-                         wxMax(1, // draw at least 1 pixel
-                               (wxCoord((i+1)*bstep) - wxCoord(i*bstep)) // integral gap to next bar
-                               - (bstep - wbar)    // space between bars
-                             ),
-                         -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+        dc.DrawRectangle(i * bstep, height,
+            wxMax(1, // draw at least 1 pixel
+                (wxCoord((i + 1) * bstep) - wxCoord(i * bstep)) // integral gap to next bar
+                - (bstep - wbar)    // space between bars
+            ),
+            -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
     }
-}
+};
 
 BEGIN_EVENT_TABLE(WSortView, wxWindow)
 
-    EVT_PAINT		(WSortView::OnPaint)
-    EVT_SIZE            (WSortView::OnSize)
+    EVT_PAINT(WSortView::OnPaint)
+    EVT_SIZE(WSortView::OnSize)
 
-END_EVENT_TABLE()
+END_EVENT_TABLE();
 
 // ****************************************************************************
 // *** Threading
 
-SortAlgoThread::SortAlgoThread(WMain* wmain, class WSortView& sortview, size_t algo)
+SortAlgoThread::SortAlgoThread(WMain* wmain, WSortView& sortview, size_t algo)
     : wxThread(wxTHREAD_JOINABLE),
       m_wmain(wmain),
       m_sortview(sortview),

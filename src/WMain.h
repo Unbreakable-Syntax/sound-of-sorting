@@ -87,8 +87,7 @@ public:
     virtual void OnAlgoListDClick(wxCommandEvent &event);
 
     virtual void OnRunFinished(wxCommandEvent&);
-
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 
 public:
 
