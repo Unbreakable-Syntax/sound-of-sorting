@@ -170,7 +170,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     //double bstep = 1.5 * wbar;
 
     // 2nd variant: one pixel between bars
-    double wbar = wxMax(1.0, (width - (size - 1)) / (double)size);
+    double wbar = (width - (size - 1)) / (double)size;
     double bstep = wbar + 1.0;
     if (size > width) {
         wbar = wxMax(0.1, width / (double)size);  // Scale down further if too many elements
