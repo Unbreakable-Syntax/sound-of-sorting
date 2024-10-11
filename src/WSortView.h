@@ -25,7 +25,6 @@
 #define WSORTVIEW_H
 
 #include <wx/wx.h>
-#include <SDL.h>
 #include "SortArray.h"
 
 // ----------------------------------------------------------------------------
@@ -37,7 +36,7 @@ extern bool g_sound_on;
 extern double g_sound_sustain;
 
 /// the SDL sound callback
-void SoundCallback(void *udata, Uint8* stream, int len);
+void SoundCallback(void *udata, unsigned char* stream, int len);
 
 /// reset internal state of sound generator
 void SoundReset();
