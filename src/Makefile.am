@@ -27,14 +27,15 @@ sorting_test_SOURCES = \
 	$(COMMON)
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
-LDADD = @WX_LIBS@ @SDL_LIBS@
+LDADD = 
 
 if GOT_RESCOMP
 resources.o: resources.rc
 	$(WX_RESCOMP) $(srcdir)/resources.rc resources.o
-
 LDADD += resources.o
 endif
+
+LDADD += @WX_LIBS@ @SDL_LIBS@
 
 EXTRA_DIST = \
 	resources.rc sos.ico sos.xpm \
