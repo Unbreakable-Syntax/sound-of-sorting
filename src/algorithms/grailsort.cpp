@@ -52,6 +52,7 @@
 #include <iterator>
 #include <type_traits>
 #include <utility>
+#include <cmath>
 
 namespace grailsort_detail
 {
@@ -509,11 +510,12 @@ namespace grailsort_detail
         static void InPlaceBufferReset(RandomAccessIterator array, int start, int length, int bufferOffset) {
             int  index = start + length - 1;
             int buffer = index - bufferOffset;
-
+            ArrayItem test = ArrayItem(index);
             while (index >= start) {
+                test.get();
                 std::swap(array[index], array[buffer]);
-                index--;
-                buffer--;
+                index--; buffer--;
+                test = ArrayItem(index);
             }
         }
 
