@@ -83,6 +83,11 @@ const struct AlgoEntry g_algolist[] =
     { _("Quick Sort (dual pivot)"), &QuickSortDualPivot, UINT_MAX, UINT_MAX,
       _("Dual pivot quick sort variant: partitions \"<1<2?>\" using three pointers, "
         "two at left and one at right.") },
+    { _("Pattern-Defeating Quick Sort"), &PDQSort, UINT_MAX, UINT_MAX,
+      _("Pattern-defeating quicksort (pdqsort) is a novel sorting algorithm that combines the fast average case of randomized quicksort"
+          "with the fast worst case of heapsort, while achieving linear time on inputs with certain patterns.") },
+    { _("Branchless Pattern-Defeating Quick Sort"), &PDQSortBranchless, UINT_MAX, UINT_MAX,
+      _("Provides potential speedup over default Pattern-Defeating Quick Sort for arithmetic data.") },
     { _("Bubble Sort"), &BubbleSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Optimized Bubble Sort"), &OptimizedBubbleSort, UINT_MAX, UINT_MAX,
@@ -1232,26 +1237,8 @@ void shiftElement(SortArray& A, size_t start, size_t end)
 
 // ****************************************************************************
 // *** In-Place Radix Sort LSD
-/*
-Copyright (c) 2019 w0rthy
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+// Copyright (c) 2019 w0rthy
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
 size_t maxLog(SortArray& A, size_t n, size_t base)
 {
     int max = A[0];
@@ -2073,27 +2060,8 @@ void CycleSort(SortArray& A)
 
 
 // ****************************************************************************
-// *** Pairwise Sorting Network (Recursive and Iterative) 
-/*
-Copyright (c) 2021 aphitorite
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// *** Pairwise Sorting Network (Recursive and Iterative)
+// Copyright (c) 2021 aphitorite
 
 void compSwap(SortArray& A, size_t a, size_t b)
 {
