@@ -65,6 +65,10 @@ const struct AlgoEntry g_algolist[] =
     { _("Merge Sort (iterative)"), &MergeSortIterative, UINT_MAX, 512,
       _("Merge sort variant which iteratively merges "
         "subarrays of sizes of powers of two.") },
+    { _("Pairwise Merge Sort (Recursive)"), &PairwiseSort, UINT_MAX, 512,
+      wxEmptyString },
+    { _("Pairwise Merge Sort (Iterative)"), &PairwiseIterativeSort, UINT_MAX, 512,
+      wxEmptyString },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -2039,4 +2043,82 @@ void CycleSort(SortArray& array, ssize_t n)
 void CycleSort(SortArray& A)
 {
     CycleSort(A, A.size());
+}
+
+
+// ****************************************************************************
+// *** Pairwise Sorting Network (Recursive and Iterative)
+// Copyright (c) 2021 aphitorite
+
+void compSwap(SortArray& A, size_t a, size_t b)
+{
+    size_t n = A.size();
+    if (b < n && A[a] > A[b]) { A.swap(a, b); }
+}
+void PairwiseMerge(SortArray& A, size_t a, size_t b)
+{
+    size_t m = (a + b) / 2, m1 = (a + m) / 2, g = m - m1;
+    for (size_t i = 0; m1 + i < m; ++i)
+    {
+        for (size_t j = m1, k = g; k > 0; k >>= 1, j -= k - (i & k))
+        {
+            compSwap(A, j + i, j + i + k);
+        }
+    }
+    if (b - a > 4) { PairwiseMerge(A, m, b); }
+}
+
+void PairwiseMergeSort(SortArray& A, size_t a, size_t b)
+{
+    size_t m = (a + b) / 2;
+    for (size_t i = a, j = m; i < m; ++i, ++j)
+    {
+        compSwap(A, i, j);
+    }
+    if (b - a > 2)
+    {
+        PairwiseMergeSort(A, a, m);
+        PairwiseMergeSort(A, m, b);
+        PairwiseMerge(A, a, b);
+    }
+}
+
+void PairwiseSort(SortArray& A)
+{
+    size_t end = A.size();
+    size_t n = 1;
+    for (; n < end; n <<= 1) {}
+    PairwiseMergeSort(A, 0, n);
+}
+
+void PairwiseIterativeSort(SortArray& A)
+{
+    size_t end = A.size(), n = 1;
+    for (; n < end; n <<= 1) {}
+    for (size_t k = n >> 1; k > 0; k >>= 1)
+    {
+        for (size_t j = 0; j < end; j += k << 1)
+        {
+            for (size_t i = 0; i < k; ++i)
+            {
+                compSwap(A, j + i, j + i + k);
+            }
+        }
+    }
+    for (size_t k = 2; k < n; k <<= 1)
+    {
+        for (size_t j = k >> 1; j > 0; j >>= 1)
+        {
+            for (size_t i = 0; i < end; i += k << 1)
+            {
+                for (size_t m = j; m < ((k - j) << 1); m += j << 1)
+                {
+                    for (size_t o = 0; o < j; ++o)
+                    {
+                        compSwap(A, i + m + o, i + m + j + o);
+                    }
+                }
+            }
+        }
+    }
 }
