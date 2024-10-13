@@ -213,6 +213,10 @@ void SelectionSort(SortArray& A)
     A.unwatch_all();
 }
 
+// ****************************************************************************
+// *** Sandpaper and Double Sandpaper Sort
+// Double Sandpaper Sort by Taihennami
+
 void DoubleSandpaperSort(SortArray& A)
 {
     for (size_t left = 0, right = A.size() - 1; left < right; ++left, --right)
@@ -1225,6 +1229,10 @@ void shiftElement(SortArray& A, size_t start, size_t end)
         }
     }
 }
+
+// ****************************************************************************
+// *** In-Place Radix Sort LSD
+// Copyright (c) 2019 w0rthy
 
 size_t maxLog(SortArray& A, size_t n, size_t base)
 {
