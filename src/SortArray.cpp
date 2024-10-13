@@ -347,7 +347,12 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         else if (size % 4 == 0) { group_count = 4; }
         else if (size % 2 != 0) { group_count = 3; }
         else { group_count = 2; }
-        
+        size_t n = m_array.size();
+        if (n <= 10)
+        {
+            if (n % 2 != 0) { group_count = 3; }
+            else { group_count = 2; }
+        }
         size_t repeat = 1;
         int val = 1;
         for (size_t i = 0; i < size; ++i)
