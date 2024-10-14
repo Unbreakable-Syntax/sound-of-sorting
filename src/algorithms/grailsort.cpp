@@ -510,12 +510,12 @@ namespace grailsort_detail
         static void InPlaceBufferReset(RandomAccessIterator array, int start, int length, int bufferOffset) {
             int  index = start + length - 1;
             int buffer = index - bufferOffset;
-            ArrayItem test = ArrayItem(index);
+            ArrayItem pos = ArrayItem(index);
             while (index >= start) {
-                test.get();
+                pos.get();
                 std::swap(array[index], array[buffer]);
                 index--; buffer--;
-                test = ArrayItem(index);
+                pos = ArrayItem(index);
             }
         }
 
@@ -529,11 +529,12 @@ namespace grailsort_detail
         static void OutOfPlaceBufferReset(RandomAccessIterator array, int start, int length, int bufferOffset) {
             int  index = start + length - 1;
             int buffer = index - bufferOffset;
-
+            ArrayItem pos = ArrayItem(index);
             while (index >= start) {
+                pos.get();
                 array[index] = std::move(array[buffer]);
-                index--;
-                buffer--;
+                index--; buffer--;
+                pos = ArrayItem(index);
             }
         }
 
