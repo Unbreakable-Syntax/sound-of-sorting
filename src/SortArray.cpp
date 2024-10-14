@@ -55,7 +55,7 @@ void ArrayItem::OnComparison(const ArrayItem& a, const ArrayItem& b)
 
 SortArray::SortArray()
     : m_calc_inversions(false),
-      m_delay(NULL)
+      m_delay(nullptr)
 {
 }
 
@@ -561,7 +561,7 @@ unsigned short SortArray::InWatchList(ssize_t idx) const
 {
     for (size_t i = 0; i < m_watch.size(); ++i)
     {
-        if (m_watch[i].first == NULL) continue;
+        if (m_watch[i].first == nullptr) continue;
 
         // compare watched value
         if (*m_watch[i].first != idx) continue;

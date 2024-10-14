@@ -273,7 +273,7 @@ void* SortAlgoThread::Entry()
     wxCommandEvent evt(wxEVT_COMMAND_BUTTON_CLICKED, WMain::ID_RUN_FINISHED);
     m_wmain->GetEventHandler()->AddPendingEvent(evt);
 
-    return NULL;
+    return nullptr;
 }
 
 void SortAlgoThread::Exit()
