@@ -126,6 +126,8 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Reverse Sawtooth"));
     list.Add(_("Many Similar"));
     list.Add(_("Quicksort Killer"));
+    list.Add(_("Spike"));
+    list.Add(_("Ribbon"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -378,7 +380,40 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[j] = temp;
         }
 
-     }
+    }
+    else if (schema == 20)  // Spike
+    {
+        int spike = 4;
+        int max = m_array.size() / (spike * 2);
+        int val = 1;
+        size_t n = m_array.size();
+        for (size_t i = 0; i < n; ++i)
+        {
+            while (val <= max && i < n)
+            {
+                m_array[i] = ArrayItem(val); ++val; ++i;
+            }
+            if (max % 2 == 0) { val = max; }
+            else { val = max - 1; }
+            while (val > 0 && i < n)
+            {
+                m_array[i] = ArrayItem(val); --val; ++i;
+            }
+            val = 1;
+            if (i < n) { m_array[i] = ArrayItem(val); }
+        }
+    }
+    else if (schema == 21)  // Ribbon
+    {
+        int min = 1;
+        int max = m_array.size();
+        for (size_t i = 0; i < m_array.size(); ++i)
+        {
+            if (i % 2 == 0) { m_array[i] = ArrayItem(min); }
+            else { m_array[i] = ArrayItem(max); }
+            ++min; --max;
+        }
+    }
     else // fallback
     {
         return FillData(0, arraysize);
