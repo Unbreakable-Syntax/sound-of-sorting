@@ -29,7 +29,7 @@
 WMain::WMain(wxWindow* parent)
     : WMain_wxg(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE)
 {
-    m_thread = NULL;
+    m_thread = nullptr;
     g_sound_on = false;
 
     recordButton->Hide();
@@ -88,7 +88,7 @@ WMain::WMain(wxWindow* parent)
     sdlaudiospec.userdata = sortview;
 
     // Open the audio device, forcing the desired format
-    if ( SDL_OpenAudio(&sdlaudiospec, NULL) < 0 ) {
+    if ( SDL_OpenAudio(&sdlaudiospec, nullptr) < 0 ) {
         wxLogError(_("Couldn't open audio: ") + wxString(SDL_GetError(), wxConvISO8859_1));
         soundButton->Disable();
     }
@@ -174,7 +174,7 @@ void WMain::AbortAlgorithm()
     g_algo_running = false;
 
     delete m_thread;
-    m_thread = NULL;
+    m_thread = nullptr;
 }
 
 void WMain::OnRunButton(wxCommandEvent &event)
@@ -186,7 +186,7 @@ void WMain::OnRunButton(wxCommandEvent &event)
         g_algo_running = false;
 
         delete m_thread;
-        m_thread = NULL;
+        m_thread = nullptr;
     }
 
     if (event.IsChecked())
@@ -221,7 +221,7 @@ void WMain::OnRunFinished(wxCommandEvent&)
         g_algo_running = false;
 
         delete m_thread;
-        m_thread = NULL;
+        m_thread = nullptr;
     }
 
     runButton->SetValue(false);
@@ -455,7 +455,7 @@ public:
 
         srand((int)wxGetLocalTime());
 
-        WMain* wmain = new WMain(NULL);
+        WMain* wmain = new WMain(nullptr);
         SetTopWindow(wmain);
         wmain->Show();
 
