@@ -452,17 +452,21 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     }
     else if (schema == 20)  // Spike
     {
-        int spike = 4;
-        int max = m_array.size() / (spike * 2);
-        int val = 1;
         size_t n = m_array.size();
+        int spike, val = 1;
+        if (n % 5 == 0) { spike = 5; }
+        else if (n % 4 == 0) { spike = 4; }
+        else if (n % 3 == 0) { spike = 3; }
+        else { spike = 2; }
+        int max = n / (spike * 2);
+        if (max == 1) { max = n / spike; }
         for (size_t i = 0; i < n; ++i)
         {
             while (val <= max && i < n)
             {
                 m_array[i] = ArrayItem(val); ++val; ++i;
             }
-            if (max % 2 == 0) { val = max; }
+            if (max % 2 == 0 || (spike == 2 && max % 2 != 0)) { val = max; }
             else { val = max - 1; }
             while (val > 0 && i < n)
             {
