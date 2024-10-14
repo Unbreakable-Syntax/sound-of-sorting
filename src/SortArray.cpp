@@ -278,28 +278,65 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     }
     else if (schema == 13) // Pipe organ (1, 1, 2, 2, 1, 1)
     {
-        int val = 1;
-        for (size_t i = 0; i < m_array.size() / 2; ++i)
+        size_t n = m_array.size();
+
+        if (n % 2 == 0)
         {
-            m_array[i] = ArrayItem(val); ++val;
+            int val = 1;
+            for (size_t i = 0; i < n / 2; ++i)
+            {
+                m_array[i] = ArrayItem(val); ++val;
+            }
+            val = n / 2;
+            for (size_t i = n / 2; i <= n - 1; ++i)
+            {
+                m_array[i] = ArrayItem(val); --val;
+            }
         }
-        val = m_array.size() / 2;
-        for (size_t i = m_array.size() / 2; i <= m_array.size() - 1; ++i)
+        else
         {
-            m_array[i] = ArrayItem(val); --val;
+            int val = 1;
+            for (size_t i = 0; i <= n / 2; ++i)
+            {
+                m_array[i] = ArrayItem(val); ++val;
+            }
+            val = n / 2;
+            for (size_t i = (n / 2) + 1; i <= n - 1; ++i)
+            {
+                m_array[i] = ArrayItem(val); --val;
+            }
         }
     }
     else if (schema == 14) // Mirrored organ (3, 2, 1, 1, 2, 3)
     {
-        int val = m_array.size() / 2;
-        for (size_t i = 0; i < m_array.size() / 2; ++i)
+        size_t n = m_array.size();
+
+        if (n % 2 == 0)
         {
-            m_array[i] = ArrayItem(val); --val;
+            int val = n / 2;
+            for (size_t i = 0; i < n / 2; ++i)
+            {
+                m_array[i] = ArrayItem(val); --val;
+            }
+            val = 1;
+            for (size_t i = n / 2; i <= n - 1; ++i)
+            {
+                m_array[i] = ArrayItem(val); ++val;
+            }
         }
-        val = 1;
-        for (size_t i = m_array.size() / 2; i <= m_array.size() - 1; ++i)
+        else
         {
-            m_array[i] = ArrayItem(val); ++val;
+            int val = n / 2;
+            for (size_t i = 0; i <= n / 2; ++i)
+            {
+                m_array[i] = ArrayItem(val);
+                if (val >= 2) { --val; }
+            }
+            val = 1;
+            for (size_t i = (n / 2) + 1; i <= n - 1; ++i)
+            {
+                m_array[i] = ArrayItem(val); ++val;
+            }
         }
     }
     else if (schema == 15) // Wave
