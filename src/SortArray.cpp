@@ -353,24 +353,56 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     }
     else if (schema == 16)  // Sawtooth
     {
-        int max = m_array.size() / 4;
+        size_t n = m_array.size(), teeth;
+        if (n % 5 == 0) { teeth = 5; }
+        else if (n % 4 == 0) { teeth = 4; }
+        else if (n % 3 == 0) { teeth = 3; }
+        else { teeth = 2; }
+        int max = n / teeth;
         int count = 1;
-        for (size_t i = 0; i < m_array.size(); ++i)
+        for (size_t i = 0; i < n; ++i)
         {
             if (count > max) { count = 1; }
             m_array[i] = ArrayItem(count);
             ++count;
         }
+        if (teeth == 2 && m_array[n - 1] == 1)
+        {
+            size_t m = n - 1;
+            while (m_array[m - 1] > m_array[m])
+            {
+                ArrayItem temp = m_array[m - 1];
+                m_array[m - 1] = m_array[m];
+                m_array[m] = temp;
+                --m;
+            }
+        }
     }
     else if (schema == 17)  // Reverse Sawtooth
     {
-        int max = m_array.size() / 4;
+        size_t n = m_array.size(), teeth;
+        if (n % 5 == 0) { teeth = 5; }
+        else if (n % 4 == 0) { teeth = 4; }
+        else if (n % 3 == 0) { teeth = 3; }
+        else { teeth = 2; }
+        int max = n / teeth;
         int count = max;
-        for (size_t i = 0; i < m_array.size(); ++i)
+        for (size_t i = 0; i < n; ++i)
         {
             if (count <= 0) { count = max; }
             m_array[i] = ArrayItem(count);
             --count;
+        }
+        if (teeth == 2 && m_array[n - 1] == max)
+        {
+            size_t m = n - 1;
+            while (m_array[m - 1] < m_array[m])
+            {
+                ArrayItem temp = m_array[m - 1];
+                m_array[m - 1] = m_array[m];
+                m_array[m] = temp;
+                --m;
+            }
         }
     }
     else if (schema == 18)  // Many Similar
