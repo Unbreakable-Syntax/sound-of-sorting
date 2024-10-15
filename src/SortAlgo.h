@@ -104,6 +104,7 @@ void StlHeapSort(class SortArray& a);
 void TimSort(class SortArray& a);
 void WikiSort(class SortArray& a);
 void GrailSort(class SortArray& a);
+void AuxGrailSort(class SortArray& a);
 void PDQSort(class SortArray& a);
 void PDQSortBranchless(class SortArray& a);
 
