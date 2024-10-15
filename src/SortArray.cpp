@@ -356,8 +356,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         size_t n = m_array.size(), teeth;
         if (n % 5 == 0) { teeth = 5; }
         else if (n % 4 == 0) { teeth = 4; }
-        else if (n % 3 == 0) { teeth = 3; }
-        else { teeth = 2; }
+        else { teeth = 3; }
         int max = n / teeth;
         int count = 1;
         for (size_t i = 0; i < n; ++i)
@@ -383,8 +382,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         size_t n = m_array.size(), teeth;
         if (n % 5 == 0) { teeth = 5; }
         else if (n % 4 == 0) { teeth = 4; }
-        else if (n % 3 == 0) { teeth = 3; }
-        else { teeth = 2; }
+        else { teeth = 3; }
         int max = n / teeth;
         int count = max;
         for (size_t i = 0; i < n; ++i)
