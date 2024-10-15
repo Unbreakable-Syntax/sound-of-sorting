@@ -52,7 +52,6 @@
 #include <iterator>
 #include <type_traits>
 #include <utility>
-#include <cmath>
 
 namespace grailsort_detail
 {
@@ -1333,7 +1332,7 @@ void GrailSort(SortArray& A)
 
 void AuxGrailSort(SortArray& A)
 {
-    size_t buf_size = log(A.size());
+    size_t buf_size = A.size() / 10;
     if (buf_size == 0) { buf_size = 1; }
     std::vector<ArrayItem> space_buf(buf_size, ArrayItem(0));
     grailsort(MyIterator(&A, 0), MyIterator(&A, A.size()), space_buf.begin(), space_buf.end());
