@@ -139,7 +139,7 @@ const struct AlgoEntry g_algolist[] =
       _("An O(1) place O(n log n) time stable merge sort.") },
     { _("Grail Sort (O(1) buffer)"), &GrailSort, UINT_MAX, inversion_count_instrumented,
       _("Grail Sort is a stable, in-place sorting algorithm that efficiently organizes an array by using a block-based merging technique.") },
-    { _("Grail Sort (10% array size buffer)"), &AuxGrailSort, UINT_MAX, inversion_count_instrumented,
+    { _("Grail Sort (external buffer)"), &AuxGrailSort, UINT_MAX, inversion_count_instrumented,
       _("A variant of Grail Sort that uses an external buffer for a potential speedup.") },
     { _("Bead Sort"), &GravitySort, UINT_MAX, UINT_MAX,
       _("Also known as Gravity Sort. This is a non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
