@@ -135,6 +135,7 @@ void WMain_wxg::do_layout()
     grid_sizer_1->Add(labelArraySize, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     sizer_6->Add(arraySizeSlider, 1, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     sizer_6->Add(labelArraySizeValue, 0, wxLEFT|wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL|wxFIXED_MINSIZE, 4);
+    labelArraySizeValue->SetMinSize(wxSize(39, -1));
     grid_sizer_1->Add(sizer_6, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
     grid_sizer_1->AddGrowableCol(1);
     sizerInputAlgorithm->Add(grid_sizer_1, 0, wxEXPAND, 0);
