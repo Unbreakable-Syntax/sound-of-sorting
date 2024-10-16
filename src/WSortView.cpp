@@ -175,7 +175,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     double bstep = wbar + 1.0;
     if (size > width) {
         step = size / width;
-        wbar = wxMax(0.05, width / (double)size);  // Scale down further if too many elements
+        wbar = wxMax(0.03, width / (double)size);  // Scale down further if too many elements
         bstep = wbar;
     }
 
