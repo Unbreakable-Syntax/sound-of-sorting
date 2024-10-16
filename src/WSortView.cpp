@@ -170,9 +170,11 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     //double bstep = 1.5 * wbar;
 
     // 2nd variant: one pixel between bars
+    size_t step = 1;
     double wbar = (width - (size - 1)) / (double)size;
     double bstep = wbar + 1.0;
     if (size > width) {
+        step = size / width;
         wbar = wxMax(0.05, width / (double)size);  // Scale down further if too many elements
         bstep = wbar;
     }
@@ -224,20 +226,23 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     wxMutexLocker lock(m_array.m_mutex);
     ASSERT(lock.IsOk());
 
+    size_t i_step = step;
     for (size_t i = 0; i < size; ++i)
     {
         int clr = m_array.GetIndexColor(i);
-
-        ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
-        dc.SetPen(pens[clr]);
-        dc.SetBrush(brushes[clr]);
-
-        dc.DrawRectangle(i * bstep, height,
-            wxMax(1, // draw at least 1 pixel
-                (wxCoord((i + 1) * bstep) - wxCoord(i * bstep)) // integral gap to next bar
-                - (bstep - wbar)    // space between bars
-            ),
-            -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+        if (i == i_step)
+        {
+            ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
+            dc.SetPen(pens[clr]);
+            dc.SetBrush(brushes[clr]);
+            dc.DrawRectangle(i * bstep, height,
+                wxMax(1, // draw at least 1 pixel
+                    (wxCoord((i + 1) * bstep) - wxCoord(i * bstep)) // integral gap to next bar
+                    - (bstep - wbar)    // space between bars
+                ),
+                -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+            i_step += step;
+        }
     }
 };
 
