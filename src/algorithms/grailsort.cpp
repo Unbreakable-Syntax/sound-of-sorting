@@ -1332,7 +1332,7 @@ void GrailSort(SortArray& A)
 
 void AuxGrailSort(SortArray& A)
 {
-    std::vector<ArrayItem> space_buf(32, ArrayItem(0));
+    std::vector<ArrayItem> space_buf(512, ArrayItem(0));
     grailsort(MyIterator(&A, 0), MyIterator(&A, A.size()), space_buf.begin(), space_buf.end());
 }
 // ****************************************************************************
