@@ -454,9 +454,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     {
         size_t n = m_array.size();
         int spike, val = 1;
-        if (n % 5 == 0) { spike = 5; }
-        else if (n % 4 == 0) { spike = 4; }
-        else if (n % 3 == 0) { spike = 3; }
+        if (n % 10 == 0) { spike = 5; }
+        else if (n % 8 == 0) { spike = 4; }
+        else if (n % 6 == 0) { spike = 3; }
         else { spike = 2; }
         int max = n / (spike * 2);
         if (max == 1) { max = n / spike; }
@@ -466,14 +466,29 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(val); ++val; ++i;
             }
-            if (max % 2 == 0 || (spike == 2 && max % 2 != 0)) { val = max; }
+            if (n % 2 == 0) { val = max; }
             else { val = max - 1; }
             while (val > 0 && i < n)
             {
-                m_array[i] = ArrayItem(val); --val; ++i;
+                m_array[i] = ArrayItem(val); --val;
+                if (val != 0) { ++i; }
             }
             val = 1;
-            if (i < n) { m_array[i] = ArrayItem(val); }
+        }
+        size_t start, end;
+        start = end = m_array.size() - 1;
+        while (m_array[start - 1] < m_array[start]) 
+        { --start; }
+        for (; start <= end; ++start)
+        {
+            ArrayItem key = m_array[start];
+            size_t j = start;
+            while (j >= 1 && m_array[j - 1] <= key)
+            {
+                m_array[j] = m_array[j - 1];
+                --j;
+            }
+            m_array[j] = key;
         }
     }
     else if (schema == 21)  // Ribbon
