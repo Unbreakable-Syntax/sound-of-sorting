@@ -226,12 +226,32 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     wxMutexLocker lock(m_array.m_mutex);
     ASSERT(lock.IsOk());
 
-    size_t i_step = step;
-    for (size_t i = 0; i < size; ++i)
+    if (step > 1)
     {
-        int clr = m_array.GetIndexColor(i);
-        if (i == i_step)
+        size_t i_step = step;
+        for (size_t i = 0; i < size; ++i)
         {
+            int clr = m_array.GetIndexColor(i);
+            if (i == i_step)
+            {
+                ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
+                dc.SetPen(pens[clr]);
+                dc.SetBrush(brushes[clr]);
+                dc.DrawRectangle(i * bstep, height,
+                    wxMax(1, // draw at least 1 pixel
+                        (wxCoord((i + 1) * bstep) - wxCoord(i * bstep)) // integral gap to next bar
+                        - (bstep - wbar)    // space between bars
+                    ),
+                    -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+                i_step += step;
+            }
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < size; ++i)
+        {
+            int clr = m_array.GetIndexColor(i);
             ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
             dc.SetPen(pens[clr]);
             dc.SetBrush(brushes[clr]);
@@ -241,7 +261,6 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
                     - (bstep - wbar)    // space between bars
                 ),
                 -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
-            i_step += step;
         }
     }
 };
