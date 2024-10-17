@@ -235,7 +235,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
             if (i == i_step)
             {
                 int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
-                clr = clr % numBrushes;
+                clr = (clr + numBrushes) % numBrushes;
                 dc.SetPen(pens[clr]);
                 dc.SetBrush(brushes[clr]);
                 dc.DrawRectangle(i * bstep, height,
