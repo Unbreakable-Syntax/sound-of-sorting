@@ -201,6 +201,16 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         wxPen(wxColour(128,192,192)), // 14 dark cyan
         wxPen(wxColour(192,192,128)), // 15 dark yellow
         wxPen(wxColour(0,128,255)),   // 16 blue/cyan mix
+        wxPen(wxColour(255,64,64)),   // 17 bright red
+        wxPen(wxColour(64,255,64)),   // 18 bright green
+        wxPen(wxColour(64,64,255)),   // 19 bright blue
+        wxPen(wxColour(255,128,64)),  // 20 coral
+        wxPen(wxColour(128,255,64)),  // 21 lime green
+        wxPen(wxColour(64,255,255)),  // 22 aqua
+        wxPen(wxColour(255,215,0)),   // 23 gold
+        wxPen(wxColour(128,0,128)),   // 24 purple
+        wxPen(wxColour(0,255,127)),   // 25 spring green
+        wxPen(wxColour(255,69,0)),    // 26 orange red
     };
 
     static const wxBrush brushes[] = {
@@ -221,6 +231,16 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         wxBrush(wxColour(128,192,192)), // 14 dark cyan
         wxBrush(wxColour(192,192,128)), // 15 dark yellow
         wxBrush(wxColour(0,128,255)),   // 16 blue/cyan mix
+        wxBrush(wxColour(255,64,64)),   // 17 bright red
+        wxBrush(wxColour(64,255,64)),   // 18 bright green
+        wxBrush(wxColour(64,64,255)),   // 19 bright blue
+        wxBrush(wxColour(255,128,64)),  // 20 coral
+        wxBrush(wxColour(128,255,64)),  // 21 lime green
+        wxBrush(wxColour(64,255,255)),  // 22 aqua
+        wxBrush(wxColour(255,215,0)),   // 23 bright yellow
+        wxBrush(wxColour(128,0,128)),   // 24 purple
+        wxBrush(wxColour(0,255,127)),   // 25 spring green
+        wxBrush(wxColour(255,69,0)),    // 26 orange red
     };
 
     wxMutexLocker lock(m_array.m_mutex);
@@ -235,7 +255,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
             if (i == i_step)
             {
                 int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
-                clr = (clr + numBrushes) % numBrushes;
+                clr = clr % numBrushes;
                 dc.SetPen(pens[clr]);
                 dc.SetBrush(brushes[clr]);
                 dc.DrawRectangle(i * bstep, height,
