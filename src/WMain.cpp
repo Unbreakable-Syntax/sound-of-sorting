@@ -318,7 +318,7 @@ void WMain::SetDelay(size_t pos)
     // different slider scale for Linux/GTK: (faster)
     // 0.001 ms formula, tested on Windows
     // Warning! The slider will never go past 0.005 ms with this formula
-    // g_delay = pow(base, pos / 15000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 750.0;
+    // g_delay = pow(base, pos / 15000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 800.0;
 #if __WXGTK__ || MSW_PERFORMANCECOUNTER
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
 #else
