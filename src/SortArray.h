@@ -316,6 +316,7 @@ public:
             OnAccess();
         }
 
+        RecalcInversions();
         return m_array[i];
     }
 
