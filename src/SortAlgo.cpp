@@ -302,7 +302,7 @@ void InsertionSort2(SortArray& A)
 }
 
 // swaps every time (keeps all values visible)
-void BinaryInsertionSort(SortArray& A)
+void BinaryInsertionSort2(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); ++i)
     {
@@ -323,10 +323,39 @@ void BinaryInsertionSort(SortArray& A)
         ssize_t j = i - 1;
         while (j >= lo)
         {
-            A.swap(j, j+1);
+            A.swap(j, j + 1);
             j--;
         }
 
+        A.unmark(i);
+    }
+}
+
+void BinaryInsertionSort(SortArray& A)
+{
+    for (size_t i = 1; i < A.size(); ++i)
+    {
+        value_type key = A[i];
+        A.mark(i);
+
+        size_t lo = 0, hi = i;
+        while (lo < hi) {
+            size_t mid = (lo + hi) / 2;
+            if (key < A[mid])
+                hi = mid;
+            else
+                lo = mid + 1;
+        }
+
+        // item has to go into position lo
+
+        size_t j = i;
+        while (j > lo)
+        {
+            A.set(j, A[j - 1]);
+            j--;
+        }
+        A.set(lo, key);
         A.unmark(i);
     }
 }
