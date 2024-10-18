@@ -56,7 +56,7 @@ void SelectionSort(class SortArray& a);
 void DoubleSelectionSort(class SortArray& a);
 void SandpaperSort(class SortArray& a);
 void DoubleSandpaperSort(class SortArray& a);
-void InsertionSort(class SortArray& a);
+void InsertionSort2(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
 
 void MergeSort(class SortArray& a);

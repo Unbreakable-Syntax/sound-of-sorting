@@ -56,7 +56,7 @@ const struct AlgoEntry g_algolist[] =
       _("Also known as Exchange Sort.") },
     { _("Double Sandpaper Sort"), &DoubleSandpaperSort, UINT_MAX, UINT_MAX,
       _("A variant of Exchange Sort that sorts the array bidirectionally.") },
-    { _("Insertion Sort"), &InsertionSort, UINT_MAX, UINT_MAX,
+    { _("Insertion Sort"), &InsertionSort2, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
@@ -288,14 +288,14 @@ void InsertionSort2(SortArray& A)
     for (size_t i = 1; i < A.size(); ++i)
     {
         A.mark(i);
-        ssize_t j = i - 1;
-        value_type tmp = A[j], key = A[i];
-        while (j >= 0 && tmp > key)
+        size_t j = i;
+        value_type key = A[i];
+        while (j >= 1 && A[j - 1] > key)
         {
-            A.set(j + 1, tmp);
-            j--;
+            A.set(j, A[j - 1]);
+            --j;
         }
-        A.set(j + 1, key);
+        A.set(j, key);
 
         A.unmark(i);
     }
