@@ -592,10 +592,10 @@ void SortArray::AddInversions(size_t pos)
 
     const ArrayItem& a = direct(pos);
     unsigned int inverses = 0;
-    for (size_t i = 0; i < size(); ++i)
+    for (size_t i = 0; i < pos; ++i)
     {
         const ArrayItem& b = direct(i);
-        if (a.greater_direct(b)) { ++inverses; }
+        if (b.greater_direct(a)) { ++inverses; }
     }
 
     m_inversions += inverses;
@@ -610,10 +610,10 @@ void SortArray::RemoveInversions(size_t pos)
 
     const ArrayItem& a = direct(pos);
     unsigned int inverses = 0;
-    for (size_t i = 0; i < size(); ++i)
+    for (size_t i = 0; i < pos; ++i)
     {
         const ArrayItem& b = direct(i);
-        if (a.greater_direct(b)) { ++inverses; }
+        if (b.greater_direct(a)) { ++inverses; }
     }
 
     m_inversions -= inverses;
