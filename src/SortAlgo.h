@@ -96,6 +96,7 @@ void BatcherSortNetwork(SortArray& a);
 void InPlaceRadixSortLSD(class SortArray& a);
 void RadixSortLSD(class SortArray& a);
 void RadixSortMSD(class SortArray& a);
+void AmericanFlagSort(SortArray& a);
 
 void StlSort(class SortArray& a);
 void StlStableSort(class SortArray& a);

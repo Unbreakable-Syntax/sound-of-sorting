@@ -127,6 +127,8 @@ const struct AlgoEntry g_algolist[] =
       _("Least significant digit radix sort, performed in O(1) space.") },
     { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX, UINT_MAX,
       _("Most significant digit radix sort, which permutes items in-place by walking cycles.") },
+    { _("American Flag Sort"), &AmericanFlagSort, UINT_MAX, inversion_count_instrumented,
+      _("American Flag Sort is an efficient, in-place variant of radix sort that distributes items into hundreds of buckets.") },
     { _("std::sort (gcc)"), &StlSort, UINT_MAX, inversion_count_instrumented,
       wxEmptyString },
     { _("std::stable_sort (gcc)"), &StlStableSort, UINT_MAX, inversion_count_instrumented,
@@ -1269,22 +1271,22 @@ void shiftElement(SortArray& A, size_t start, size_t end)
 // ****************************************************************************
 // *** In-Place Radix Sort LSD
 /*
-Copyright (c) 2019 w0rthy
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    Copyright (c) 2019 w0rthy
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 */
 
 size_t maxLog(SortArray& A, size_t n, size_t base)
@@ -2110,22 +2112,22 @@ void CycleSort(SortArray& A)
 // ****************************************************************************
 // *** Pairwise Sorting Network (Recursive and Iterative)
 /*
-Copyright (c) 2021 aphitorite
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    Copyright (c) 2021 aphitorite
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 */
 
 void compSwap(SortArray& A, size_t a, size_t b)
@@ -2200,3 +2202,116 @@ void PairwiseIterativeSort(SortArray& A)
         }
     }
 }
+
+// ****************************************************************************
+// *** American Flag Sort
+// Adapted from https://en.wikipedia.org/wiki/American_flag_sort
+/*
+    Copyright 2017 Justin Wetherell
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+int getMaxNumberOfDigits(SortArray& A, size_t len, int buckets)
+{
+    int max = std::numeric_limits<int>::min();
+    int temp = 0;
+    for (size_t i = 0; i < len; ++i)
+    {
+        int ele = A[i].get();
+        temp = static_cast<int>(log(ele) / log(buckets)) + 1;
+        if (temp > max) { max = temp; }
+    }
+    return max;
+}
+
+size_t getDigit(size_t num, size_t divisor, size_t buckets)
+{
+    return (num / divisor) % buckets;
+}
+
+void sort(SortArray& A, size_t start, size_t len, size_t divisor)
+{
+    size_t buckets = 128;
+    std::vector<int> count(buckets, 0);
+    std::vector<int> offset(buckets, 0);
+    size_t digit = 0;
+
+    for (size_t i = start; i < len; ++i)
+    {
+        int d = A[i].get();
+        size_t l = d;
+        digit = getDigit(l, divisor, buckets);
+        count[digit] = count[digit] + 1;
+    }
+    int s = start;
+    offset[0] = s;
+
+    for (size_t i = 1; i < buckets; ++i)
+    {
+        offset[i] = count[i - 1] + offset[i - 1];
+    }
+
+    for (size_t b = 0; b < buckets; ++b)
+    {
+        while (count[b] > 0)
+        {
+            size_t origin = offset[b], from = origin;
+            int num = A[from];
+            do
+            {
+                size_t m = num;
+                digit = getDigit(m, divisor, buckets);
+                size_t to = offset[digit];
+
+                offset[digit] = offset[digit] + 1;
+                count[digit] = count[digit] - 1;
+                
+                int temp = A[to].get();
+                A.set(to, ArrayItem(num));
+
+                num = temp;
+                from = to;
+            } 
+            while (from != origin);
+        }
+    }
+    if (divisor > 1)
+    {
+        for (size_t i = 0; i < buckets; ++i)
+        {
+            size_t begin = 0;
+            if (i > 0) { begin = offset[i - 1]; }
+            else { begin = start; }
+            size_t last = offset[i];
+
+            if (last - begin > 1)
+            {
+                sort(A, begin, last, divisor / buckets);
+            }
+        }
+    }
+}
+
+void AmericanFlagSort(SortArray& A)
+{
+    size_t len = A.size();
+    int buckets = 128, max = 1;
+    int numberOfDigits = getMaxNumberOfDigits(A, len, buckets); // Max number of digits
+
+    for (int i = 0; i < numberOfDigits - 1; ++i) { max *= buckets; }
+
+    size_t m = max;
+    sort(A, 0, len, m);
+}
+
+
