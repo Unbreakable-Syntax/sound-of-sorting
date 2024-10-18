@@ -316,20 +316,24 @@ void WMain::SetDelay(size_t pos)
     const double base = 4;
 
     // different slider scale for Linux/GTK: (faster)
+    // 0.001 ms formula, tested on Windows
+    // Warning! The slider will never go past 0.005 ms with this formula
+    // g_delay = pow(base, pos / 15000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 750.0;
 #if __WXGTK__ || MSW_PERFORMANCECOUNTER
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
 #else
     // other systems probably have sucking real-time performance anyway
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
+    
 #endif
     if (pos == 0) g_delay = 0;
 
     if (g_delay > 10)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
     else if (g_delay > 1)
-        labelDelayValue->SetLabel(wxString::Format(_("%.1f ms"), g_delay));
-    else
         labelDelayValue->SetLabel(wxString::Format(_("%.2f ms"), g_delay));
+    else
+        labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
 }
 
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)
