@@ -207,6 +207,9 @@ public:
     /// turn on/off calculation of inversions
     void SetCalcInversions(bool on);
 
+    void AddInversions(size_t i);
+    void RemoveInversions(size_t i);
+
     /// toggle boolean to calculate inversions
     void ToggleCalcInversions();
 
@@ -313,7 +316,6 @@ public:
             OnAccess();
         }
 
-        RecalcInversions();
         return m_array[i];
     }
 
@@ -344,6 +346,7 @@ public:
     void set(size_t i, const ArrayItem& v)
     {
         ASSERT(i < m_array.size());
+        RemoveInversions(i);
 
         {
             wxMutexLocker lock(m_mutex);
@@ -355,7 +358,7 @@ public:
             m_array[i] = v;
         }
 
-        RecalcInversions();
+        AddInversions(i);
         OnAccess();
     }
 
