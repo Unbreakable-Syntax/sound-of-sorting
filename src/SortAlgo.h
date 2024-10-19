@@ -63,6 +63,7 @@ void MergeSort(class SortArray& a);
 void MergeSortIterative(class SortArray& a);
 void PairwiseSort(class SortArray& a);
 void PairwiseIterativeSort(class SortArray& a);
+void WeaveMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 
@@ -96,7 +97,7 @@ void BatcherSortNetwork(SortArray& a);
 void InPlaceRadixSortLSD(class SortArray& a);
 void RadixSortLSD(class SortArray& a);
 void RadixSortMSD(class SortArray& a);
-void AmericanFlagSort(SortArray& a);
+void AmericanFlagSort(class SortArray& a);
 
 void StlSort(class SortArray& a);
 void StlStableSort(class SortArray& a);

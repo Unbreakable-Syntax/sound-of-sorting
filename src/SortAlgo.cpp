@@ -69,6 +69,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Pairwise Merge Sort (Iterative)"), &PairwiseIterativeSort, UINT_MAX, 512,
       wxEmptyString },
+    { _("Weave Merge Sort"), &WeaveMergeSort, UINT_MAX, 512,
+      wxEmptyString },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -431,6 +433,91 @@ void MergeSortIterative(SortArray& A)
                   std::min(i + 2 * s, A.size()));
         }
     }
+}
+
+/*
+    MIT License
+
+    Copyright (c) 2021 EmeraldBlock
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+void weaveMerge(SortArray& A, std::vector<value_type> tmp, size_t len, size_t residue, size_t modulus)
+{
+    if (residue + modulus >= len) { return; }
+
+    size_t low = residue, high = residue + modulus, dmodulus = modulus << 1;
+
+    weaveMerge(A, tmp, len, low, dmodulus);
+    weaveMerge(A, tmp, len, high, dmodulus);
+
+    size_t next = residue;
+    for (; low < len && high < len; next += modulus)
+    {
+        int cmp = 0;
+        if (A[low] > A[high]) { cmp = 1; }
+        else if (A[low] < A[high]) { cmp = -1; }
+
+        if (cmp == 1 || (cmp == 0 && low > high))
+        {
+            tmp[next] = A[high];
+            high += dmodulus;
+        }
+        else
+        {
+            tmp[next] = A[low];
+            low += dmodulus;
+        }
+    }
+
+    if (low >= len)
+    {
+        while (high < len)
+        {
+            tmp[next] = A[high];
+            next += modulus;
+            high += dmodulus;
+        }
+    }
+    else
+    {
+        while (low < len)
+        {
+            tmp[next] = A[low];
+            next += modulus;
+            low += dmodulus;
+        }
+    }
+
+    for (size_t i = residue; i < len; i += modulus)
+    {
+        A.set(i, tmp[i]);
+        A[i].get();
+    }
+}
+
+void WeaveMergeSort(SortArray& A)
+{
+    size_t len = A.size();
+    std::vector<value_type> tmp(len);
+    weaveMerge(A, tmp, len, 0, 1);
 }
 
 // ****************************************************************************
