@@ -440,7 +440,7 @@ void MergeSortIterative(SortArray& A)
 /*
     MIT License
 
-    Copyright (c) 2021 EmeraldBlock
+    Copyright (c) 2020 aphitorite/2021 EmeraldBlock
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -461,18 +461,18 @@ void MergeSortIterative(SortArray& A)
     SOFTWARE.
 */
 
-void weaveMerge(SortArray& A, std::vector<value_type>& tmp, size_t len, size_t residue, size_t modulus)
+void weaveMerge2(SortArray& A, std::vector<value_type>& tmp, size_t len, size_t residue, size_t modulus)
 {
     if (residue + modulus >= len) { return; }
 
     size_t low = residue, high = residue + modulus, dmodulus = modulus << 1;
 
-    weaveMerge(A, tmp, len, low, dmodulus);
-    weaveMerge(A, tmp, len, high, dmodulus);
+    weaveMerge2(A, tmp, len, low, dmodulus);
+    weaveMerge2(A, tmp, len, high, dmodulus);
 
     size_t next = residue;
     for (; low < len && high < len; next += modulus)
-    {
+    { 
         int cmp = 0;
         if (A[low] > A[high]) { cmp = 1; }
         else if (A[low] < A[high]) { cmp = -1; }
@@ -496,6 +496,7 @@ void weaveMerge(SortArray& A, std::vector<value_type>& tmp, size_t len, size_t r
             tmp[next] = A[high];
             next += modulus;
             high += dmodulus;
+            
         }
     }
     else
@@ -515,13 +516,145 @@ void weaveMerge(SortArray& A, std::vector<value_type>& tmp, size_t len, size_t r
     }
 }
 
-void WeaveMergeSort(SortArray& A)
+void WeaveMergeSort2(SortArray& A)
 {
     size_t len = A.size();
     std::vector<value_type> tmp(len);
-    weaveMerge(A, tmp, len, 0, 1);
+    weaveMerge2(A, tmp, len, 0, 1);
 }
 
+void insertTo(SortArray& A, size_t a, size_t b)
+{
+    value_type temp = A[a];
+    while (a > b) { A.set(a, A[a - 1]); --a; }
+    A.set(b, temp);
+}
+
+void shiftValue(SortArray& A, size_t a, size_t b, size_t len)
+{
+    for (size_t i = 0; i < len; ++i)
+    {
+        A.swap(a + i, b + i);
+    }
+}
+
+void rotate(SortArray& A, size_t a, size_t m, size_t b)
+{
+    size_t l = m - a, r = b - m;
+    while (l > 0 && r > 0)
+    {
+        if (r < l)
+        {
+            shiftValue(A, m - r, m, r);
+            b -= r;
+            m -= r;
+            l -= r;
+        }
+
+        else
+        {
+            shiftValue(A, a, m, l);
+            a += l;
+            m += l;
+            r -= l;
+        }
+    }
+}
+
+void bitReversal(SortArray& A, size_t a, size_t b)
+{
+    size_t len = b - a, m = 0;
+    size_t d1 = len >> 1, d2 = d1 + (d1 >> 1);
+    for (size_t i = 1; i < len - 1; ++i)
+    {
+        size_t j = d1;
+        for (size_t k = i, n = d2; (k & 1) == 0; j -= n, k >>= 1, n >>= 1) {}
+        m += j;
+        if (m > i)
+        {
+            A.swap(a + i, a + m);
+        }
+    }
+}
+
+void weaveInsert(SortArray& A, size_t a, size_t b, bool right)
+{
+    size_t i = a, j = i + 1;
+    while (j < b)
+    {
+        while (i < j && ((right == true && A[i] <= A[j]) || (right == false && A[i] < A[j]))) { ++i; }
+        if (i == j)
+        {
+            right = !right;
+            ++j;
+        }
+        else
+        {
+            insertTo(A, j, i++);
+            j += 2;
+        }
+    }
+}
+
+void weaveMerge(SortArray& A, size_t a, size_t m, size_t b)
+{
+    if (b - a < 2) { return; }
+    size_t a1 = a, b1 = b;
+    bool right = true;
+    if ((b - a) % 2 == 1)
+    {
+        if (m - a < b - m)
+        {
+            --a1;
+            right = false;
+        }
+        else { ++b1; }
+    }
+
+    for (size_t e = b1, f; e - a1 > 2; e = f)
+    {
+        m = (a1 + e) / 2;
+        size_t p = 1 << static_cast<size_t>(log(m - a1) / log(2));
+        rotate(A, m - p, m, e - p);
+
+        m = e - p;
+        f = m - p;
+
+        bitReversal(A, f, m);
+        bitReversal(A, m, e);
+        bitReversal(A, f, e);
+    }
+    weaveInsert(A, a, b, right);
+}
+
+void WeaveMergeSort(SortArray& A)
+{
+    size_t n = A.size(), d = 1 << static_cast<size_t>(log(n - 1) / log(2) + 1);
+    while (d > 1)
+    {
+        size_t i = 0, dec = 0;
+        while (i < n)
+        {
+            size_t j = i;
+            dec += n;
+            while (dec >= d)
+            {
+                dec -= d;
+                ++j;
+            }
+            size_t k = j;
+            dec += n;
+            while (dec >= d)
+            {
+                dec -= d;
+                ++k;
+            }
+            weaveMerge(A, i, j, k);
+            i = k;
+        }
+        d /= 2;
+    }
+}
 // ****************************************************************************
 // *** Quick Sort Pivot Selection
 
