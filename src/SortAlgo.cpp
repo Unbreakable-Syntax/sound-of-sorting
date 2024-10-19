@@ -71,6 +71,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Weave Merge Sort"), &WeaveMergeSort, UINT_MAX, 512,
       wxEmptyString },
+    { _("Strand Sort"), &StrandSort, UINT_MAX, 512,
+      wxEmptyString },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -459,7 +461,7 @@ void MergeSortIterative(SortArray& A)
     SOFTWARE.
 */
 
-void weaveMerge(SortArray& A, std::vector<value_type> tmp, size_t len, size_t residue, size_t modulus)
+void weaveMerge(SortArray& A, std::vector<value_type>& tmp, size_t len, size_t residue, size_t modulus)
 {
     if (residue + modulus >= len) { return; }
 
@@ -2402,3 +2404,74 @@ void AmericanFlagSort(SortArray& A)
 }
 
 
+// ****************************************************************************
+// *** Strand Sort
+
+/*
+    MIT License
+
+    Copyright (c) 2020-2021 aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+void mergeTo(SortArray& A, std::vector<value_type>& subList, size_t a, size_t m, size_t b)
+{
+    size_t i = 0, s = m - a;
+    while (i < s && m < b)
+    {
+        if (subList[i] < A[m]) 
+        { 
+            A.set(a++, subList[i++]);
+        }
+        else
+        {
+            A.set(a++, A[m++]);
+        }
+    }
+    while (i < s)
+    {
+        A.set(a++, subList[i++]);
+    }
+}
+
+void StrandSort(SortArray& A)
+{
+    size_t n = A.size(), j = n, k = j;
+    std::vector<value_type> subList(n);
+    while (j > 0)
+    {
+        subList[0] = A[0];
+        --k;
+        for (size_t i = 0, p = 0, m = 1; m < j; ++m)
+        {
+            if (A[m] >= subList[i])
+            {
+                subList[++i] = A[m];
+                --k;
+            }
+            else
+            {
+                A.set(p++, A[m]);
+            }
+        }
+        mergeTo(A, subList, k, j, n);
+        j = k;
+    }
+}
