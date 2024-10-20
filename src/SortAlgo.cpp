@@ -70,7 +70,9 @@ const struct AlgoEntry g_algolist[] =
     { _("Pairwise Merge Sort (Iterative)"), &PairwiseIterativeSort, UINT_MAX, 512,
       wxEmptyString },
     { _("Weave Merge Sort"), &WeaveMergeSort, UINT_MAX, 512,
-      wxEmptyString },
+      _("An in-place merge sort variant that interleaves 2 halves of the input array, and then uses Insertion Sort to sort the array.")},
+    { _("New Shuffle Merge Sort"), &NewShuffleMergeSort, UINT_MAX, 512,
+      _("An improvement upon Weave Merge Sort, with faster weave time, and inserting now makes comparisons with a worst-case similar to Merge Sort.") },
     { _("Strand Sort"), &StrandSort, UINT_MAX, 512,
       wxEmptyString },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
@@ -2608,3 +2610,285 @@ void StrandSort(SortArray& A)
         j = k;
     }
 }
+
+/*
+    MIT License
+
+    Copyright (c) 2021 EmeraldBlock
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+/*
+  * Implements https://www.sciencedirect.com/science/article/pii/S1877050910005478.
+  *
+  * The shuffle algorithm is at https://arxiv.org/abs/0805.1598.
+  * Note that the unshuffle algorithm is not the shuffle algorithm in reverse,
+  * but rather, it is a variation of the shuffle algorithm.
+  *
+  * See also a proof of the time complexity at https://arxiv.org/abs/1508.00292.
+  * The implementation is based on the pseudocode found in this.
+*/
+
+void rotateEqual(SortArray& A, size_t a, size_t b, size_t size)
+{
+    for (size_t i = 0; i < size; ++i)
+    {
+        A.swap(a + i, b + i);
+    }
+}
+
+void rotateArray(SortArray& A, size_t mid, size_t a, size_t b)
+{
+    while (a > 0 && b > 0)
+    {
+        if (a > b)
+        {
+            rotateEqual(A, mid - b, mid, b);
+            mid -= b;
+            a -= b;
+        }
+        else
+        {
+            rotateEqual(A, mid - a, mid, a);
+            mid += a;
+            b -= a;
+        }
+    }
+}
+
+void shuffleEasy(SortArray& A, size_t start, size_t size)
+{
+    for (size_t i = 1; i < size; i *= 3)
+    {
+        value_type val = A[start + i - 1];
+        for (size_t j = i * 2 % size; j != i; j = j * 2 % size)
+        {
+            value_type nval = A[start + j - 1];
+            A.set(start + j - 1, val);
+            val = nval;
+        }
+        A.set(start + i - 1, val);
+    }
+}
+
+void shuffleArray(SortArray& A, size_t start, size_t end)
+{
+    while (end - start > 1)
+    {
+        size_t n = (end - start) / 2, l = 1;
+        while (l * 3 - 1 <= 2 * n) { l *= 3; }
+        size_t m = (l - 1) / 2;
+        rotateArray(A, start + n, n - m, m);
+        shuffleEasy(A, start, l);
+        start += l - 1;
+    }
+}
+
+void rotateShuffledEqual(SortArray& A, size_t a, size_t b, size_t size)
+{
+    for (size_t i = 0; i < size; i += 2)
+    {
+        A.swap(a + i, b + i);
+    }
+}
+
+void rotateShuffled(SortArray& A, size_t mid, size_t a, size_t b)
+{
+    while (a > 0 && b > 0)
+    {
+        if (a > b)
+        {
+            rotateShuffledEqual(A, mid - b, mid, b);
+            mid -= b;
+            a -= b;
+        }
+        else
+        {
+            rotateShuffledEqual(A, mid - a, mid, a);
+            mid += a;
+            b -= a;
+        }
+    }
+}
+
+void rotateShuffledOuter(SortArray& A, size_t mid, size_t a, size_t b) 
+{
+    if (a > b) 
+    {
+        rotateShuffledEqual(A, mid - b, mid + 1, b);
+        mid -= b;
+        a -= b;
+        rotateShuffled(A, mid, a, b);
+    }
+    else 
+    {
+        rotateShuffledEqual(A, mid - a, mid + 1, a);
+        mid += a + 1;
+        b -= a;
+        rotateShuffled(A, mid, a, b);
+    }
+}
+
+void unshuffleEasy(SortArray& A, size_t start, size_t size) 
+{
+    for (size_t i = 1; i < size; i *= 3) 
+    {
+        size_t prev = i;
+        value_type val = A[start + i - 1];
+        for (size_t j = i * 2 % size; j != i; j = j * 2 % size) {
+            A.set(start + prev - 1, A[start + j - 1]);
+            prev = j;
+        }
+        A.set(start + prev - 1, val);
+    }
+}
+
+void unshuffle(SortArray& A, size_t start, size_t end) 
+{
+    while (end - start > 1) 
+    {
+        size_t n = (end - start) / 2, l = 1;
+        while (l * 3 - 1 <= 2 * n) { l *= 3; }
+        size_t m = (l - 1) / 2;
+
+        rotateShuffledOuter(A, start + 2 * m, 2 * m, 2 * n - 2 * m);
+        unshuffleEasy(A, start, l);
+        start += l - 1;
+    }
+}
+
+void mergeUp(SortArray& A, size_t start, size_t end, bool type)
+{
+    size_t i = start, j = i + 1;
+    while (j < end)
+    {
+        if (A[i] < A[j] || (!type && A[i] == A[j]))
+        {
+            ++i;
+            if (i == j)
+            {
+                ++j;
+                type = !type;
+            }
+        }
+        else if (end - j == 1)
+        {
+            rotateArray(A, j, j - i, 1);
+            break;
+        }
+        else
+        {
+            size_t r = 0;
+            if (type)
+            {
+                while (j + 2 * r < end && A[j + 2 * r] <= A[i]) { ++r; }
+            }
+            else
+            {
+                while (j + 2 * r < end && A[j + 2 * r] < A[i]) { ++r; }
+            }
+            --j;
+            unshuffle(A, j, j + 2 * r);
+            rotateArray(A, j, j - i, r);
+            i += r + 1;
+            j += 2 * r + 1;
+        }
+    }
+}
+
+void mergeArray(SortArray& A, size_t start, size_t mid, size_t end)
+{
+    if (mid - start <= end - mid)
+    {
+        shuffleArray(A, start, end);
+        mergeUp(A, start, end, true);
+    }
+    else
+    {
+        shuffleArray(A, start + 1, end);
+        mergeUp(A, start, end, false);
+    }
+}
+
+size_t ceilPowerOfTwo(size_t x)
+{
+    --x;
+    for (size_t i = 16; i > 0; i >>= 1) { x |= x >> i; }
+    return ++x;
+}
+
+void sortLarge(SortArray& A, size_t len)
+{
+    for (size_t subarrayCount = ceilPowerOfTwo(len), wholeI = len / subarrayCount, fracI = len % subarrayCount; subarrayCount > 1; )
+    {
+        for (size_t whole = 0, frac = 0; whole < len; )
+        {
+            size_t start = whole;
+            whole += wholeI;
+            frac += fracI;
+            if (frac >= subarrayCount)
+            {
+                ++whole;
+                frac -= subarrayCount;
+            }
+            size_t mid = whole;
+            whole += wholeI;
+            frac += fracI;
+            if (frac >= subarrayCount)
+            {
+                ++whole;
+                frac -= subarrayCount;
+            }
+            mergeArray(A, start, mid, whole);
+        }
+        subarrayCount >>= 1;
+        wholeI <<= 1;
+        if (fracI >= subarrayCount)
+        {
+            ++wholeI;
+            fracI -= subarrayCount;
+        }
+    }
+}
+
+void mergeSortArray(SortArray& A, size_t len)
+{
+    if (len < 1 << 15)
+    {
+        for (size_t subarrayCount = ceilPowerOfTwo(len); subarrayCount > 1; subarrayCount >>= 1)
+        {
+            for (size_t i = 0; i < subarrayCount; i += 2)
+            {
+                mergeArray(A, len * i / subarrayCount, len * (i + 1) / subarrayCount, len * (i + 2) / subarrayCount);
+            }
+        }
+    }
+    else
+    {
+        sortLarge(A, len);
+    }
+}
+
+void NewShuffleMergeSort(SortArray& A) 
+{
+    size_t len = A.size();
+    mergeSortArray(A, len);
+}
+
