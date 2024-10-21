@@ -112,7 +112,7 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Shell Sort"), &ShellSort, UINT_MAX, 1024,
       wxEmptyString },
-    { _("Heap Sort"), &HeapSort, UINT_MAX, UINT_MAX,
+    { _("Heap Sort"), &HeapSort, UINT_MAX, inversion_count_instrumented,
       wxEmptyString },
     { _("Smooth Sort"), &SmoothSort, UINT_MAX, 1024,
       wxEmptyString },
@@ -131,7 +131,7 @@ const struct AlgoEntry g_algolist[] =
         "array during counting.") },
     { _("In-Place Radix Sort (LSD)"), &InPlaceRadixSortLSD, UINT_MAX, UINT_MAX,
       _("Least significant digit radix sort, performed in O(1) space.") },
-    { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX, UINT_MAX,
+    { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX, 512,
       _("Most significant digit radix sort, which permutes items in-place by walking cycles.") },
     { _("American Flag Sort"), &AmericanFlagSort, UINT_MAX, inversion_count_instrumented,
       _("American Flag Sort is an efficient, in-place variant of radix sort that distributes items into hundreds of buckets.") },
@@ -1360,7 +1360,7 @@ void HeapSort(SortArray& A)
 
 // by myself (Timo Bingmann)
 
-void RadixSortMSD(SortArray& A, size_t lo, size_t hi, size_t depth)
+void RadixSortMSD2(SortArray& A, size_t lo, size_t hi, size_t depth)
 {
     A.mark(lo); A.mark(hi-1);
 
@@ -1412,14 +1412,109 @@ void RadixSortMSD(SortArray& A, size_t lo, size_t hi, size_t depth)
     for (size_t i = 0; i < RADIX; ++i)
     {
         if (count[i] > 1)
-            RadixSortMSD(A, sum, sum+count[i], depth+1);
+            RadixSortMSD2(A, sum, sum+count[i], depth+1);
         sum += count[i];
+    }
+}
+
+void RadixSortMSD2(SortArray& A)
+{
+    return RadixSortMSD2(A, 0, A.size(), 0);
+}
+
+/*
+    MIT License
+
+    Copyright (c) 2019 w0rthy
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+size_t maxLog(SortArray& A, size_t n, size_t base)
+{
+    int max = A[0];
+    for (size_t i = 1, j = n - 1; i <= j; ++i, --j)
+    {
+        int ele1 = A[i].get(), ele2 = A[j];
+        if (ele1 > max) { max = A[i]; }
+        if (ele2 > max) { max = A[j]; }
+    }
+    size_t digit = static_cast<size_t>(log(max) / log(base));
+    return digit;
+}
+
+int getDigit(int a, double power, int radix)
+{
+    double digit = (a / static_cast<int>(pow(radix, power)) % radix);
+    return static_cast<int>(digit);
+}
+
+void transcribeMSD(SortArray& A, std::vector<std::vector<value_type>>& registers, size_t start, size_t min)
+{
+    size_t total = start, temp = 0;
+    for (const std::vector<value_type>& arr : registers)
+    {
+        total += arr.size();
+    }
+
+    for (int i = registers.size() - 1; i >= 0; --i)
+    {
+        for (int j = registers[i].size() - 1; j >= 0; --j)
+        {
+            size_t loc = total + min - temp - 1;
+            A.set(loc, registers[i].at(j));
+            A[loc].get();
+            ++temp;
+        }
+    }
+}
+
+void radixMSD(SortArray& A, size_t len, size_t min, size_t max, size_t radix, double pow)
+{
+    if (min >= max || pow < 0) { return; }
+    A.mark(min); A.mark(max - 1);
+
+    std::vector<std::vector<value_type>> registers(radix, std::vector<value_type>());
+
+    for (size_t i = min; i < max; ++i)
+    {
+        int ele = A[i].get();
+        int digit = getDigit(ele, pow, radix);
+        registers[digit].push_back(A[i]);
+    }
+
+    transcribeMSD(A, registers, 0, min);
+    A.unmark_all();
+
+    size_t sum = 0;
+    for (size_t i = 0; i < registers.size(); ++i)
+    {
+        radixMSD(A, len, sum + min, sum + min + registers[i].size(), radix, pow - 1);
+        sum += registers[i].size();
+        registers[i].clear();
     }
 }
 
 void RadixSortMSD(SortArray& A)
 {
-    return RadixSortMSD(A, 0, A.size(), 0);
+    size_t n = A.size(), maxPow = maxLog(A, n, 4);
+    radixMSD(A, n, 0, n, 4, (double)maxPow);
 }
 
 // ****************************************************************************
@@ -1470,28 +1565,6 @@ void RadixSortLSD(SortArray& A)
     }
 }
 
-void shiftElement(SortArray& A, size_t start, size_t end)
-{
-    if (start < end)
-    {
-        while (start < end)
-        {
-            A[start].get();
-            A.swap(start, start + 1);
-            ++start;
-        }
-    }
-    else
-    {
-        while (start > end)
-        {
-            A[start].get();
-            A.swap(start, start - 1);
-            --start;
-        }
-    }
-}
-
 // ****************************************************************************
 // *** In-Place Radix Sort LSD
 /*
@@ -1513,23 +1586,26 @@ void shiftElement(SortArray& A, size_t start, size_t end)
     SOFTWARE.
 */
 
-size_t maxLog(SortArray& A, size_t n, size_t base)
+void shiftElement(SortArray& A, size_t start, size_t end)
 {
-    int max = A[0];
-    for (size_t i = 1, j = n - 1; i <= j; ++i, --j)
+    if (start < end)
     {
-        int ele1 = A[i].get(), ele2 = A[j];
-        if (ele1 > max) { max = A[i]; }
-        if (ele2 > max) { max = A[j]; }
+        while (start < end)
+        {
+            A[start].get();
+            A.swap(start, start + 1);
+            ++start;
+        }
     }
-    size_t digit = static_cast<size_t>(log(max) / log(base));
-    return digit;
-}
-
-int getDigit(int a, double power, int radix)
-{
-    double digit = (a / static_cast<int>(pow(radix, power)) % radix);
-    return static_cast<int>(digit);
+    else
+    {
+        while (start > end)
+        {
+            A[start].get();
+            A.swap(start, start - 1);
+            --start;
+        }
+    }
 }
 
 void InPlaceRadixSortLSD(SortArray& A)
