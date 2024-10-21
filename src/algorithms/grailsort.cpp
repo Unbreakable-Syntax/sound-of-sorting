@@ -53,8 +53,6 @@
 #include <type_traits>
 #include <utility>
 
-SortArray sortarray;
-
 namespace grailsort_detail
 {
     // Credit to phoenixbound for this clever idea
