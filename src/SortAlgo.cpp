@@ -2392,7 +2392,7 @@ void CycleSort(SortArray& array, ssize_t n)
                 rank++;
 
             // Put item into right place and colorize
-            std::swap(array.get_mutable(rank), item);
+            counted_swap(array.get_mutable(rank), item);
             array.mark(rank, 2);
 
             // Continue for rest of the cycle.
