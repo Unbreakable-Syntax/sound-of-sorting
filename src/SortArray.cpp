@@ -37,6 +37,8 @@ size_t g_compare_count = 0;
 
 size_t g_access_count = 0;
 
+size_t m_swaps = 0;
+
 void ArrayItem::OnAccess(const ArrayItem& a)
 {
     SoundAccess(a.get_direct());

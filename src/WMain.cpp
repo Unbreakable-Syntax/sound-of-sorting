@@ -430,7 +430,7 @@ void WMain::RefreshTimer::Notify()
     long int compares = g_compare_count;
     wm.labelComparisonsValue->SetLabel(wxString::Format(_("%ld"), compares));
 
-    long int swaps = wm.sortview->m_array.GetSwaps();
+    long int swaps = m_swaps;
     wm.labelSwapsCount->SetLabel(wxString::Format(_("%ld"), swaps));
 
     long int inversions = wm.sortview->m_array.GetInversions();

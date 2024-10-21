@@ -50,6 +50,22 @@ extern size_t       g_compare_count;
 /// globally count the number of array access
 extern size_t       g_access_count;
 
+extern size_t m_swaps;
+
+// Custom counted swap function
+template <typename T>
+void counted_swap(T & a, T & b) {
+    std::swap(a, b);
+    ++m_swaps;
+}
+
+// Custom counted iter_swap function
+template <typename Iterator>
+void counted_iter_swap(Iterator a, Iterator b) {
+    std::iter_swap(a, b);
+    ++m_swaps;
+}
+
 // custom struct for array items, which allows detailed counting of comparisons.
 class ArrayItem
 {
@@ -157,9 +173,6 @@ protected:
     /// the number of inversions in the array order
     ssize_t m_inversions;
 
-    /// number of swaps
-    size_t m_swaps;
-
     /// access touch color
     struct Access
     {
@@ -234,10 +247,6 @@ public:
     /// return the number of inversions in the array
     ssize_t GetInversions() const
     { return m_inversions; }
-
-    /// return the number of swaps in the array
-    ssize_t GetSwaps() const
-    { return m_swaps; }
 
     /// calculate the number of runs in the array
     size_t GetRuns() const;
@@ -382,7 +391,7 @@ public:
             ASSERT(lock.IsOk());
 
             m_access1 = i;
-            m_access2 = j;
+            m_access2 = j;           
 
             m_access_list.push_back(i);
             m_access_list.push_back(j);
