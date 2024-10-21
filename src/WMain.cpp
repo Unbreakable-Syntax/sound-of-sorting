@@ -153,6 +153,7 @@ bool WMain::RunAlgorithm()
 
         m_thread_terminate = false;
         m_thread->Create();
+        m_thread->SetPriority(WXTHREAD_MAX_PRIORITY);
 
         g_algo_running = true;
         m_thread->Run();
@@ -326,7 +327,7 @@ void WMain::SetDelay(size_t pos)
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
     
 #endif
-    if (pos == 0) g_delay = 0;
+    if (pos == 0) g_delay = 0.1;
 
     if (g_delay > 10)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
