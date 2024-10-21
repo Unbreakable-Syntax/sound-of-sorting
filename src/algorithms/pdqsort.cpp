@@ -150,7 +150,7 @@ namespace pdqsort_detail {
 
     template<class Iter, class Compare>
     inline void sort2(Iter a, Iter b, Compare comp) {
-        if (comp(*b, *a)) std::iter_swap(a, b);
+        if (comp(*b, *a)) counted_iter_swap(a, b);
     }
 
     // Sorts the elements *a, *b and *c using comparison function comp.
@@ -181,7 +181,7 @@ namespace pdqsort_detail {
             // This case is needed for the descending distribution, where we need
             // to have proper swapping for pdqsort to remain O(n).
             for (size_t i = 0; i < num; ++i) {
-                std::iter_swap(first + offsets_l[i], last - offsets_r[i]);
+                counted_iter_swap(first + offsets_l[i], last - offsets_r[i]);
             }
         } else if (num > 0) {
             Iter l = first + offsets_l[0]; Iter r = last - offsets_r[0];
@@ -221,7 +221,7 @@ namespace pdqsort_detail {
         // the passed in sequence already was correctly partitioned.
         bool already_partitioned = first >= last;
         if (!already_partitioned) {
-            std::iter_swap(first, last);
+            counted_iter_swap(first, last);
             ++first;
 
             // The following branchless partitioning is derived from "BlockQuicksort: How Branch
@@ -301,12 +301,12 @@ namespace pdqsort_detail {
             // We have now fully identified [first, last)'s proper position. Swap the last elements.
             if (num_l) {
                 offsets_l += start_l;
-                while (num_l--) std::iter_swap(offsets_l_base + offsets_l[num_l], --last);
+                while (num_l--) counted_iter_swap(offsets_l_base + offsets_l[num_l], --last);
                 first = last;
             }
             if (num_r) {
                 offsets_r += start_r;
-                while (num_r--) std::iter_swap(offsets_r_base - offsets_r[num_r], first), ++first;
+                while (num_r--) counted_iter_swap(offsets_r_base - offsets_r[num_r], first), ++first;
                 last = first;
             }
         }
@@ -353,7 +353,7 @@ namespace pdqsort_detail {
         // swapped pairs guard the searches, which is why the first iteration is special-cased
         // above.
         while (first < last) {
-            std::iter_swap(first, last);
+            counted_iter_swap(first, last);
             while (comp(*++first, pivot));
             while (!comp(*--last, pivot));
         }
@@ -384,7 +384,7 @@ namespace pdqsort_detail {
         else                 while (                !comp(pivot, *++first));
 
         while (first < last) {
-            std::iter_swap(first, last);
+            counted_iter_swap(first, last);
             while (comp(pivot, *--last));
             while (!comp(pivot, *++first));
         }
@@ -419,7 +419,7 @@ namespace pdqsort_detail {
                 sort3(begin + 1, begin + (s2 - 1), end - 2, comp);
                 sort3(begin + 2, begin + (s2 + 1), end - 3, comp);
                 sort3(begin + (s2 - 1), begin + s2, begin + (s2 + 1), comp);
-                std::iter_swap(begin, begin + s2);
+                counted_iter_swap(begin, begin + s2);
             } else sort3(begin + s2, begin, end - 1, comp);
 
             // If *(begin - 1) is the end of the right partition of a previous partition operation
@@ -454,26 +454,26 @@ namespace pdqsort_detail {
                 }
 
                 if (l_size >= insertion_sort_threshold) {
-                    std::iter_swap(begin,             begin + l_size / 4);
-                    std::iter_swap(pivot_pos - 1, pivot_pos - l_size / 4);
+                    counted_iter_swap(begin, begin + l_size / 4);
+                    counted_iter_swap(pivot_pos - 1, pivot_pos - l_size / 4);
 
                     if (l_size > ninther_threshold) {
-                        std::iter_swap(begin + 1,         begin + (l_size / 4 + 1));
-                        std::iter_swap(begin + 2,         begin + (l_size / 4 + 2));
-                        std::iter_swap(pivot_pos - 2, pivot_pos - (l_size / 4 + 1));
-                        std::iter_swap(pivot_pos - 3, pivot_pos - (l_size / 4 + 2));
+                        counted_iter_swap(begin + 1, begin + (l_size / 4 + 1));
+                        counted_iter_swap(begin + 2, begin + (l_size / 4 + 2));
+                        counted_iter_swap(pivot_pos - 2, pivot_pos - (l_size / 4 + 1));
+                        counted_iter_swap(pivot_pos - 3, pivot_pos - (l_size / 4 + 2));
                     }
                 }
                 
                 if (r_size >= insertion_sort_threshold) {
-                    std::iter_swap(pivot_pos + 1, pivot_pos + (1 + r_size / 4));
-                    std::iter_swap(end - 1,                   end - r_size / 4);
+                    counted_iter_swap(pivot_pos + 1, pivot_pos + (1 + r_size / 4));
+                    counted_iter_swap(end - 1, end - r_size / 4);
                     
                     if (r_size > ninther_threshold) {
-                        std::iter_swap(pivot_pos + 2, pivot_pos + (2 + r_size / 4));
-                        std::iter_swap(pivot_pos + 3, pivot_pos + (3 + r_size / 4));
-                        std::iter_swap(end - 2,             end - (1 + r_size / 4));
-                        std::iter_swap(end - 3,             end - (2 + r_size / 4));
+                        counted_iter_swap(pivot_pos + 2, pivot_pos + (2 + r_size / 4));
+                        counted_iter_swap(pivot_pos + 3, pivot_pos + (3 + r_size / 4));
+                        counted_iter_swap(end - 2, end - (1 + r_size / 4));
+                        counted_iter_swap(end - 3, end - (2 + r_size / 4));
                     }
                 }
             } else {

@@ -53,6 +53,8 @@
 #include <type_traits>
 #include <utility>
 
+SortArray sortarray;
+
 namespace grailsort_detail
 {
     // Credit to phoenixbound for this clever idea
@@ -91,7 +93,7 @@ namespace grailsort_detail
 
         template<typename RandomAccessIterator>
         static void BlockSwap(RandomAccessIterator array, int a, int b, int blockLen) {
-            std::swap_ranges(array + a, array + (a + blockLen), array + b);
+            counted_swap_ranges(array + a, array + (a + blockLen), array + b);
         }
 
         // Swaps the order of two adjacent blocks whose lengths may or may not be equal.
@@ -120,7 +122,7 @@ namespace grailsort_detail
                 int right = start + item;
 
                 while (left >= start && comp(array[left], array[right]) > 0) {
-                    std::iter_swap(array + left, array + right);
+                    counted_iter_swap(array + left, array + right);
                     left--;
                     right--;
                 }
@@ -215,18 +217,18 @@ namespace grailsort_detail
                 int right = start + index;
 
                 if (comp(array[left], array[right]) > 0) {
-                    std::swap(array[left - 2], array[right]);
-                    std::swap(array[right - 2], array[left]);
+                    counted_swap(array[left - 2], array[right]);
+                    counted_swap(array[right - 2], array[left]);
                 }
                 else {
-                    std::swap(array[left - 2], array[left]);
-                    std::swap(array[right - 2], array[right]);
+                    counted_swap(array[left - 2], array[left]);
+                    counted_swap(array[right - 2], array[right]);
                 }
             }
 
             int left = start + index - 1;
             if (left < start + length) {
-                std::swap(array[left - 2], array[left]);
+                counted_swap(array[left - 2], array[left]);
             }
         }
 
@@ -267,18 +269,18 @@ namespace grailsort_detail
 
             while (right != end) {
                 if (left == middle || comp(*left, *right) > 0) {
-                    std::iter_swap(buffer, right);
+                    counted_iter_swap(buffer, right);
                     ++right;
                 }
                 else {
-                    std::iter_swap(buffer, left);
+                    counted_iter_swap(buffer, left);
                     ++left;
                 }
                 ++buffer;
             }
 
             while (left != middle) {
-                std::iter_swap(buffer, left);
+                counted_iter_swap(buffer, left);
                 ++buffer;
                 ++left;
             }
@@ -301,11 +303,11 @@ namespace grailsort_detail
             while (left > end) {
                 if (right == middle || comp(array[left], array[right]) > 0) {
 
-                    std::swap(array[buffer], array[left]);
+                    counted_swap(array[buffer], array[left]);
                     left--;
                 }
                 else {
-                    std::swap(array[buffer], array[right]);
+                    counted_swap(array[buffer], array[right]);
                     right--;
                 }
                 buffer--;
@@ -313,7 +315,7 @@ namespace grailsort_detail
 
             if (right != buffer) {
                 while (right > middle) {
-                    std::swap(array[buffer], array[right]);
+                    counted_swap(array[buffer], array[right]);
                     buffer--;
                     right--;
                 }
@@ -482,7 +484,7 @@ namespace grailsort_detail
                     BlockSwap(array, start + (firstBlock * blockLen), start + (selectBlock * blockLen), blockLen);
 
                     // Swap the keys...
-                    std::swap(array[firstKey + firstBlock], array[firstKey + selectBlock]);
+                    counted_swap(array[firstKey + firstBlock], array[firstKey + selectBlock]);
 
                     // ...and follow the 'medianKey' if it was swapped
 
@@ -512,7 +514,7 @@ namespace grailsort_detail
             ArrayItem pos = ArrayItem(index);
             while (index >= start) {
                 pos.get();
-                std::swap(array[index], array[buffer]);
+                counted_swap(array[index], array[buffer]);
                 index--; buffer--;
                 pos = ArrayItem(index);
             }
@@ -547,7 +549,7 @@ namespace grailsort_detail
         template<typename RandomAccessIterator>
         static void InPlaceBufferRewind(RandomAccessIterator array, int start, int leftBlock, int buffer) {
             while (leftBlock >= start) {
-                std::swap(array[buffer], array[leftBlock]);
+                counted_swap(array[buffer], array[leftBlock]);
                 leftBlock--;
                 buffer--;
             }
@@ -606,11 +608,11 @@ namespace grailsort_detail
             if (leftOrigin == Subarray::LEFT) {
                 while (left != middle && right != end) {
                     if (comp(*left, *right) <= 0) {
-                        std::iter_swap(buffer, left);
+                        counted_iter_swap(buffer, left);
                         ++left;
                     }
                     else {
-                        std::iter_swap(buffer, right);
+                        counted_iter_swap(buffer, right);
                         ++right;
                     }
                     ++buffer;
@@ -619,11 +621,11 @@ namespace grailsort_detail
             else {
                 while (left != middle && right != end) {
                     if (comp(*left, *right) < 0) {
-                        std::iter_swap(buffer, left);
+                        counted_iter_swap(buffer, left);
                         ++left;
                     }
                     else {
-                        std::iter_swap(buffer, right);
+                        counted_iter_swap(buffer, right);
                         ++right;
                     }
                     ++buffer;
@@ -1143,7 +1145,7 @@ namespace grailsort_detail
                 int right = start + index;
 
                 if (comp(array[left], array[right]) > 0) {
-                    std::swap(array[left], array[right]);
+                    counted_swap(array[left], array[right]);
                 }
             }
             for (int mergeLen = 2; mergeLen < length; mergeLen *= 2) {
