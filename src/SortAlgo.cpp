@@ -1452,8 +1452,8 @@ size_t maxLog(SortArray& A, size_t n, size_t base)
     for (size_t i = 1, j = n - 1; i <= j; ++i, --j)
     {
         int ele1 = A[i].get(), ele2 = A[j];
-        if (ele1 > max) { max = A[i]; }
-        if (ele2 > max) { max = A[j]; }
+        if (ele1 > max) { max = ele1; }
+        if (ele2 > max) { max = ele2; }
     }
     size_t digit = static_cast<size_t>(log(max) / log(base));
     return digit;
@@ -2687,6 +2687,9 @@ void StrandSort(SortArray& A)
     }
 }
 
+
+// ****************************************************************************
+// *** New Shuffle Merge Sort
 /*
     MIT License
 
@@ -2968,3 +2971,5 @@ void NewShuffleMergeSort(SortArray& A)
     mergeSortArray(A, len);
 }
 
+// ****************************************************************************
+// *** Andrey Astrelin's In-Place Merge Sort

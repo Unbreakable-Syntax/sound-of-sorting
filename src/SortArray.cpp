@@ -100,6 +100,7 @@ void SortArray::FinishFill()
     g_access_count = 0;
     g_compare_count = 0;
     m_calc_inversions = true;
+    m_swaps = 0;
 
     RecalcInversions();
 }

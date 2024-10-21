@@ -157,6 +157,9 @@ protected:
     /// the number of inversions in the array order
     ssize_t m_inversions;
 
+    /// number of swaps
+    size_t m_swaps;
+
     /// access touch color
     struct Access
     {
@@ -231,6 +234,10 @@ public:
     /// return the number of inversions in the array
     ssize_t GetInversions() const
     { return m_inversions; }
+
+    /// return the number of swaps in the array
+    ssize_t GetSwaps() const
+    { return m_swaps; }
 
     /// calculate the number of runs in the array
     size_t GetRuns() const;
@@ -387,6 +394,7 @@ public:
         std::swap(m_array[i], m_array[j]);
         OnAccess();
         m_access2 = -1;
+        ++m_swaps;
     }
 
     /// Touch an item of the array: set color till next frame is outputted.
