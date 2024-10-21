@@ -391,7 +391,8 @@ public:
             ASSERT(lock.IsOk());
 
             m_access1 = i;
-            m_access2 = j;           
+            m_access2 = j;
+            ++m_swaps;
 
             m_access_list.push_back(i);
             m_access_list.push_back(j);
@@ -402,8 +403,7 @@ public:
         OnAccess();
         std::swap(m_array[i], m_array[j]);
         OnAccess();
-        m_access2 = -1;
-        ++m_swaps;
+        m_access2 = -1;       
     }
 
     /// Touch an item of the array: set color till next frame is outputted.
