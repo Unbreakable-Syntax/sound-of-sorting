@@ -69,13 +69,12 @@ void counted_iter_swap(Iterator a, Iterator b) {
 // Custom counted swap_ranges function
 template <typename ForwardIt1, typename ForwardIt2>
 ForwardIt2 counted_swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2) {
-    // Check that both ranges are of equal length
     while (first1 != last1) {
-        counted_iter_swap(first1, first2); // Use counted iter_swap
-        ++first1; // Move to the next element in the first range
-        ++first2; // Move to the next element in the second range
+        counted_iter_swap(first1, first2);
+        ++first1;
+        ++first2;
     }
-    return first2; // Return the end iterator of the second range
+    return first2;
 }
 
 // custom struct for array items, which allows detailed counting of comparisons.
