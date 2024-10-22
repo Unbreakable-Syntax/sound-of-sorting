@@ -71,10 +71,33 @@ template <typename ForwardIt1, typename ForwardIt2>
 ForwardIt2 counted_swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2) {
     while (first1 != last1) {
         counted_iter_swap(first1, first2);
-        ++first1;
+        ++first1; 
         ++first2;
     }
     return first2;
+}
+
+template<class ForwardIt>
+ForwardIt counted_rotate(ForwardIt first, ForwardIt middle, ForwardIt last)
+{
+    if (first == middle)
+        return last;
+
+    if (middle == last)
+        return first;
+
+    ForwardIt write = first;
+    ForwardIt next_read = first;
+
+    for (ForwardIt read = middle; read != last; ++write, ++read)
+    {
+        if (write == next_read)
+            next_read = read;
+        counted_iter_swap(write, read);
+    }
+
+    counted_rotate(write, next_read, last);
+    return write;
 }
 
 // custom struct for array items, which allows detailed counting of comparisons.
