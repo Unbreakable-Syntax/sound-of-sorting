@@ -131,6 +131,21 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Quicksort Killer"));
     list.Add(_("Spike"));
     list.Add(_("Ribbon"));
+    list.Add(_("Heapified"));
+}
+
+void heapify(std::vector<ArrayItem>& m_array, int n, int i)
+{
+    int largest = i, left = 2 * i + 1, right = 2 * i + 2;
+    if (left < n && m_array[left] > m_array[largest]) { largest = left; }
+    if (right < n && m_array[right] > m_array[largest]) { largest = right; }
+    if (largest != i)
+    {
+        ArrayItem temp = m_array[i];
+        m_array[i] = m_array[largest];
+        m_array[largest] = temp;
+        heapify(m_array, n, largest);
+    }
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -503,6 +518,20 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             if (i % 2 == 0) { m_array[i] = ArrayItem(min); }
             else { m_array[i] = ArrayItem(max); }
             ++min; --max;
+        }
+    }
+    else if (schema == 22)
+    {
+        int n = m_array.size();
+        for (int i = 0; i < n; ++i)
+        {
+            m_array[i] = ArrayItem(i + 1);
+        }
+        std::shuffle(m_array.begin(), m_array.end(), g);
+        
+        for (int i = n / 2 - 1; i >= 0; --i)
+        {
+            heapify(m_array, n, i);
         }
     }
     else // fallback
