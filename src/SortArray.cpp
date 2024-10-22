@@ -564,7 +564,6 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         default:
             return FillData(0, arraysize);
-            break;
     }
     FinishFill();
 }
