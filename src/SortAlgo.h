@@ -66,6 +66,7 @@ void PairwiseIterativeSort(class SortArray& a);
 void WeaveMergeSort(class SortArray& a);
 void StrandSort(class SortArray& a);
 void NewShuffleMergeSort(class SortArray& a);
+void AndreyMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 

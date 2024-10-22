@@ -75,6 +75,8 @@ const struct AlgoEntry g_algolist[] =
       _("An improvement upon Weave Merge Sort, with faster weave time, and inserting now makes comparisons with a worst-case similar to Merge Sort.") },
     { _("Strand Sort"), &StrandSort, UINT_MAX, 512,
       wxEmptyString },
+    { _("Andrey's In-Place Merge Sort"), &AndreyMergeSort, UINT_MAX, 512,
+      wxEmptyString },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -2973,3 +2975,134 @@ void NewShuffleMergeSort(SortArray& A)
 
 // ****************************************************************************
 // *** Andrey Astrelin's In-Place Merge Sort
+void sortVector(SortArray& A, size_t a, size_t b)
+{
+    while (b > 1)
+    {
+        size_t k = 0;
+        for (size_t i = 1; i < b; ++i)
+        {
+            if (A[a + k] > A[a + i]) { k = i; }
+        }
+        A.swap(a, a + k);
+        ++a; --b;
+    }
+}
+
+void aswap(SortArray& A, size_t arr1, size_t arr2, size_t l)
+{
+    while (l-- > 0)
+    {
+        A.swap(arr1, arr2);
+        ++arr1; ++arr2;
+    }
+}
+
+int backMerge(SortArray& A, size_t arr1, size_t l1, size_t arr2, size_t l2)
+{
+    size_t arr0 = arr2 + l1;
+    for (;;)
+    {
+        if (A[arr1] > A[arr2])
+        {
+            A.swap(arr1, arr0);
+            --arr1; --arr0;
+            if (--l1 == 0) { return 0; }
+        }
+        else
+        {
+            A.swap(arr2, arr0);
+            --arr2; --arr0;
+            if (--l2 == 0) { break; }
+        }
+    }
+    size_t res = l1;
+    do
+    {
+        A.swap(arr1, arr0);
+        --arr1; --arr0;
+    } 
+    while (--l1 != 0);
+    return res;
+}
+
+void rMerge(SortArray& A, size_t a, size_t l, size_t r)
+{
+    for (size_t i = 0; i < l; i += r)
+    {
+        size_t q = i;
+        for (size_t j = i + r; j < l; j += r)
+        {
+            if (A[a + q] > A[a + j]) { q = j; }
+        }
+        if (q != i) { aswap(A, a + i, a + q, r); }
+        if (i != 0)
+        {
+            aswap(A, a + l, a + i, r);
+            backMerge(A, a + (l + r - 1), r, a + (i - 1), r);
+        }
+    }
+}
+
+size_t rbnd(size_t len)
+{
+    len = len / 2;
+    size_t k = 0;
+    for (size_t i = 1; i < len; i *= 2) { ++k; }
+    len /= k;
+    for (k = 1; k <= len; k *= 2) {}
+    return k;
+}
+
+void msort(SortArray& A, size_t a, size_t len)
+{
+    if (len < 12) { sortVector(A, a, len); return; }
+    size_t r = rbnd(len), lr = (len / r - 1) * r;
+    for (size_t p = 2; p <= lr; p += 2)
+    {
+        if (A[a + (p - 2)] > A[a + (p - 1)]) 
+        { A.swap(a + (p - 2), a + (p - 1)); }
+        if ((p & 2) != 0) { continue; }
+        aswap(A, a + (p - 2), a + p, 2);
+        size_t m = len - p, q = 2;
+        for (;;)
+        {
+            size_t q0 = 2 * q;
+            if (q0 > m || (p & q0) != 0) { break; }
+            backMerge(A, a + (p - q - 1), q, a + (p + q - 1), q);
+            q = q0;
+        }
+        backMerge(A, a + (p + q - 1), q, a + (p - q - 1), q);
+        size_t q1 = q;
+        q *= 2;
+        while ((q & p) == 0)
+        {
+            q *= 2;
+            rMerge(A, a + (p - q), q, q1);
+        }
+    }
+
+    size_t q1 = 0;
+    for (size_t q = r; q < lr; q *= 2)
+    {
+        if ((lr & q) != 0)
+        {
+            q1 += q;
+            if (q1 != q)
+            {
+                rMerge(A, a + (lr - q1), q1, r);
+            }
+        }
+    }
+
+    size_t s = len - lr;
+    msort(A, a + lr, s);
+    aswap(A, a, a + lr, s);
+    s += backMerge(A, a + (s - 1), s, a + (lr - 1), lr - s);
+    msort(A, a, s);
+}
+
+void AndreyMergeSort(SortArray& A)
+{
+    msort(A, 0, A.size());
+}
