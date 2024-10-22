@@ -73,7 +73,7 @@ size_t FloorPowerOfTwo (const size_t value) {
 template <typename Iterator, typename Comparison>
 void InsertionSort(Iterator begin, Iterator end, const Comparison compare) {
     for (Iterator it = begin; it != end; ++it) {
-        std::rotate(std::upper_bound(begin, it, *it, compare), it, it+1);
+        counted_rotate(std::upper_bound(begin, it, *it, compare), it, it+1);
     }
 }
 
@@ -117,7 +117,7 @@ void Rotate(Iterator begin, Iterator end, const ssize_t amount,
         }
     }
 
-    std::rotate(begin, split, end);
+    counted_rotate(begin, split, end);
 }
 
 // standard merge operation using an internal or external buffer
