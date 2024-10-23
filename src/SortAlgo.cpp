@@ -1777,7 +1777,7 @@ void StlSort(SortArray& A)
 {
     size_t n = A.size();
     introsortLoop(A, 0, n, 2 * floorLogBaseTwo(n));
-    InsertionSort(A);
+    InsertionSort2(A);
 }
 
 void StlSort2(SortArray& A)
