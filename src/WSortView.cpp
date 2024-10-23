@@ -81,7 +81,10 @@ void WSortView::DoDelay(double delay)
     ASSERT(wxThread::GetCurrentId() == wmain->m_thread->GetId());
 
     if (wmain->m_thread_terminate)
+    {
         wmain->m_thread->Exit();
+        return;
+    }
 
     // idle until main thread signals a condition
     while (m_stepwise)
@@ -90,11 +93,8 @@ void WSortView::DoDelay(double delay)
         if (se == wxSEMA_NO_ERROR)
             break;
         // else timeout, recheck m_stepwise and loop
-        wmain->m_thread->TestDestroy();
-        wmain->m_thread->Yield();
+        wxMilliSleep(1);
     }
-
-    wmain->m_thread->TestDestroy();
 
 #if __WXGTK__
     wxMicroSleep(delay * 1000.0);
@@ -245,11 +245,10 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
 
     wxMutexLocker lock(m_array.m_mutex);
     ASSERT(lock.IsOk());
-
+    int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
     if (step > 1)
     {
         size_t i_step = step;
-        int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
         for (size_t i = 0; i < size; ++i)
         {
             int clr = m_array.GetIndexColor(i);
@@ -273,7 +272,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         for (size_t i = 0; i < size; ++i)
         {
             int clr = m_array.GetIndexColor(i);
-            ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
+            ASSERT(clr < numBrushes);
             dc.SetPen(pens[clr]);
             dc.SetBrush(brushes[clr]);
             dc.DrawRectangle(i * bstep, height,
