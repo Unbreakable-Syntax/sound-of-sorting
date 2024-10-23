@@ -120,7 +120,55 @@ void counted_reverse(BidirIt first, BidirIt last)
         while (first != last && first != --last)
         { counted_iter_swap(first++, last); }
     }
-            
+}
+
+template <typename RandomIt, typename Compare = std::less<>>
+void counted_make_heap(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    if (last - first < 2) return;  // Nothing to do for 0 or 1 element
+
+    // The index of the last non-leaf node is (n / 2) - 1, where n = distance(first, last)
+    auto n = std::distance(first, last);
+    for (auto i = (n / 2) - 1; i >= 0; --i)
+    {
+        // Sift down the element at index i to restore heap property
+        sift_down(first, last, i, comp);
+    }
+}
+
+template <typename RandomIt, typename Compare>
+void sift_down(RandomIt first, RandomIt last, std::size_t index, Compare comp)
+{
+    size_t n = std::distance(first, last);
+    size_t current = index;
+
+    while (true)
+    {
+        size_t left_child = 2 * current + 1;
+        size_t right_child = 2 * current + 2;
+        size_t largest = current;
+
+        if (left_child < n && comp(first[largest], first[left_child])) 
+        { largest = left_child; }
+
+        if (right_child < n && comp(first[largest], first[right_child])) 
+        { largest = right_child; }
+
+        if (largest == current) { break; }
+        counted_swap(first[current], first[largest]);
+        current = largest;
+    }
+}
+
+template <typename RandomIt, typename Compare = std::less<>>
+void counted_sort_heap(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    while (last - first > 1)
+    {
+        counted_swap(*first, *(last - 1));
+        sift_down(first, last - 1, 0, comp);
+        --last;
+    }
 }
 
 // custom struct for array items, which allows detailed counting of comparisons.
