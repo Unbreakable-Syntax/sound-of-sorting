@@ -1645,16 +1645,17 @@ void siftDown(SortArray& A, size_t root, size_t dist, size_t start, bool isMax)
     int compareVal = 0;
     if (isMax) { compareVal = -1; }
     else { compareVal = 1; }
-    size_t n = A.size();
     while (root <= dist / 2)
     {
         size_t leaf = 2 * root;
         int compVal = 0;
-        if (leaf >= n) { --leaf; }
-        if (A[start + leaf - 1] < A[start + leaf]) { compVal = -1; }
-        else if (A[start + leaf - 1] > A[start + leaf]) { compVal = 1; }
 
-        if (leaf < dist && compVal == compareVal) { ++leaf; }
+        if (leaf < dist) 
+        { 
+            if (A[start + leaf - 1] < A[start + leaf]) { compVal = -1; }
+            else if (A[start + leaf - 1] > A[start + leaf]) { compVal = 1; }
+            if (compVal == compareVal) { ++leaf; }
+        }
         
         if (A[start + root - 1] < A[start + leaf -  1]) { compVal = -1; }
         else if (A[start + root - 1] > A[start + leaf - 1]) { compVal = 1; }
