@@ -66,7 +66,7 @@ void WMain_wxg::set_properties()
     SetTitle(_("The Sound of Sorting - http://panthema.net/2013/sound-of-sorting"));
     sortview->SetMinSize(wxSize(640, 480));
     speedSlider->SetToolTip(_("Changes the animation speed by setting the delay for each array access."));
-    arraySizeSlider->SetToolTip(_("Resize the options panel if a sorting algorithm doesn't\nimmediately update the visualized array when it's supposed to."));
+    arraySizeSlider->SetToolTip(_("Resize the options panel if the visualized array doesn't seem to update."));
     soundSustainSlider->SetToolTip(_("Changes the duration of each access sound as a multiple of the delay."));
     labelInversionCount->SetToolTip(_("Current number of inversions. Click to enable or disable."));
     labelRunsCount->SetToolTip(_("Current number of runs."));
