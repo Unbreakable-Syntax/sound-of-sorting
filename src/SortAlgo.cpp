@@ -1647,7 +1647,7 @@ void siftDown(SortArray& A, size_t root, size_t dist, size_t start, bool isMax)
     else { compareVal = 1; }
     while (root <= dist / 2)
     {
-        size_t leaf = 2 * root;
+        size_t leaf = 2 * root - 1;
         int compVal = 0;
         if (A[start + leaf - 1] < A[start + leaf]) { compVal = -1; }
         else if (A[start + leaf - 1] > A[start + leaf]) { compVal = 1; }
@@ -1670,7 +1670,7 @@ void siftDown(SortArray& A, size_t root, size_t dist, size_t start, bool isMax)
 void heapifyArr(SortArray& A, size_t low, size_t high, bool isMax)
 {
     size_t len = high - low;
-    for (size_t i = len / 2; i >= 1; --i)
+    for (size_t i = len; i >= 1; --i)
     {
         siftDown(A, i, len, low, isMax);
     }
