@@ -54,6 +54,7 @@ extern size_t m_swaps;
 
 // Custom counted swap function
 template <typename T>
+constexpr
 void counted_swap(T & a, T & b) {
     std::swap(a, b);
     ++m_swaps;
@@ -61,6 +62,7 @@ void counted_swap(T & a, T & b) {
 
 // Custom counted iter_swap function
 template <typename Iterator>
+constexpr
 void counted_iter_swap(Iterator a, Iterator b) {
     std::iter_swap(a, b);
     ++m_swaps;
@@ -68,6 +70,7 @@ void counted_iter_swap(Iterator a, Iterator b) {
 
 // Custom counted swap_ranges function
 template <typename ForwardIt1, typename ForwardIt2>
+constexpr
 ForwardIt2 counted_swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2) {
     while (first1 != last1) {
         counted_iter_swap(first1, first2);
@@ -78,6 +81,7 @@ ForwardIt2 counted_swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 f
 }
 
 template<class ForwardIt>
+constexpr
 ForwardIt counted_rotate(ForwardIt first, ForwardIt middle, ForwardIt last)
 {
     if (first == middle)
@@ -98,6 +102,25 @@ ForwardIt counted_rotate(ForwardIt first, ForwardIt middle, ForwardIt last)
 
     counted_rotate(write, next_read, last);
     return write;
+}
+
+template<class BidirIt>
+constexpr
+void counted_reverse(BidirIt first, BidirIt last)
+{
+    using iter_cat = typename std::iterator_traits<BidirIt>::iterator_category;
+    if constexpr (std::is_base_of_v<std::random_access_iterator_tag, iter_cat>)
+    {
+        if (first == last) { return; }
+        for (--last; first < last; (void)++first, --last)
+        { counted_iter_swap(first, last); }
+    }
+    else
+    {
+        while (first != last && first != --last)
+        { counted_iter_swap(first++, last); }
+    }
+            
 }
 
 // custom struct for array items, which allows detailed counting of comparisons.
