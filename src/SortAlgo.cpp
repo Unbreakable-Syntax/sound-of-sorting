@@ -1670,7 +1670,7 @@ void siftDown(SortArray& A, size_t root, size_t dist, size_t start, bool isMax)
 void heapifyArr(SortArray& A, size_t low, size_t high, bool isMax)
 {
     size_t len = high - low;
-    for (size_t i = len; i >= 1; --i)
+    for (size_t i = len / 2; i >= 1; --i)
     {
         siftDown(A, i, len, low, isMax);
     }
