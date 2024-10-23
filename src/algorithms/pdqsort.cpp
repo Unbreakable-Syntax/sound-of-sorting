@@ -448,8 +448,8 @@ namespace pdqsort_detail {
             if (highly_unbalanced) {
                 // If we had too many bad partitions, switch to heapsort to guarantee O(n log n).
                 if (--bad_allowed == 0) {
-                    std::make_heap(begin, end, comp);
-                    std::sort_heap(begin, end, comp);
+                    counted_make_heap(begin, end);
+                    counted_sort_heap(begin, end);
                     return;
                 }
 
