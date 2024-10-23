@@ -135,16 +135,20 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Flipped Min Heapified"));
 }
 
-void minheapify(std::vector<ArrayItem>& m_array, int n, int i) {
-    int smallest = i, left = 2 * i + 1, right = 2 * i + 2;
-    if (left < n && m_array[left] < m_array[smallest]) { smallest = left; }
-    if (right < n && m_array[right] < m_array[smallest]) { smallest = right; }
-    if (smallest != i) 
+void flippedminheapify(std::vector<ArrayItem>& m_array, int len, int root, int dist)
+{
+    while (root <= dist / 2)
     {
-        ArrayItem temp = m_array[i];
-        m_array[i] = m_array[smallest];
-        m_array[smallest] = temp;
-        minheapify(m_array, n, smallest);
+        int leaf = 2 * root;
+        if (leaf < dist && m_array[len - leaf] > m_array[len - leaf - 1]) { ++leaf; }
+        if (m_array[len - root] > m_array[len - leaf])
+        {
+            ArrayItem temp = m_array[len - root];
+            m_array[len - root] = m_array[len - leaf];
+            m_array[len - leaf] = temp;
+            root = leaf;
+        }
+        else { break; }
     }
 }
 
@@ -558,8 +562,8 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             int n = m_array.size();
             for (int i = 0; i < n; ++i) { m_array[i] = ArrayItem(i + 1); }
             std::shuffle(m_array.begin(), m_array.end(), g);
-            for (int i = n / 2 - 1; i >= 0; --i) { minheapify(m_array, n, i); }
-            std::reverse(m_array.begin(), m_array.end());
+            for (int i = n / 2; i >= 1; --i) 
+            { flippedminheapify(m_array, n, i, n); }
             break;
         }
         default:
