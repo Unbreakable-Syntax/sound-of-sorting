@@ -1640,20 +1640,162 @@ void InPlaceRadixSortLSD(SortArray& A)
 // ****************************************************************************
 // *** Use STL Sorts via Iterator Adapters
 
+void siftDown(SortArray& A, size_t root, size_t dist, size_t start, bool isMax)
+{
+    int compareVal = 0;
+    if (isMax) { compareVal = -1; }
+    else { compareVal = 1; }
+    while (root <= dist / 2)
+    {
+        size_t leaf = 2 * root;
+        int compVal = 0;
+        if (A[start + leaf - 1] < A[start + leaf]) { compVal = -1; }
+        else if (A[start + leaf - 1] > A[start + leaf]) { compVal = 1; }
+
+        if (leaf < dist && compVal == compareVal) { ++leaf; }
+        
+        if (A[start + root - 1] < A[start + leaf -  1]) { compVal = -1; }
+        else if (A[start + root - 1] > A[start + leaf - 1]) { compVal = 1; }
+        else { compVal = 0; }
+
+        if (compVal == compareVal)
+        {
+            A.swap(start + root - 1, start + leaf - 1);
+            root = leaf;
+        }
+        else { break; }
+    }
+}
+
+void heapifyArr(SortArray& A, size_t low, size_t high, bool isMax)
+{
+    size_t len = high - low;
+    for (size_t i = len / 2; i >= 1; --i)
+    {
+        siftDown(A, i, len, low, isMax);
+    }
+}
+
+void reverseArr(SortArray& A, size_t start, size_t len)
+{
+    for (size_t i = start; i < start + ((len - start + 1) / 2); ++i)
+    {
+        A.swap(i, start + len - 1);
+    }
+}
+
+void HeapSort2(SortArray& A, size_t start, size_t len, bool isMax)
+{
+    heapifyArr(A, start, len, isMax);
+    for (size_t i = len - start; i > 1; --i)
+    {
+        A.swap(start, start + i - 1);
+        siftDown(A, 1, i - 1, start, isMax);
+    }
+
+    if (!isMax)
+    {
+        reverseArr(A, start, start + len - 1);
+    }
+}
+
+size_t floorLogBaseTwo(size_t a)
+{
+    return static_cast<size_t>(floor(log(a) / log(2)));
+}
+
+value_type gccmedianof3(SortArray& A, size_t left, size_t mid, size_t right)
+{
+    if (A[left] < A[mid])
+    {
+        if (A[mid] < A[right])
+        {
+            A.swap(left, mid);
+        }
+        else if (A[left] < A[right])
+        {
+            A.swap(left, right);
+        }
+    }
+    else if (A[left] < A[right]) { return A[left]; }
+    else if (A[mid] < A[right])
+    {
+        A.swap(left, right);
+    }
+    else
+    {
+        A.swap(mid, right);
+    }
+    return A[left];
+}
+
+value_type medianof3(SortArray& A, size_t left, size_t mid, size_t right)
+{
+    if (A[right] < A[left]) { A.swap(left, right); }
+    if (A[mid] < A[left]) { A.swap(mid, left); }
+    if (A[right] < A[mid]) { A.swap(right, mid); }
+    return A[mid];
+}
+
+size_t partitionArr(SortArray& A, size_t lo, size_t hi, value_type x)
+{
+    size_t i = lo, j = hi;
+    while (true)
+    {
+        while (A[i] < x) { ++i; }
+        --j;
+        while (x < A[j]) { --j; }
+
+        if (!(i < j)) { return i; }
+        A.swap(i, j);
+        ++i;
+    }
+}
+
+void introsortLoop(SortArray& A, size_t lo, size_t hi, size_t depth)
+{
+    size_t threshold = 16;
+    while (hi - lo > threshold)
+    {
+        if (depth == 0)
+        {
+            HeapSort2(A, lo, hi, true);
+            return;
+        }
+        --depth;
+        size_t p = partitionArr(A, lo, hi, medianof3(A, lo, lo + ((hi - lo) / 2), hi - 1));
+        introsortLoop(A, p, hi, depth);
+        hi = p;
+    }
+    return;
+}
+
 void StlSort(SortArray& A)
 {
-    std::sort(MyIterator(&A,0), MyIterator(&A,A.size()));
+    size_t n = A.size();
+    introsortLoop(A, 0, n, 2 * floorLogBaseTwo(n));
+    InsertionSort(A);
+}
+
+void StlSort2(SortArray& A)
+{
+    std::sort(MyIterator(&A, 0), MyIterator(&A, A.size()));
 }
 
 void StlStableSort(SortArray& A)
 {
-    std::stable_sort(MyIterator(&A,0), MyIterator(&A,A.size()));
+    std::stable_sort(MyIterator(&A, 0), MyIterator(&A, A.size()));
+}
+
+void StlHeapSort2(SortArray& A)
+{
+    std::make_heap(MyIterator(&A, 0), MyIterator(&A, A.size()));
+    std::sort_heap(MyIterator(&A, 0), MyIterator(&A, A.size()));
 }
 
 void StlHeapSort(SortArray& A)
 {
-    std::make_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
-    std::sort_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
+    HeapSort2(A, 0, A.size(), true);
 }
 
 // ****************************************************************************
