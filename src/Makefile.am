@@ -27,7 +27,7 @@ sorting_test_SOURCES = \
 	SortTest.cpp \
 	$(COMMON)
 
-AM_CXXFLAGS = -W -Wall -O2 $(filter-out -g, @WX_CXXFLAGS@) $(filter-out -Dmain=SDL_main, @SDL_CFLAGS@)
+AM_CXXFLAGS = -W -Wall $(filter-out -g, @WX_CXXFLAGS@) $(filter-out -Dmain=SDL_main, @SDL_CFLAGS@)
 LDADD = 
 
 if GOT_RESCOMP

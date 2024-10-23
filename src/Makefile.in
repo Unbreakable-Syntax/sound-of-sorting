@@ -548,7 +548,7 @@ sorting_test_SOURCES = \
 	SortTest.cpp \
 	$(COMMON)
 
-AM_CXXFLAGS = -W -Wall -O2 $(filter-out -g, @WX_CXXFLAGS@) $(filter-out -Dmain=SDL_main, @SDL_CFLAGS@)
+AM_CXXFLAGS = -W -Wall $(filter-out -g, @WX_CXXFLAGS@) $(filter-out -Dmain=SDL_main, @SDL_CFLAGS@)
 LDADD = $(am__append_1) @WX_LIBS@ @SDL_LIBS@
 EXTRA_DIST = \
 	resources.rc sos.ico sos.xpm \
