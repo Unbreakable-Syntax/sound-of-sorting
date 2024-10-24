@@ -125,13 +125,11 @@ void counted_reverse(BidirIt first, BidirIt last)
 template <typename RandomIt, typename Compare = std::less<>>
 void counted_make_heap(RandomIt first, RandomIt last, Compare comp = Compare())
 {
-    if (last - first < 2) return;  // Nothing to do for 0 or 1 element
+    if (last - first < 2) return;
 
-    // The index of the last non-leaf node is (n / 2) - 1, where n = distance(first, last)
     auto n = std::distance(first, last);
     for (auto i = (n / 2) - 1; i >= 0; --i)
     {
-        // Sift down the element at index i to restore heap property
         sift_down(first, last, i, comp);
     }
 }
