@@ -352,7 +352,7 @@ void BinaryInsertSort(SortArray& A, size_t start, size_t end)
 
         size_t lo = start, hi = i;
         while (lo < hi) {
-            size_t mid = lo + ((hi - lo) / 2);
+            size_t mid = (lo + hi) / 2;
             if (key < A[mid])
                 hi = mid;
             else
