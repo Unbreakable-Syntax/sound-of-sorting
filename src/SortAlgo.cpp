@@ -73,9 +73,11 @@ const struct AlgoEntry g_algolist[] =
       _("An in-place merge sort variant that interleaves 2 halves of the input array, and then uses Insertion Sort to sort the array.")},
     { _("New Shuffle Merge Sort"), &NewShuffleMergeSort, UINT_MAX, 512,
       _("An improvement upon Weave Merge Sort, with faster weave time, and inserting now makes comparisons with a worst-case similar to Merge Sort.") },
-    { _("Strand Sort"), &StrandSort, UINT_MAX, 512,
-      wxEmptyString },
     { _("Andrey's In-Place Merge Sort"), &AndreyMergeSort, UINT_MAX, 512,
+      wxEmptyString },
+    { _("Proportion Extend Merge Sort"), &ProportionMergeSort, UINT_MAX, 512,
+      wxEmptyString },
+    { _("Strand Sort"), &StrandSort, UINT_MAX, 512,
       wxEmptyString },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
@@ -341,14 +343,14 @@ void BinaryInsertionSort2(SortArray& A)
     }
 }
 
-void BinaryInsertionSort(SortArray& A)
+void BinaryInsertSort(SortArray& A, size_t start, size_t end)
 {
-    for (size_t i = 1; i < A.size(); ++i)
+    for (size_t i = start; i < end; ++i)
     {
         value_type key = A[i];
         A.mark(i);
 
-        size_t lo = 0, hi = i;
+        size_t lo = start, hi = i;
         while (lo < hi) {
             size_t mid = (lo + hi) / 2;
             if (key < A[mid])
@@ -356,8 +358,6 @@ void BinaryInsertionSort(SortArray& A)
             else
                 lo = mid + 1;
         }
-
-        // item has to go into position lo
 
         size_t j = i;
         while (j > lo)
@@ -368,6 +368,11 @@ void BinaryInsertionSort(SortArray& A)
         A.set(lo, key);
         A.unmark(i);
     }
+}
+
+void BinaryInsertionSort(SortArray& A)
+{
+    BinaryInsertSort(A, 0, A.size());
 }
 
 // ****************************************************************************
@@ -3120,6 +3125,7 @@ void NewShuffleMergeSort(SortArray& A)
 
 // ****************************************************************************
 // *** Andrey Astrelin's In-Place Merge Sort
+
 void sortVector(SortArray& A, size_t a, size_t b)
 {
     while (b > 1)
@@ -3250,4 +3256,168 @@ void msort(SortArray& A, size_t a, size_t len)
 void AndreyMergeSort(SortArray& A)
 {
     msort(A, 0, A.size());
+}
+
+
+// ****************************************************************************
+// *** Proportion Extend Merge Sort
+
+/*
+    MIT License
+
+    Copyright (c) 2023 aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+void blockSwap(SortArray& A, size_t a, size_t b, size_t s)
+{
+    while (s-- > 0)
+    {
+        A.swap(a, b);
+        ++a; ++b;
+    }
+}
+
+size_t partition(SortArray& A, size_t a, size_t b, size_t p)
+{
+    size_t i = a - 1, j = b;
+    while (true)
+    {
+        do { ++i; } while (i < j && A[i] < A[p]);
+        do { --j; } while (j >= i && A[j] > A[p]);
+        if (i < j) { A.swap(i, j); }
+        else { return i; }
+    }
+}
+
+void mergeFW(SortArray& A, size_t a, size_t m, size_t b, size_t p)
+{
+    size_t pLen = m - a, i = 0, j = m, k = a;
+    blockSwap(A, a, p, pLen);
+    while (i < pLen && j < b)
+    {
+        if (A[p + i] <= A[j]) { A.swap(k, p + i); ++k; ++i; }
+        else { A.swap(k, j); ++k; ++j; }
+    }
+    while (i < pLen) { A.swap(k, p + i); ++k; ++i; }
+}
+
+void mergeBW(SortArray& A, size_t a, size_t m, size_t b, size_t p)
+{
+    size_t pLen = b - m, j = m - 1, k = b - 1;
+    int i = pLen - 1;
+    blockSwap(A, m, p, pLen);
+    while (i >= 0 && j >= a)
+    {
+        if (A[p + i] >= A[j]) { A.swap(k, p + i); --k; --i; }
+        else { A.swap(k, j); --k; --j; }
+    }
+    while (i >= 0) { A.swap(k, p + i); --k; --i; }
+}
+
+void smartMerge(SortArray& A, size_t a, size_t m, size_t b, size_t p)
+{
+    if (m - a < b - m) { mergeFW(A, a, m, b, p); }
+    else { mergeBW(A, a, m, b, p); }
+}
+
+void mergeTo(SortArray& A, size_t a, size_t m, size_t b, size_t p)
+{
+    size_t i = a, j = m;
+    while (i < m && j < b)
+    {
+        if (A[i] <= A[j]) { A.swap(p, i); ++p; ++i; }
+        else { A.swap(p, j); ++p; ++j; }
+    }
+    while (i < m) { A.swap(p, i); ++p; ++i; }
+    while (j < b) { A.swap(p, j); ++p; ++j; }
+}
+
+void pingPongMerge(SortArray& A, size_t a, size_t m1, size_t m, size_t m2, size_t b, size_t p)
+{
+    size_t p1 = p + m - a, pEnd = p + b - a;
+    mergeTo(A, a, m1, m, p);
+    mergeTo(A, m, m2, b, p1);
+    mergeTo(A, p, p1, pEnd, a);
+}
+
+void mergeSort(SortArray& A, size_t a, size_t b, size_t p)
+{
+    const size_t min_insert = 8;
+    size_t n = b - a, j = n;
+    for (; (j + 3) / 4 >= min_insert; j = (j + 3) / 4) {}
+    for (size_t i = a; i < b; i += j)
+    {
+        BinaryInsertSort(A, i, std::min(b, i + j));
+    }
+    for (size_t i; j < n; j *= 4)
+    {
+        for (i = a; i + 2 * j < b; i += 4 * j)
+        {
+            pingPongMerge(A, i, i + j, i + 2 * j, std::min(i + 3 * j, b), std::min(i + 4 * j, b), p);
+
+        }
+        if (i + j < b) { mergeBW(A, i, i + j, b, p); }
+    }
+}
+
+void smartMergeSort(SortArray& A, size_t a, size_t b, size_t p, size_t pb) 
+{
+    if (b - a <= pb - p) { mergeSort(A, a, b, p); return; }
+    size_t m = (a + b) >> 1;
+    mergeSort(A, a, m, p);
+    mergeSort(A, m, b, p);
+    mergeFW(A, a, m, b, p);
+}
+
+void peSort(SortArray& A, size_t a, size_t m, size_t b)
+{
+    size_t n = b - a;
+    const size_t min_insert = 8;
+    if (n < 4 * min_insert) { BinaryInsertSort(A, a, b); return; }
+    if (m - a <= n / 3)
+    {
+        size_t t = (n + 2) / 3;
+        smartMergeSort(A, m, b - t, b - t, b);
+        smartMerge(A, a, m, b - t, b - t);
+        m = b - t;
+    }
+    size_t m1 = (a + m) >> 1, m2 = partition(A, m, b, m1);
+    size_t i = m, j = m2;
+    while (i > m1) { --i; --j; A.swap(i, j); }
+    m = m2 - (m - m1);
+    if (m - m1 < b - m2)
+    {
+        mergeSort(A, m1, m, m2);
+        smartMerge(A, a, m1, m, m2);
+        peSort(A, m + 1, m2, b);
+    }
+    else
+    {
+        mergeSort(A, m2, b, m1);
+        smartMerge(A, m + 1, m2, b, m1);
+        peSort(A, a, m1, m);
+    }
+}
+
+void ProportionMergeSort(SortArray& A)
+{
+    peSort(A, 0, 0, A.size());
 }
