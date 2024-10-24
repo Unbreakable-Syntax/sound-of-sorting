@@ -352,7 +352,7 @@ void BinaryInsertSort(SortArray& A, size_t start, size_t end)
 
         size_t lo = start, hi = i;
         while (lo < hi) {
-            size_t mid = (lo + hi) / 2;
+            size_t mid = lo + ((hi - lo) / 2);
             if (key < A[mid])
                 hi = mid;
             else
@@ -3321,10 +3321,10 @@ void mergeFW(SortArray& A, size_t a, size_t m, size_t b, size_t p)
 
 void mergeBW(SortArray& A, size_t a, size_t m, size_t b, size_t p)
 {
-    size_t pLen = b - m, j = m - 1, k = b - 1;
-    int i = pLen - 1;
+    size_t pLen = b - m;
+    int i = static_cast<int>(pLen - 1), j = m - 1, k = b - 1, z = a;
     blockSwap(A, m, p, pLen);
-    while (i >= 0 && j >= a)
+    while (i >= 0 && j >= z)
     {
         if (A[p + i] >= A[j]) { A.swap(k, p + i); --k; --i; }
         else { A.swap(k, j); --k; --j; }
