@@ -165,7 +165,7 @@ void counted_sort_heap(RandomIt first, RandomIt last, Compare comp = Compare())
 {
     while (last - first > 1)
     {
-        counted_swap(*first, *(last - 1));
+        counted_iter_swap(first, last - 1);
         sift_down(first, last - 1, 0, comp);
         --last;
     }
