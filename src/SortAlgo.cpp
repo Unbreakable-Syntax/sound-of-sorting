@@ -1065,11 +1065,11 @@ void OptimizedBubbleSort(SortArray& A)
 void TargetedBubbleSort(SortArray& A)
 {
     bool sorted = false;
-    size_t target = A.size(), lastSwapped = 0;
+    size_t target = A.size() - 1, lastSwapped = 0;
     while (!sorted)
     {
         sorted = true;
-        for (size_t i = 0; i < target - 1; ++i)
+        for (size_t i = 0; i < target; ++i)
         {
             if (A[i] > A[i + 1])
             {
@@ -1078,7 +1078,7 @@ void TargetedBubbleSort(SortArray& A)
                 sorted = false;
             }
         }
-        target = lastSwapped + 1;
+        target = lastSwapped;
     }
 }
 
