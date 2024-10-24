@@ -84,19 +84,15 @@ template<class ForwardIt>
 constexpr
 ForwardIt counted_rotate(ForwardIt first, ForwardIt middle, ForwardIt last)
 {
-    if (first == middle)
-        return last;
-
-    if (middle == last)
-        return first;
+    if (first == middle) { return last; }
+    if (middle == last) { return first; }
 
     ForwardIt write = first;
     ForwardIt next_read = first;
 
     for (ForwardIt read = middle; read != last; ++write, ++read)
     {
-        if (write == next_read)
-            next_read = read;
+        if (write == next_read) { next_read = read; }
         counted_iter_swap(write, read);
     }
 
@@ -167,6 +163,24 @@ void counted_sort_heap(RandomIt first, RandomIt last, Compare comp = Compare())
         sift_down(first, last - 1, 0, comp);
         --last;
     }
+}
+
+template<class ForwardIt, class UnaryPred>
+ForwardIt counted_partition(ForwardIt first, ForwardIt last, UnaryPred p)
+{
+    first = std::find_if_not(first, last, p);
+    if (first == last) { return first; }
+
+    for (auto i = std::next(first); i != last; ++i)
+    {
+        if (p(*i))
+        {
+            counted_iter_swap(i, first);
+            ++first;
+        }
+    }
+
+    return first;
 }
 
 // custom struct for array items, which allows detailed counting of comparisons.
