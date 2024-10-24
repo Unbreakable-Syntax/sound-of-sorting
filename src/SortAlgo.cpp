@@ -1270,8 +1270,7 @@ void CombinedOddEvenSort(SortArray& A)
         sorted = true;
         for (size_t i = 0; i < n - 1; ++i)
         {
-            if ((i % 2 == 0 && A[i] > A[i + 1]) ||
-                (i % 2 == 1 && A[i] > A[i + 1]))
+            if (A[i] > A[i + 1])
             {
                 A.swap(i, i + 1); 
                 sorted = false;
