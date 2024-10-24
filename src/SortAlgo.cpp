@@ -102,6 +102,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Optimized Bubble Sort"), &OptimizedBubbleSort, UINT_MAX, UINT_MAX,
       _("This variant terminates early if the array is already sorted.") },
+    { _("Targeted Bubble Sort"), &TargetedBubbleSort, UINT_MAX, 1024,
+      _("This variant of Bubble Sort is capable of adjusting the sorting boundaries based on the input array.") },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Dual Cocktail Shaker Sort"), &DualCocktailShakerSort, UINT_MAX, UINT_MAX,
@@ -122,8 +124,6 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Odd-Even Sort"), &OddEvenSort, UINT_MAX, 1024,
       wxEmptyString },
-    { _("Combined Odd-Even Sort"), &CombinedOddEvenSort, UINT_MAX, 1024,
-      _("This variant of Odd-Even Sort combines the odd and even phases into a single loop.") },
     // older sequential implementation, which really makes little sense to do
     //{ _("Bitonic Sort"), &BitonicSort, UINT_MAX, UINT_MAX, wxEmptyString },
     { _("Batcher's Bitonic Sort"), &BitonicSortNetwork, UINT_MAX, UINT_MAX,
@@ -1062,6 +1062,26 @@ void OptimizedBubbleSort(SortArray& A)
     }
 }
 
+void TargetedBubbleSort(SortArray& A)
+{
+    bool sorted = false;
+    size_t target = A.size(), lastSwapped = 0;
+    while (!sorted)
+    {
+        sorted = true;
+        for (size_t i = 0; i < target - 1; ++i)
+        {
+            if (A[i] > A[i + 1])
+            {
+                A.swap(i, i + 1);
+                lastSwapped = i;
+                sorted = false;
+            }
+        }
+        target = lastSwapped + 1;
+    }
+}
+
 // ****************************************************************************
 // *** Cocktail Shaker Sort
 
@@ -1258,25 +1278,6 @@ void OddEvenSort(SortArray& A)
                 sorted = false;
             }
         }
-    }
-}
-
-void CombinedOddEvenSort(SortArray& A)
-{
-    bool sorted = false;
-    size_t n = A.size();
-    while (!sorted)
-    {
-        sorted = true;
-        for (size_t i = 0; i < n - 1; ++i)
-        {
-            if (A[i] > A[i + 1])
-            {
-                A.swap(i, i + 1); 
-                sorted = false;
-            }
-        }
-        --n;
     }
 }
 
