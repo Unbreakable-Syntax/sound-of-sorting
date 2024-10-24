@@ -101,7 +101,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Bubble Sort"), &BubbleSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Optimized Bubble Sort"), &OptimizedBubbleSort, UINT_MAX, UINT_MAX,
-      _("This variant can detect if an array is sorted, if the array is sorted, the sorting process will stop.") },
+      _("This variant terminates early if the array is already sorted.") },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Dual Cocktail Shaker Sort"), &DualCocktailShakerSort, UINT_MAX, UINT_MAX,
@@ -122,6 +122,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Odd-Even Sort"), &OddEvenSort, UINT_MAX, 1024,
       wxEmptyString },
+    { _("Combined Odd-Even Sort"), &CombinedOddEvenSort, UINT_MAX, 1024,
+      _("This variant of Odd-Even Sort combines the odd and even phases into a single loop.") },
     // older sequential implementation, which really makes little sense to do
     //{ _("Bitonic Sort"), &BitonicSort, UINT_MAX, UINT_MAX, wxEmptyString },
     { _("Batcher's Bitonic Sort"), &BitonicSortNetwork, UINT_MAX, UINT_MAX,
@@ -1256,6 +1258,26 @@ void OddEvenSort(SortArray& A)
                 sorted = false;
             }
         }
+    }
+}
+
+void CombinedOddEvenSort(SortArray& A)
+{
+    bool sorted = false;
+    size_t n = A.size();
+    while (!sorted)
+    {
+        sorted = true;
+        for (size_t i = 0; i < n - 1; ++i)
+        {
+            if ((i % 2 == 0 && A[i] > A[i + 1]) ||
+                (i % 2 == 1 && A[i] > A[i + 1]))
+            {
+                A.swap(i, i + 1); 
+                sorted = false;
+            }
+        }
+        --n;
     }
 }
 
