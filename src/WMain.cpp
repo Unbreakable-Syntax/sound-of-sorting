@@ -165,11 +165,7 @@ bool WMain::RunAlgorithm()
     }
 }
 
-void WMain::OnDClick(wxSplitterEvent& event)
-{
-    // Veto the event to prevent the default behavior
-    event.Veto();
-}
+void WMain::OnDClick(wxSplitterEvent& event) { event.Veto(); }
 
 void WMain::AbortAlgorithm()
 {
