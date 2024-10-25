@@ -121,6 +121,8 @@ void BozoSort(class SortArray& a);
 void StoogeSort(class SortArray& a);
 void SlowSort(class SortArray& a);
 void PancakeSort(class SortArray& a);
+void AdjacencyPancakeSort(class SortArray& a);
+void BeadSort(class SortArray& a);
 void GravitySort(class SortArray& a);
 
 void CycleSort(class SortArray& a);

@@ -155,10 +155,14 @@ const struct AlgoEntry g_algolist[] =
       _("Grail Sort is a stable, in-place sorting algorithm that efficiently organizes an array by using a block-based merging technique.") },
     { _("Grail Sort (external buffer)"), &AuxGrailSort, UINT_MAX, inversion_count_instrumented,
       _("A variant of Grail Sort that uses an external buffer for a potential speedup.") },
-    { _("Bead Sort"), &GravitySort, UINT_MAX, UINT_MAX,
-      _("Also known as Gravity Sort. This is a non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
+    { _("Bead Sort"), &BeadSort, UINT_MAX, UINT_MAX,
+      _("This is a non-comparison based sorting algorithm that uses the concept of stacked beads to sort the elements.") },
+    { _("Gravity Sort"), &GravitySort, UINT_MAX, UINT_MAX,
+      _("A non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
     { _("Pancake Sort"), &PancakeSort, UINT_MAX, UINT_MAX,
       _("Sorts the array by performing a series of 'flips' to push the maximum element to the correct spot.") },
+    { _("Adjacency Pancake Sort"), &AdjacencyPancakeSort, UINT_MAX, UINT_MAX,
+      _("An improvement upon Pancake Sort, which performs only 5/3 N + O(1) flips.") },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
@@ -1963,7 +1967,7 @@ void PancakeSort(SortArray& A)
     }
 }
 
-void GravitySort(SortArray& A)
+void BeadSort(SortArray& A)
 {  
     int max = A[0];
     int len = A.size();
@@ -1998,6 +2002,220 @@ void GravitySort(SortArray& A)
             A[k].get();
         }
     }
+}
+
+/*
+    MIT License
+
+    Copyright (c) 2020 aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+void GravitySort(SortArray& A)
+{
+    int n = A.size();
+    int min = A[0], max = A[0];
+    for (int i = 1; i < n; ++i)
+    {
+        int ele = A[i].get();
+        if (ele < min) { min = ele; }
+        if (ele > max) { max = ele; }
+    }
+    std::vector<int> x(n, 0);
+    std::vector<int> y(max - min + 1, 0);
+    for (int i = 0; i < n; ++i)
+    {
+        int ele = A[i].get();
+        x[i] = ele - min;
+        y[ele - min] = y[ele - min] + 1;
+    }
+
+    int y_size = static_cast<int>(y.size() - 1);
+    for (int i = y_size; i > 0; --i)
+    {
+        y[i - 1] = y[i - 1] += y[i];
+    }
+
+    for (int j = y_size; j >= 0; --j)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            int val = 0, val2 = 0;
+            if (i >= n - y[j]) { val = 1; }
+            if (x[i] >= j) { val2 = 1; }
+            int inc = val - val2, ele = A[i].get();
+            A.set(i, ArrayItem(ele + inc));
+        }
+    }
+}
+
+/*
+    MIT License
+
+    Copyright (c) 2024 aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+*/
+
+void dualSwap(SortArray& A, std::vector<value_type>& keys, int a, int b)
+{
+    size_t z = static_cast<size_t>(a);
+    A[z].get();
+    A.swap(z, static_cast<size_t>(b));
+    value_type temp = keys[a];
+    keys[a] = keys[b];
+    keys[b] = temp;
+}
+
+void reversal(SortArray& A, std::vector<value_type>& keys, int a, int b)
+{
+    while (b - a > 1) { --b; dualSwap(A, keys, a, b); ++a; }
+}
+
+bool isAdjacent(std::vector<value_type>& keys, int a, int b, int N)
+{
+    return (keys[a] + 1) % N == keys[b] || (keys[b] + 1) % N == keys[a];
+}
+
+int findAdjacent(std::vector<value_type>& keys, int e, int a, int N)
+{
+    while (!isAdjacent(keys, a, e, N)) { ++a; }
+    return a;
+}
+
+void AdjacencyPancakeSort(SortArray& A)
+{
+    int a = 0, N = static_cast<int>(A.size()), b = N;
+    if (N == 2)
+    {
+        reverseArr(A, a, a + 1);
+        return;
+    }
+    std::vector<value_type> keys(N);
+
+    for (int j = a; j < b; ++j)
+    {
+        int c = 0;
+        for (int i = a; i < b; ++i)
+        {
+            if (i == j) { continue; }
+            if (A[i] < A[j] || (A[i] == A[j] && i < j)) { ++c; }
+        }
+        keys[j - a] = ArrayItem(c);
+    }
+
+    while (true)
+    {
+        int i = a;
+        while (i < b - 1 && isAdjacent(keys, i, i + 1, N)) { ++i; }
+        if (i == b - 1) { break; }
+        if (i == a)
+        {
+            int j = findAdjacent(keys, a, a + 2, N);
+            if (!isAdjacent(keys, j - 1, j, N))
+            { reversal(A, keys, a, j); }
+            else
+            {
+                int k = findAdjacent(keys, a, j + 1, N);
+                if (!isAdjacent(keys, k - 1, k, N))
+                { reversal(A, keys, a, k); }
+                else
+                {
+                    reversal(A, keys, a, j + 1);
+                    reversal(A, keys, a, j);
+                    reversal(A, keys, a, k + 1);
+                    reversal(A, keys, a, a + k - j);
+                }
+            }
+        }
+        else
+        {
+            int j = findAdjacent(keys, a, i + 1, N);
+            if (!isAdjacent(keys, j - 1, j, N))
+            { reversal(A, keys, a, j); }
+            else
+            {
+                int k = findAdjacent(keys, i, i + 2, N);
+                if (k + 1 < b && isAdjacent(keys, k + 1, k, N))
+                {
+                    reversal(A, keys, a, i + 1);
+                    reversal(A, keys, a, k + 1);
+                }
+                else if (k + 1 < b && isAdjacent(keys, k - 1, k, N))
+                {
+                    reversal(A, keys, a, k + 1);
+                    reversal(A, keys, a, a + k - i);
+                }
+                else
+                {
+                    reversal(A, keys, a, k + 1);
+                    reversal(A, keys, a, a + k - i);
+                    if (j < k)
+                    {
+                        reversal(A, keys, a, k + 1);
+                        reversal(A, keys, a, i + k - j + 1);
+                    }
+                    else
+                    {
+                        reversal(A, keys, a, j + 1);
+                        reversal(A, keys, a, a + j - k);
+                    }
+                }
+            }
+        }
+    }
+
+    int i = a;
+    while (keys[i] != 0 && keys[i] != N - 1) { ++i; }
+    if (keys[i] == 0)
+    {
+        if (i == a) { return; }
+        reversal(A, keys, a, b);
+        i = b - 2 - (i - a);
+    }
+    else if (i == a)
+    {
+        reversal(A, keys, a, b);
+        return;
+    }
+    ++i;
+    reversal(A, keys, a, i);
+    reversal(A, keys, a, b);
+    reversal(A, keys, a, b - i);
 }
 
 // ****************************************************************************
@@ -3344,7 +3562,10 @@ void mergeFW(SortArray& A, size_t a, size_t m, size_t b, size_t p)
 void mergeBW(SortArray& A, size_t a, size_t m, size_t b, size_t p)
 {
     size_t pLen = b - m;
-    int i = static_cast<int>(pLen - 1), j = m - 1, k = b - 1, z = a;
+    int i = static_cast<int>(pLen - 1), 
+        j = static_cast<int>(m - 1), 
+        k = static_cast<int>(b - 1), 
+        z = static_cast<int>(a);
     blockSwap(A, m, p, pLen);
     while (i >= 0 && j >= z)
     {
