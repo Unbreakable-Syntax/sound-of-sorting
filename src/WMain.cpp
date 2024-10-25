@@ -47,6 +47,7 @@ WMain::WMain(wxWindow* parent)
 
     // resize right split window
     splitter_0->SetSashPosition(GetSize().x - 280);
+    splitter_0->SetMinimumPaneSize(1);
 
     // insert list of algorithms into wxListBox
     for (const AlgoEntry* ae = g_algolist; ae != g_algolist_end; ++ae)
@@ -116,6 +117,7 @@ BEGIN_EVENT_TABLE(WMain, WMain_wxg)
     EVT_TOGGLEBUTTON(ID_SOUND_BUTTON, WMain::OnSoundButton)
     EVT_BUTTON(ID_RANDOM_BUTTON, WMain::OnRandomButton)
     EVT_BUTTON(wxID_ABOUT, WMain::OnAboutButton)
+    EVT_SPLITTER_DCLICK(wxID_ANY, WMain::OnDClick)
 
     EVT_COMMAND_SCROLL(ID_SPEED_SLIDER, WMain::OnSpeedSliderChange)
     EVT_COMMAND_SCROLL(ID_SOUND_SUSTAIN_SLIDER, WMain::OnSoundSustainSliderChange)
@@ -161,6 +163,12 @@ bool WMain::RunAlgorithm()
         runButton->SetValue(true);
         return true;
     }
+}
+
+void WMain::OnDClick(wxSplitterEvent& event)
+{
+    // Veto the event to prevent the default behavior
+    event.Veto();
 }
 
 void WMain::AbortAlgorithm()

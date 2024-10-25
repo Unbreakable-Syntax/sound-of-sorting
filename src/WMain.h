@@ -85,6 +85,7 @@ public:
     virtual void OnArraySizeSliderChange(wxScrollEvent &event);
     virtual void OnAlgoList(wxCommandEvent &event);
     virtual void OnAlgoListDClick(wxCommandEvent &event);
+    virtual void OnDClick(wxSplitterEvent& event);
 
     virtual void OnRunFinished(wxCommandEvent&);
     DECLARE_EVENT_TABLE()
