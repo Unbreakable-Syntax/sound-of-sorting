@@ -108,9 +108,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = SortArray.$(OBJEXT) SortSound.$(OBJEXT) \
-	SortAlgo.$(OBJEXT) algorithms/grailsort.$(OBJEXT) \
-	algorithms/pdqsort.$(OBJEXT) \
-	algorithms/quicklibrarysort.$(OBJEXT) \
+	SortAlgo.$(OBJEXT) algorithms/flansort.$(OBJEXT) \
+	algorithms/grailsort.$(OBJEXT) algorithms/pdqsort.$(OBJEXT) \
 	algorithms/timsort.$(OBJEXT) algorithms/wikisort.$(OBJEXT)
 am_sorting_test_OBJECTS = SortTest.$(OBJEXT) $(am__objects_1)
 sorting_test_OBJECTS = $(am_sorting_test_OBJECTS)
@@ -140,9 +139,9 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/SortAlgo.Po ./$(DEPDIR)/SortArray.Po \
 	./$(DEPDIR)/SortSound.Po ./$(DEPDIR)/SortTest.Po \
 	./$(DEPDIR)/WMain.Po ./$(DEPDIR)/WSortView.Po \
-	./$(DEPDIR)/wxClickText.Po algorithms/$(DEPDIR)/grailsort.Po \
+	./$(DEPDIR)/wxClickText.Po algorithms/$(DEPDIR)/flansort.Po \
+	algorithms/$(DEPDIR)/grailsort.Po \
 	algorithms/$(DEPDIR)/pdqsort.Po \
-	algorithms/$(DEPDIR)/quicklibrarysort.Po \
 	algorithms/$(DEPDIR)/timsort.Po \
 	algorithms/$(DEPDIR)/wikisort.Po wxg/$(DEPDIR)/WAbout_wxg.Po \
 	wxg/$(DEPDIR)/WMain_wxg.Po
@@ -533,9 +532,9 @@ top_srcdir = @top_srcdir@
 COMMON = SortArray.cpp SortArray.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
+	algorithms/flansort.cpp \
 	algorithms/grailsort.cpp \
 	algorithms/pdqsort.cpp \
-	algorithms/quicklibrarysort.cpp \
 	algorithms/timsort.cpp \
 	algorithms/wikisort.cpp
 
@@ -641,11 +640,11 @@ algorithms/$(am__dirstamp):
 algorithms/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) algorithms/$(DEPDIR)
 	@: > algorithms/$(DEPDIR)/$(am__dirstamp)
+algorithms/flansort.$(OBJEXT): algorithms/$(am__dirstamp) \
+	algorithms/$(DEPDIR)/$(am__dirstamp)
 algorithms/grailsort.$(OBJEXT): algorithms/$(am__dirstamp) \
 	algorithms/$(DEPDIR)/$(am__dirstamp)
 algorithms/pdqsort.$(OBJEXT): algorithms/$(am__dirstamp) \
-	algorithms/$(DEPDIR)/$(am__dirstamp)
-algorithms/quicklibrarysort.$(OBJEXT): algorithms/$(am__dirstamp) \
 	algorithms/$(DEPDIR)/$(am__dirstamp)
 algorithms/timsort.$(OBJEXT): algorithms/$(am__dirstamp) \
 	algorithms/$(DEPDIR)/$(am__dirstamp)
@@ -685,9 +684,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WMain.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WSortView.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wxClickText.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@algorithms/$(DEPDIR)/flansort.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@algorithms/$(DEPDIR)/grailsort.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@algorithms/$(DEPDIR)/pdqsort.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@algorithms/$(DEPDIR)/quicklibrarysort.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@algorithms/$(DEPDIR)/timsort.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@algorithms/$(DEPDIR)/wikisort.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@wxg/$(DEPDIR)/WAbout_wxg.Po@am__quote@ # am--include-marker
@@ -1020,9 +1019,9 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/WMain.Po
 	-rm -f ./$(DEPDIR)/WSortView.Po
 	-rm -f ./$(DEPDIR)/wxClickText.Po
+	-rm -f algorithms/$(DEPDIR)/flansort.Po
 	-rm -f algorithms/$(DEPDIR)/grailsort.Po
 	-rm -f algorithms/$(DEPDIR)/pdqsort.Po
-	-rm -f algorithms/$(DEPDIR)/quicklibrarysort.Po
 	-rm -f algorithms/$(DEPDIR)/timsort.Po
 	-rm -f algorithms/$(DEPDIR)/wikisort.Po
 	-rm -f wxg/$(DEPDIR)/WAbout_wxg.Po
@@ -1079,9 +1078,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/WMain.Po
 	-rm -f ./$(DEPDIR)/WSortView.Po
 	-rm -f ./$(DEPDIR)/wxClickText.Po
+	-rm -f algorithms/$(DEPDIR)/flansort.Po
 	-rm -f algorithms/$(DEPDIR)/grailsort.Po
 	-rm -f algorithms/$(DEPDIR)/pdqsort.Po
-	-rm -f algorithms/$(DEPDIR)/quicklibrarysort.Po
 	-rm -f algorithms/$(DEPDIR)/timsort.Po
 	-rm -f algorithms/$(DEPDIR)/wikisort.Po
 	-rm -f wxg/$(DEPDIR)/WAbout_wxg.Po
