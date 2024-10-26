@@ -51,7 +51,7 @@ std::mt19937 eng(rd());
 
 void shiftBW(SortArray& A, int a, int m, int b)
 {
-	while (m > a) { --b; --m; A.swap(b, m); }
+	while (m > a) { --b; --m; A[b].get(); A.swap(b, m); }
 }
 
 int randGapSearch(SortArray& A, int a, int b, int val)
@@ -60,14 +60,14 @@ int randGapSearch(SortArray& A, int a, int b, int val)
 	while (a < b)
 	{
 		int m = a + (((b - a) / s) / 2) * s;
-		int ele = A[m];
+		int ele = A[m].get();
 		if (val < ele) { b = m; }
 		else if (val > ele) { a = m + s; }
 		else if (randCnt++ < 1)
 		{
 			std::uniform_int_distribution<> distr(0, ((b - a) / s) - 1);
 			m = a + distr(eng) * s;
-			ele = A[m];
+			ele = A[m].get();
 			if (val < ele) { b = m; }
 			else if (val > ele) { a = m + s; }
 			else { a = m; break; }
@@ -84,7 +84,7 @@ int rightBinSearch(SortArray& A, int a, int b, int val, bool bw)
 	while (a < b)
 	{
 		int m = a + (b - a) / 2;
-		int ele = A[m], result = 0;
+		int ele = A[m].get(), result = 0;
 		if (val < ele) { result = -1; }
 		else if (val > ele) { result = 1; }
 
@@ -99,18 +99,20 @@ void insertTo(SortArray& A, int tmp, int a, int b)
 	while (a > b) 
 	{ 
 		size_t z = static_cast<size_t>(a);
+		A[z].get();
 		A.set(z, A[z - 1]); 
 		--a; 
 	}
 	size_t z = static_cast<size_t>(b);
 	A.set(z, ArrayItem(tmp));
+	A[z].get();
 }
 
 void binaryInsert(SortArray& A, int a, int b)
 {
 	for (int i = a + 1; i < b; ++i)
 	{
-		int ele = A[i];
+		int ele = A[i].get();
 		insertTo(A, ele, i, rightBinSearch(A, a, i, ele, false));
 	}
 }
@@ -125,6 +127,7 @@ void retrieve(SortArray& A, int b, int p, int pEnd, int bsv, bool bw)
 		while (m >= k) 
 		{ 
 			size_t x = static_cast<size_t>(j), y = static_cast<size_t>(m);
+			A[x].get();
 			A.swap(x, y); 
 			--j; --m; 
 		}
@@ -133,6 +136,7 @@ void retrieve(SortArray& A, int b, int p, int pEnd, int bsv, bool bw)
 	while (m >= p) 
 	{
 		size_t x = static_cast<size_t>(j), y = static_cast<size_t>(m);
+		A[x].get();
 		A.swap(x, y); 
 		--j; --m; 
 	}
@@ -148,6 +152,7 @@ void rescatter(SortArray & A, int i, int p, int pEnd, int bsv, bool bw)
 		while (m >= k)
 		{
 			size_t x = static_cast<size_t>(j), y = static_cast<size_t>(m);
+			A[x].get();
 			A.swap(x, y);
 			j -= G + 1; --m;
 		}
@@ -156,6 +161,7 @@ void rescatter(SortArray & A, int i, int p, int pEnd, int bsv, bool bw)
 	while (m >= p)
 	{
 		size_t x = static_cast<size_t>(j), y = static_cast<size_t>(m);
+		A[x].get();
 		A.swap(x, y);
 		j -= G + 1; --m;
 	}
@@ -177,12 +183,14 @@ void rebalance(SortArray& A, int a, int b, int p, int pEnd, int pb, int bsv, boo
 		for (int j = 0; j < iter; ++j)
 		{
 			size_t x = static_cast<size_t>(a), y = static_cast<size_t>(k - G + j);
+			A[x].get();
 			A.swap(x, y);
 			++a;
 		}
 		if (k < pb - (G + 1))
 		{
 			size_t x = static_cast<size_t>(a), y = static_cast<size_t>(k);
+			A[x].get();
 			A.swap(x, y);
 			++a;
 		}
@@ -207,6 +215,7 @@ void librarySort(SortArray& A, int a, int b, int p, int pb, int bsv, bool bw)
 	{
 		size_t x = static_cast<size_t>(a + k);
 		size_t y = static_cast<size_t>(p + k * (G + 1) + G);
+		A[x].get();
 		A.swap(x, y);
 	}
 
@@ -229,7 +238,7 @@ void librarySort(SortArray& A, int a, int b, int p, int pb, int bsv, bool bw)
 				j = a + (j - a) * R;
 			}
 		}
-		int ele = A[i];
+		int ele = A[i].get();
 		int bLoc = randGapSearch(A, p + G, pEnd - (G + 1), ele);
 		int loc = rightBinSearch(A, bLoc - G, bLoc, bsv, bw);
 		if (loc == bLoc)
@@ -253,7 +262,7 @@ void librarySort(SortArray& A, int a, int b, int p, int pb, int bsv, bool bw)
 		else
 		{
 			size_t k = static_cast<size_t>(i), l = static_cast<size_t>(loc);
-			int ele = A[k];
+			int ele = A[k].get();
 			A.set(k, A[l]);
 			++i;
 			insertTo(A, ele, loc, rightBinSearch(A, bLoc - G, loc, ele, false));
@@ -314,14 +323,14 @@ void quickLibrary(SortArray& A, int a, int b, int p, int pb, int minSize, int bs
 		do
 		{
 			++i;
-			val = A[i];
+			val = A[i].get();
 		} 
 		while (i < j && val < piv);
 		val = A[0];
 		do
 		{
 			--j;
-			val = A[j];
+			val = A[j].get();
 		} 
 		while (j >= i && val > piv);
 		if (i < j) 
@@ -348,7 +357,7 @@ void QuickLibrarySort(SortArray& A)
 			++i;
 			while (i < j)
 			{
-				int ele = A[i];
+				int ele = A[i].get();
 				if (ele == piv) 
 				{ 
 					size_t x = static_cast<size_t>(i1), y = static_cast<size_t>(i);
@@ -360,7 +369,7 @@ void QuickLibrarySort(SortArray& A)
 			--j;
 			while (j > i)
 			{
-				int ele = A[j];
+				int ele = A[j].get();
 				if (ele == piv)
 				{ 
 					--j1;
@@ -383,11 +392,13 @@ void QuickLibrarySort(SortArray& A)
 				{
 					--i; --i1;
 					size_t x = static_cast<size_t>(i), y = static_cast<size_t>(i1);
+					A[x].get();
 					A.swap(x, y);
 				}
 				while (j1 < b)
 				{
 					size_t x = static_cast<size_t>(j), y = static_cast<size_t>(j1);
+					A[x].get();
 					A.swap(x, y);
 					++j; ++j1;
 				}
