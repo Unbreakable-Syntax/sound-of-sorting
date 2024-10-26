@@ -99,7 +99,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Branchless PDQ Sort"), &PDQSortBranchless, UINT_MAX, inversion_count_instrumented,
       _("Provides potential speedup over default Pattern-Defeating Quick Sort for arithmetic data.") },
     { _("Flan Sort (Quick Library Sort)"), &QuickLibrarySort, UINT_MAX, inversion_count_instrumented,
-      _("A Library Sort variant that uses Quick Sort partitioning.") },
+      _("An in-place Library Sort variant that uses Quick Sort partitioning to make space.") },
     { _("Bubble Sort"), &BubbleSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Optimized Bubble Sort"), &OptimizedBubbleSort, UINT_MAX, UINT_MAX,
