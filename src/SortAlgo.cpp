@@ -98,6 +98,8 @@ const struct AlgoEntry g_algolist[] =
           "with the fast worst case of heapsort, while achieving linear time on inputs with certain patterns.") },
     { _("Branchless PDQ Sort"), &PDQSortBranchless, UINT_MAX, inversion_count_instrumented,
       _("Provides potential speedup over default Pattern-Defeating Quick Sort for arithmetic data.") },
+    { _("Quick Library Sort"), &QuickLibrarySort, UINT_MAX, inversion_count_instrumented,
+      _("A Library Sort variant that uses Quick Sort partitioning.") },
     { _("Bubble Sort"), &BubbleSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Optimized Bubble Sort"), &OptimizedBubbleSort, UINT_MAX, UINT_MAX,

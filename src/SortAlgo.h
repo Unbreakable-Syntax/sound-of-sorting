@@ -58,6 +58,7 @@ void SandpaperSort(class SortArray& a);
 void DoubleSandpaperSort(class SortArray& a);
 void InsertionSort2(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
+void BinaryInsertSort(class SortArray& a, size_t start, size_t end);
 
 void MergeSort(class SortArray& a);
 void MergeSortIterative(class SortArray& a);
@@ -79,6 +80,7 @@ void QuickSortLL(class SortArray& a);
 void QuickSortTernaryLR(class SortArray& a);
 void QuickSortTernaryLL(class SortArray& a);
 void QuickSortDualPivot(class SortArray& a);
+void QuickLibrarySort(SortArray& a);
 
 void BubbleSort(class SortArray& a);
 void OptimizedBubbleSort(class SortArray& a);
