@@ -203,8 +203,7 @@ void librarySort(SortArray& A, int a, int b, int p, int pb, int bsv, bool bw)
 	int len = b - a;
 	if (len <= MIN_INSERT)
 	{
-		size_t x = static_cast<size_t>(a), y = static_cast<size_t>(b);
-		binaryInsert(A, x, y);
+		binaryInsert(A, a, b);
 		return;
 	}
 	int s = len;
@@ -273,19 +272,16 @@ void librarySort(SortArray& A, int a, int b, int p, int pb, int bsv, bool bw)
 
 int medianOfThree(SortArray& A, int a, int m, int b)
 {
-	size_t d = static_cast<size_t>(a);
-	size_t n = static_cast<size_t>(m);
-	size_t c = static_cast<size_t>(b);
-	if (A[n] > A[d])
+	if (A[m] > A[a])
 	{
-		if (A[n] < A[c]) { return m; }
-		if (A[d] > A[c]) { return a; }
+		if (A[m] < A[b]) { return m; }
+		if (A[a] > A[b]) { return a; }
 		else { return b; }
 	}
 	else
 	{
-		if (A[n] > A[c]) { return m; }
-		if (A[d] < A[c]) { return a; }
+		if (A[m] > A[b]) { return m; }
+		if (A[a] < A[b]) { return a; }
 		else { return b; }
 	}
 }
