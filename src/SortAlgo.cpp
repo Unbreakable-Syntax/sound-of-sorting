@@ -163,6 +163,8 @@ const struct AlgoEntry g_algolist[] =
       _("A non-comparison based sorting algorithm that uses the concept of gravitational fall to sort the elements.") },
     { _("Pancake Sort"), &PancakeSort, UINT_MAX, UINT_MAX,
       _("Sorts the array by performing a series of 'flips' to push the maximum element to the correct spot.") },
+    { _("Optimized Pancake Sort"), &OptimizedPancakeSort, UINT_MAX, UINT_MAX,
+      _("An optimized variant of Pancake Sort that performs 1/2 as many flips.") },
     { _("Adjacency Pancake Sort"), &AdjacencyPancakeSort, UINT_MAX, UINT_MAX,
       _("An improvement upon Pancake Sort, which performs only 5/3 N + O(1) flips.") },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
@@ -1967,6 +1969,105 @@ void PancakeSort(SortArray& A)
             flip(A, cur_size);
         }
     }
+}
+
+
+// ****************************************************************************
+// *** Optimized Pancake Sort
+/*
+    The MIT License (MIT)
+
+    Copyright (c) 2021-2023 aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+void flip2(SortArray& A, size_t high)
+{
+    if (high > 0) { --high; }
+    size_t low = 0; 
+    while (low < high)
+    {
+        A[low].get();
+        A.swap(low, high);
+        ++low; --high;
+    }
+}
+
+
+bool mergeFlip(SortArray& A, size_t h1, size_t h2)
+{
+    if (h1 == 1 && h2 == 1)
+    {
+        if (A[0] > A[1]) { flip2(A, 2); }
+        return true;
+    }
+    size_t n = h1 + h2, m = n / 2;
+    if (h2 < h1)
+    {
+        if (h2 < 1) { return true; }
+        size_t i = 0, j = h2;
+        while (i < j)
+        {
+            size_t k = (i + j) / 2, loc = n - 1 - k;
+            A[loc].get();
+            if (A[n - 1 - k - m] > A[loc]) { i = k + 1; }
+            else { j = k; }
+        }
+        flip2(A, n - m - i);
+        flip2(A, n - i);
+        if (mergeFlip(A, h2 - i, i + m - h2)) { flip2(A, m); }
+        flip2(A, n);
+        if (!mergeFlip(A, i, n - m - i)) { flip2(A, n - m); }
+    }
+    else
+    {
+        if (h1 < 1) { return false; }
+        size_t i = 0, j = h1;
+        while (i < j)
+        {
+            size_t k = (i + j) / 2;
+            A[k].get();
+            if (A[k] < A[k + m]) { i = k + 1; }
+            else { j = k; }
+        }
+        flip2(A, i);
+        flip2(A, i + m);
+        if (mergeFlip(A, i + m - h1, h1 - i)) { flip2(A, m); }
+        flip2(A, n);
+        if (!mergeFlip(A, n - m - i, i)) { flip2(A, n - m); }
+    }
+    return true;
+}
+
+void sortFlip(SortArray& A, size_t n)
+{
+    if (n < 2) { return; }
+    size_t h = n / 2;
+    sortFlip(A, h);
+    flip2(A, n);
+    sortFlip(A, n - h);
+    mergeFlip(A, n - h, h);
+}
+
+void OptimizedPancakeSort(SortArray& A)
+{
+    sortFlip(A, A.size());
 }
 
 void BeadSort(SortArray& A)
