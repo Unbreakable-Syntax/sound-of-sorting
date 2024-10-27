@@ -56,7 +56,7 @@ const struct AlgoEntry g_algolist[] =
       _("Also known as Exchange Sort.") },
     { _("Double Sandpaper Sort"), &DoubleSandpaperSort, UINT_MAX, UINT_MAX,
       _("A variant of Exchange Sort that sorts the array bidirectionally.") },
-    { _("Insertion Sort"), &InsertionSort2, UINT_MAX, UINT_MAX,
+    { _("Insertion Sort"), &InsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
@@ -76,6 +76,8 @@ const struct AlgoEntry g_algolist[] =
     { _("Andrey's In-Place Merge Sort"), &AndreyMergeSort, UINT_MAX, 512,
       wxEmptyString },
     { _("Proportion Extend Merge Sort"), &ProportionMergeSort, UINT_MAX, 512,
+      wxEmptyString },
+    { _("Buffer Partition Merge Sort"), &BufferPartitionMergeSort, UINT_MAX, 512,
       wxEmptyString },
     { _("Strand Sort"), &StrandSort, UINT_MAX, 512,
       wxEmptyString },
@@ -294,8 +296,34 @@ void SandpaperSort(SortArray& A)
 // ****************************************************************************
 // *** Insertion Sort
 
-// swaps every time (keeps all values visible)
+void InsertSort(SortArray& A, size_t start, size_t end)
+{
+    int begin = static_cast<int>(start);
+    for (size_t i = start; i < end; ++i)
+    {
+        A.mark(i);
+        int j = i - 1;
+        value_type key = A[i];
+        while (j >= begin && A[j] > key)
+        {
+            A.set(j + 1, A[j]);
+            --j;
+        }
+        int index = j + 1;
+        A.set(index, key);
+
+        A.unmark(i);
+    }
+}
+
+// with extra item on stack
 void InsertionSort(SortArray& A)
+{
+    InsertSort(A, 0, A.size());
+}
+
+// swaps every time (keeps all values visible)
+void InsertionSort2(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); ++i)
     {
@@ -305,28 +333,9 @@ void InsertionSort(SortArray& A)
         ssize_t j = i - 1;
         while (j >= 0 && A[j] > key)
         {
-            A.swap(j, j+1);
+            A.swap(j, j + 1);
             j--;
         }
-
-        A.unmark(i);
-    }
-}
-
-// with extra item on stack
-void InsertionSort2(SortArray& A)
-{
-    for (size_t i = 1; i < A.size(); ++i)
-    {
-        A.mark(i);
-        size_t j = i;
-        value_type key = A[i];
-        while (j >= 1 && A[j - 1] > key)
-        {
-            A.set(j, A[j - 1]);
-            --j;
-        }
-        A.set(j, key);
 
         A.unmark(i);
     }
@@ -3773,4 +3782,263 @@ void peSort(SortArray& A, size_t a, size_t m, size_t b)
 void ProportionMergeSort(SortArray& A)
 {
     peSort(A, 0, 0, A.size());
+}
+ 
+// ****************************************************************************
+// *** Buffer Partition Merge Sort
+
+/*
+ *
+    MIT License
+
+    Copyright (c) 2021 yuji, implemented by aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*
+*/
+
+void shiftBW2(SortArray& A, int a, int m, int b)
+{
+    while (m > a) 
+    {  
+        --b; --m;
+        A.swap(static_cast<size_t>(b), static_cast<size_t>(m));
+    }
+}
+
+void inPlaceMerge(SortArray& A, int a, int m, int b)
+{
+    int i = a, j = m, k = 0;
+    while (i < j && j < b)
+    {
+        if (A[i] > A[j])
+        {
+            k = j; ++k;
+            while (k < b && A[i] > A[k]) { ++k; }
+            rotate(A, static_cast<size_t>(i), static_cast<size_t>(j), static_cast<size_t>(k));
+            i += k - j;
+            j = k;
+        }
+        else { ++i; }
+    }
+}
+
+void medianOfThree(SortArray& A, int a, int b)
+{
+    int m = a + (b - 1 - a) / 2;
+    if (A[a] > A[m]) { A.swap(static_cast<size_t>(a), static_cast<size_t>(m)); }
+    if (A[m] > A[b - 1]) 
+    { 
+        A.swap(static_cast<size_t>(m), static_cast<size_t>(b - 1)); 
+        if (A[a] > A[m]) { return; }
+    }
+    A.swap(static_cast<size_t>(a), static_cast<size_t>(m));
+}
+
+void medianofMedians(SortArray& A, int a, int b, int s)
+{
+    int end = b, start = a, i, j;
+    bool ad = true;
+    while (end - start > 1)
+    {
+        j = start;
+        for (i = start; i + 2 * s <= end; i += s)
+        {
+            InsertSort(A, static_cast<size_t>(i), static_cast<size_t>(i + s));
+            A.swap(static_cast<size_t>(j), static_cast<size_t>(i + s / 2));
+            ++j;
+        }
+        if (i < end)
+        {
+            InsertSort(A, static_cast<size_t>(i), static_cast<size_t>(end));
+            int val = 0;
+            if (ad) { val = 1; }
+            A.swap(static_cast<size_t>(j), static_cast<size_t>(i + (end - val - i) / 2));
+            if ((end - i) % 2 == 0) { ad = !ad; }
+            ++j;
+        }
+        end = j;
+    }
+}
+
+int partition(SortArray& A, int a, int b)
+{
+    int i = a, j = b;
+    while (true)
+    {
+        do { ++i; }
+        while (i < j && A[i] > A[a]);
+        do { --j; }
+        while (j >= i && A[j] < A[a]);
+        if (i < j) { A.swap(static_cast<size_t>(i), static_cast<size_t>(j)); }
+        else { return j; }
+    }
+}
+
+int quickSelect(SortArray& A, int a, int b, int m)
+{
+    bool badPartition = false, mom = false;
+    int m1 = (m + b + 1) / 2;
+    while (true)
+    {
+        if (badPartition)
+        {
+            medianofMedians(A, a, b, 5);
+            mom = true;
+        }
+        else { medianOfThree(A, a, b); }
+        int p = partition(A, a, b);
+        A.swap(static_cast<size_t>(a), static_cast<size_t>(p));
+        int l = std::max(1, p - a), r = std::max(1, b - (p + 1));
+        badPartition = !mom && (l / r >= 16 || r / l >= 16);
+        if (p >= m && p < m1) { return p; }
+        else if (p < m) { a = p + 1; }
+        else { b = p; }
+    }
+}
+
+void mergeVector(SortArray& A, int a, int m, int b, int p)
+{
+    int i = a, j = m;
+    while (i < m && j < b)
+    {
+        if (A[i] <= A[j])
+        {
+            A.swap(static_cast<size_t>(p), static_cast<size_t>(i));
+            ++p; ++i;
+        }
+        else
+        {
+            A.swap(static_cast<size_t>(p), static_cast<size_t>(j));
+            ++p; ++j;
+        }
+    }
+    while (i < m) 
+    { 
+        A.swap(static_cast<size_t>(p), static_cast<size_t>(i));
+        ++p; ++i;
+    }
+    while (j < b)
+    {
+        A.swap(static_cast<size_t>(p), static_cast<size_t>(j));
+        ++p; ++j;
+    }
+}
+
+int mergeFW2(SortArray& A, int p, int a, int m, int b)
+{
+    int i = a, j = m;
+    while (i < m && j < b)
+    {
+        if (A[i] <= A[j]) 
+        { 
+            A.swap(static_cast<size_t>(p), static_cast<size_t>(i)); 
+            ++p; ++i;
+        }
+        else
+        {
+            A.swap(static_cast<size_t>(p), static_cast<size_t>(j));
+            ++p; ++j;
+        }
+    }
+    if (i < m) { return i; }
+    else { return j; }
+}
+
+int getMinLevel(int n)
+{
+    while (n >= 32) { n = (n + 3) / 4; }
+    return n;
+}
+
+void mergeSort2(SortArray& A, int a, int b, int p)
+{
+    int len = b - a;
+    if (len < 2) { return; }
+    int i, pos, j = getMinLevel(len);
+    for (i = a; i + j <= b; i += j)
+    {
+        BinaryInsertSort(A, static_cast<size_t>(i), static_cast<size_t>(i + j));
+    }
+    BinaryInsertSort(A, static_cast<size_t>(i), static_cast<size_t>(b));
+    while (j < len)
+    {
+        pos = p;
+        for (i = a; i + 2 * j <= b; i += 2 * j, pos += 2 * j)
+        { mergeVector(A, i, i + j, i + 2 * j, pos); }
+        if (i + j < b) { mergeVector(A, i, i + j, b, pos); }
+        else
+        {
+            while (i < b) 
+            {
+                A.swap(static_cast<size_t>(i), static_cast<size_t>(pos));
+                ++i; ++pos;
+            }
+        }
+        j *= 2;
+        pos = a;
+        for (i = p; i + 2 * j <= p + len; i += 2 * j, pos += 2 * j)
+        { mergeVector(A, i, i + j, i + 2 * j, pos); }
+        if (i + j < p + len) { mergeVector(A, i, i + j, p + len, pos); }
+        else
+        {
+            while (i < p + len)
+            {
+                A.swap(static_cast<size_t>(i), static_cast<size_t>(pos));
+                ++i; ++pos;
+            }
+        }
+        j *= 2;
+    }
+}
+
+void sortArray(SortArray& A, int a, int b)
+{
+    int minLvl = static_cast<int>(sqrt(b - a));
+    int m = (a + b + 1) / 2;
+    mergeSort2(A, m, b, a);
+    while (m - a > minLvl)
+    {
+        int m1 = (a + m + 1) / 2;
+        m1 = quickSelect(A, a, m, m1);
+        mergeSort2(A, m1, m, a);
+        int bSize = m1 - a;
+        int m2 = std::min(m1 + bSize, b);
+        m1 = mergeFW2(A, a, m1, m, m2);
+        while (m1 < m)
+        {
+            shiftBW2(A, m1, m, m2);
+            m1 = m2 - (m - m1);
+            a = m1 - bSize;
+            m = m2;
+            if (m == b) { break; }
+            m2 = std::min(m2 + bSize, b);
+            m1 = mergeFW2(A, a, m1, m, m2);
+        }
+        m = m1;
+        a = m1 - bSize;
+    }
+    BinaryInsertSort(A, static_cast<size_t>(a), static_cast<size_t>(m));
+    inPlaceMerge(A, a, m, b);
+}
+
+void BufferPartitionMergeSort(SortArray& A)
+{
+    sortArray(A, 0, A.size());
 }

@@ -56,7 +56,7 @@ void SelectionSort(class SortArray& a);
 void DoubleSelectionSort(class SortArray& a);
 void SandpaperSort(class SortArray& a);
 void DoubleSandpaperSort(class SortArray& a);
-void InsertionSort2(class SortArray& a);
+void InsertionSort(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
 void BinaryInsertSort(class SortArray& a, size_t start, size_t end);
 
@@ -69,6 +69,7 @@ void StrandSort(class SortArray& a);
 void NewShuffleMergeSort(class SortArray& a);
 void AndreyMergeSort(class SortArray& a);
 void ProportionMergeSort(class SortArray& a);
+void BufferPartitionMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 
