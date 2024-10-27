@@ -283,7 +283,8 @@ void SandpaperSort(SortArray& A)
     {
         for (size_t j = i + 1; j < n; ++j)
         {
-            if (A[i] > A[j]) {
+            if (A[i] > A[j]) 
+            {
                 A.swap(i, j);
             }
         }
@@ -1212,7 +1213,6 @@ void GnomeSort(SortArray& A)
             A.swap(i, i-1);
             if (i > 1) --i;
         }
-        
     }
 }
 
@@ -1949,7 +1949,7 @@ void flip(SortArray& A, size_t high)
     }
 }
 
-size_t find_max(SortArray& A, size_t n)  // Optimized find_max method, the original method performs the search in linear time
+size_t find_max(SortArray& A, size_t n)  // Optimized find_max method, searching the max element in n/2 time
 {
     size_t max = 0;
     for (size_t low = 1, hi = n; low <= hi; ++low, --hi)
@@ -2287,24 +2287,22 @@ void AdjacencyPancakeSort(SortArray& A)
                     reversal(A, keys, a, i + 1);
                     reversal(A, keys, a, k + 1);
                 }
-                else if (k + 1 < b && isAdjacent(keys, k - 1, k, N))
-                {
-                    reversal(A, keys, a, k + 1);
-                    reversal(A, keys, a, a + k - i);
-                }
                 else
                 {
                     reversal(A, keys, a, k + 1);
                     reversal(A, keys, a, a + k - i);
-                    if (j < k)
+                    if (!isAdjacent(keys, k - 1, k, N))
                     {
-                        reversal(A, keys, a, k + 1);
-                        reversal(A, keys, a, i + k - j + 1);
-                    }
-                    else
-                    {
-                        reversal(A, keys, a, j + 1);
-                        reversal(A, keys, a, a + j - k);
+                        if (j < k)
+                        {
+                            reversal(A, keys, a, k + 1);
+                            reversal(A, keys, a, i + k - j + 1);
+                        }
+                        else
+                        {
+                            reversal(A, keys, a, j + 1);
+                            reversal(A, keys, a, a + j - k);
+                        }
                     }
                 }
             }
@@ -2327,7 +2325,7 @@ void AdjacencyPancakeSort(SortArray& A)
     ++i;
     reversal(A, keys, a, i);
     reversal(A, keys, a, b);
-    reversal(A, keys, a, b - i);
+    reversal(A, keys, a, b - (i - a));
 }
 
 // ****************************************************************************
