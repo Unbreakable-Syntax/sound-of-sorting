@@ -133,6 +133,7 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Ribbon"));
     list.Add(_("Max Heapified"));
     list.Add(_("Flipped Min Heapified"));
+    list.Add(_("Bell Curve"));
 }
 
 void flippedminheapify(std::vector<ArrayItem>& m_array, int len, int root, int dist)
@@ -164,6 +165,12 @@ void heapify(std::vector<ArrayItem>& m_array, int n, int i)
         m_array[largest] = temp;
         heapify(m_array, n, largest);
     }
+}
+
+float gaussian(float x, float mean, float std_dev) 
+{
+    float exponent = -((x - mean) * (x - mean)) / (2 * std_dev * std_dev);
+    return std::exp(exponent);
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -206,7 +213,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(i + 1);
                 if (i <= half + (half / 2))
-                { ++it1; }
+                {
+                    ++it1;
+                }
             }
             std::shuffle(it1, m_array.end(), g);
             break;
@@ -218,7 +227,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(i + 1);
                 if (i <= (m_array.size() / 4))
-                { ++it; }
+                {
+                    ++it;
+                }
             }
             std::shuffle(m_array.begin(), it, g);
             break;
@@ -230,7 +241,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(i + 1);
                 if (i <= (m_array.size() / 2) - 1)
-                { ++it2; }
+                {
+                    ++it2;
+                }
             }
             std::shuffle(it2, m_array.end(), g);
             break;
@@ -242,7 +255,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(i + 1);
                 if (i <= (m_array.size() / 2) - 1)
-                { ++it3; }
+                {
+                    ++it3;
+                }
             }
             std::shuffle(m_array.begin(), it3, g);
             break;
@@ -254,7 +269,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(i + 1);
                 if (i <= (m_array.size() / 4))
-                { ++it4; }
+                {
+                    ++it4;
+                }
             }
             std::shuffle(it4, m_array.end(), g);
             break;
@@ -267,7 +284,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             {
                 m_array[i] = ArrayItem(i + 1);
                 if (i <= half + (half / 2))
-                { ++it5; }
+                {
+                    ++it5;
+                }
             }
             std::shuffle(m_array.begin(), it5, g);
             break;
@@ -562,8 +581,25 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             int n = m_array.size();
             for (int i = 0; i < n; ++i) { m_array[i] = ArrayItem(i + 1); }
             std::shuffle(m_array.begin(), m_array.end(), g);
-            for (int i = n / 2; i >= 1; --i) 
-            { flippedminheapify(m_array, n, i, n); }
+            for (int i = n / 2; i >= 1; --i)
+            {
+                flippedminheapify(m_array, n, i, n);
+            }
+            break;
+        }
+        case 24:  // Bell Curve
+        {
+            int length = m_array.size();
+            float mean = length / 2.0f;
+            float std_dev = length / 6.4f;
+            for (int i = 0; i < length; ++i) 
+            {
+                float x = static_cast<float>(i);
+                float gaussianValue = gaussian(x, mean, std_dev);
+                int item = static_cast<int>(gaussianValue * 255.0f);
+                item = std::max(0, std::min(item, 255));
+                m_array[i] = ArrayItem(item);
+            }
             break;
         }
         default:
