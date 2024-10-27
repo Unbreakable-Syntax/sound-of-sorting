@@ -189,9 +189,11 @@ const struct AlgoEntry* g_algolist_end = g_algolist + g_algolist_size;
 void DoubleSelectionSort(SortArray& A)
 {
     size_t left = 0;
-    size_t right = A.size() - 1;
-    volatile size_t max_idx = 0;
-    volatile size_t low_idx = 0;
+    size_t right = A.size() - 1, n = right;
+    volatile ssize_t max_idx = 0;
+    volatile ssize_t low_idx = 0;
+    A.watch(&max_idx, 4);
+    A.watch(&low_idx, 5);
     while (left < right)
     {
         max_idx = right;
@@ -210,10 +212,16 @@ void DoubleSelectionSort(SortArray& A)
             }
         }
         A.swap(left, low_idx);
-        if (max_idx == left) { max_idx = low_idx; }
+        ssize_t l = left;  // This removes comparison warning
+        if (max_idx == l) { max_idx = low_idx; }
         A.swap(right, max_idx);
+        if (left > 0) { A.unmark(left - 1); }
+        if (right < n) { A.unmark(right + 1); }
+        A.mark(left);
+        A.mark(right);
         ++left; --right;
     }
+    A.unwatch_all();
 }
 
 void SelectionSort(SortArray& A)
@@ -1204,6 +1212,7 @@ void GnomeSort(SortArray& A)
             A.swap(i, i-1);
             if (i > 1) --i;
         }
+        
     }
 }
 
