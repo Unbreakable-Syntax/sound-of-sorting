@@ -135,7 +135,7 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Bell Curve"));
 }
 
-void flippedminheapify(std::vector<ArrayItem>& m_array, int len, int root, int dist)
+static void flippedminheapify(std::vector<ArrayItem>& m_array, int len, int root, int dist)
 {
     while (root <= dist / 2)
     {
@@ -152,7 +152,7 @@ void flippedminheapify(std::vector<ArrayItem>& m_array, int len, int root, int d
     }
 }
 
-void heapify(std::vector<ArrayItem>& m_array, int n, int i)
+static void heapify(std::vector<ArrayItem>& m_array, int n, int i)
 {
     int largest = i, left = 2 * i + 1, right = 2 * i + 2;
     if (left < n && m_array[left] > m_array[largest]) { largest = left; }
@@ -166,7 +166,7 @@ void heapify(std::vector<ArrayItem>& m_array, int n, int i)
     }
 }
 
-float gaussian(float x, float mean, float std_dev) 
+static float gaussian(float x, float mean, float std_dev) 
 {
     float exponent = -((x - mean) * (x - mean)) / (2 * std_dev * std_dev);
     return std::exp(exponent);
