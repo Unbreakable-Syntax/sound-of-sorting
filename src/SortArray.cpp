@@ -39,6 +39,9 @@ size_t g_access_count = 0;
 
 size_t m_swaps = 0;
 
+static int scrambled_tail_intensity = 1;
+static int scrambled_head_intensity = 1;
+
 void ArrayItem::OnAccess(const ArrayItem& a)
 {
     SoundAccess(a.get_direct());
@@ -113,12 +116,8 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Ascending"));
     list.Add(_("Descending"));
     list.Add(_("Near Sorted"));
-    list.Add(_("25% Shuffled (Tail)"));
-    list.Add(_("25% Shuffled (Head)"));
-    list.Add(_("50% Shuffled (Tail)"));
-    list.Add(_("50% Shuffled (Head)"));
-    list.Add(_("75% Shuffled (Tail)"));
-    list.Add(_("75% Shuffled (Head)"));
+    list.Add(_("Scrambled Tail"));
+    list.Add(_("Scrambled Head"));
     list.Add(_("Shuffled Cubic"));
     list.Add(_("Shuffled Quintic"));
     list.Add(_("Shuffled n-2 Equal"));
@@ -205,93 +204,102 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             m_array[m_array.size() - 1] = temp1;
             break;
         }
-        case 4:  // 25% Shuffled
+        case 4:  // Scrambled Tail
         {
             std::vector<ArrayItem>::iterator it1 = m_array.begin();
-            size_t half = m_array.size() / 2;
-            for (size_t i = 0; i < m_array.size(); ++i)
+            if (scrambled_tail_intensity > 3) { scrambled_tail_intensity = 1; }
+            switch (scrambled_tail_intensity)
             {
-                m_array[i] = ArrayItem(i + 1);
-                if (i <= half + (half / 2))
+                case 1:
                 {
-                    ++it1;
+                    size_t half = m_array.size() / 2;
+                    for (size_t i = 0; i < m_array.size(); ++i)
+                    {
+                        m_array[i] = ArrayItem(i + 1);
+                        if (i <= half + (half / 2))
+                        {
+                            ++it1;
+                        }
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    for (size_t i = 0; i < m_array.size(); ++i)
+                    {
+                        m_array[i] = ArrayItem(i + 1);
+                        if (i <= (m_array.size() / 2) - 1)
+                        {
+                            ++it1;
+                        }
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    for (size_t i = 0; i < m_array.size(); ++i)
+                    {
+                        m_array[i] = ArrayItem(i + 1);
+                        if (i <= (m_array.size() / 4))
+                        {
+                            ++it1;
+                        }
+                    }
                 }
             }
+            ++scrambled_tail_intensity;
             std::shuffle(it1, m_array.end(), g);
             break;
         }
-        case 5:  // 25% Sorted, Head
+        case 5:  // Scrambled Head
         {
             std::vector<ArrayItem>::iterator it = m_array.begin();
-            for (size_t i = 0; i < m_array.size(); ++i)
+            if (scrambled_head_intensity > 3) { scrambled_head_intensity = 1; }
+            switch (scrambled_head_intensity)
             {
-                m_array[i] = ArrayItem(i + 1);
-                if (i <= (m_array.size() / 4))
+                case 1:
                 {
-                    ++it;
+                    for (size_t i = 0; i < m_array.size(); ++i)
+                    {
+                        m_array[i] = ArrayItem(i + 1);
+                        if (i <= (m_array.size() / 4))
+                        {
+                            ++it;
+                        }
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    for (size_t i = 0; i < m_array.size(); ++i)
+                    {
+                        m_array[i] = ArrayItem(i + 1);
+                        if (i <= (m_array.size() / 2) - 1)
+                        {
+                            ++it;
+                        }
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    size_t half = m_array.size() / 2;
+                    for (size_t i = 0; i < m_array.size(); ++i)
+                    {
+                        m_array[i] = ArrayItem(i + 1);
+                        if (i <= half + (half / 2))
+                        {
+                            ++it;
+                        }
+                    }
+                    break;
                 }
             }
+            ++scrambled_head_intensity;
             std::shuffle(m_array.begin(), it, g);
             break;
         }
-        case 6:  // 50% Sorted
-        {
-            std::vector<ArrayItem>::iterator it2 = m_array.begin();
-            for (size_t i = 0; i < m_array.size(); ++i)
-            {
-                m_array[i] = ArrayItem(i + 1);
-                if (i <= (m_array.size() / 2) - 1)
-                {
-                    ++it2;
-                }
-            }
-            std::shuffle(it2, m_array.end(), g);
-            break;
-        }
-        case 7:  // 50% Sorted, Head
-        {
-            std::vector<ArrayItem>::iterator it3 = m_array.begin();
-            for (size_t i = 0; i < m_array.size(); ++i)
-            {
-                m_array[i] = ArrayItem(i + 1);
-                if (i <= (m_array.size() / 2) - 1)
-                {
-                    ++it3;
-                }
-            }
-            std::shuffle(m_array.begin(), it3, g);
-            break;
-        }
-        case 8:  // 75% Shuffled
-        {
-            std::vector<ArrayItem>::iterator it4 = m_array.begin();
-            for (size_t i = 0; i < m_array.size(); ++i)
-            {
-                m_array[i] = ArrayItem(i + 1);
-                if (i <= (m_array.size() / 4))
-                {
-                    ++it4;
-                }
-            }
-            std::shuffle(it4, m_array.end(), g);
-            break;
-        }
-        case 9:  // 75% Shuffled, Head
-        {
-            std::vector<ArrayItem>::iterator it5 = m_array.begin();
-            size_t half = m_array.size() / 2;
-            for (size_t i = 0; i < m_array.size(); ++i)
-            {
-                m_array[i] = ArrayItem(i + 1);
-                if (i <= half + (half / 2))
-                {
-                    ++it5;
-                }
-            }
-            std::shuffle(m_array.begin(), it5, g);
-            break;
-        }
-        case 10:  // Cubic skew of [1,n]
+        case 6:  // Cubic skew of [1,n]
         {
             for (size_t i = 0; i < m_array.size(); ++i)
             {
@@ -308,7 +316,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             std::shuffle(m_array.begin(), m_array.end(), g);
             break;
         }
-        case 11:  // Quintic skew of [1,n]
+        case 7:  // Quintic skew of [1,n]
         {
             for (size_t i = 0; i < m_array.size(); ++i)
             {
@@ -325,7 +333,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             std::shuffle(m_array.begin(), m_array.end(), g);
             break;
         }
-        case 12:  // shuffled n-2 equal values in [1,n]
+        case 8:  // shuffled n-2 equal values in [1,n]
         {
             m_array[0] = ArrayItem(1);
             for (size_t i = 1; i < m_array.size() - 1; ++i) { m_array[i] = ArrayItem(arraysize / 2 + 1); }
@@ -333,7 +341,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             std::shuffle(m_array.begin(), m_array.end(), g);
             break;
         }
-        case 13:  // Pipe organ (1, 1, 2, 2, 1, 1)
+        case 9:  // Pipe organ (1, 1, 2, 2, 1, 1)
         {
             size_t n = m_array.size();
             if (n % 2 == 0)
@@ -364,7 +372,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 14:  // Mirrored organ (3, 2, 1, 1, 2, 3)
+        case 10:  // Mirrored organ (3, 2, 1, 1, 2, 3)
         {
             size_t n = m_array.size();
             if (n % 2 == 0)
@@ -396,7 +404,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 15:  // Wave
+        case 11:  // Wave
         {
             double n = double(m_array.size());
             double pi = 3.14159265358979323846;
@@ -409,7 +417,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 16:  // Sawtooth
+        case 12:  // Sawtooth
         {
             size_t n = m_array.size(), teeth;
             if (n % 5 == 0) { teeth = 5; }
@@ -437,7 +445,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 17:  // Reverse Sawtooth
+        case 13:  // Reverse Sawtooth
         {
             size_t n = m_array.size(), teeth;
             if (n % 5 == 0) { teeth = 5; }
@@ -465,7 +473,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 18:  // Many Similar
+        case 14:  // Many Similar
         {
             size_t group_count = 0, size = m_array.size();
             if (size % 10 == 0) { group_count = 10; }
@@ -497,7 +505,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             std::shuffle(m_array.begin(), m_array.end(), g);
             break;
         }
-        case 19:  // Quicksort Killer
+        case 15:  // Quicksort Killer
         {
             int currentLen = m_array.size();
             for (int i = 0; i < currentLen; ++i)
@@ -512,7 +520,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 20:  // Spike
+        case 16:  // Spike
         {
             size_t n = m_array.size();
             int spike, val = 1;
@@ -556,7 +564,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 21:  // Ribbon
+        case 17:  // Ribbon
         {
             int min = 1;
             int max = m_array.size();
@@ -568,7 +576,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 22:  // Max Heapified
+        case 18:  // Max Heapified
         {
             int n = m_array.size();
             for (int i = 0; i < n; ++i) { m_array[i] = ArrayItem(i + 1); }
@@ -576,7 +584,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             for (int i = n / 2 - 1; i >= 0; --i) { heapify(m_array, n, i); }
             break;
         }
-        case 23:  // Flipped Min Heapified
+        case 19:  // Flipped Min Heapified
         {
             int n = m_array.size();
             for (int i = 0; i < n; ++i) { m_array[i] = ArrayItem(i + 1); }
@@ -587,7 +595,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 24:  // Bell Curve
+        case 20:  // Bell Curve
         {
             int length = m_array.size();
             float mean = length / 2.0f;
