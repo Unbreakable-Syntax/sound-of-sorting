@@ -245,6 +245,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                             ++it1;
                         }
                     }
+                    break;
                 }
             }
             ++scrambled_tail_intensity;
