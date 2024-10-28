@@ -207,7 +207,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         case 4:  // Scrambled Tail
         {
             std::vector<ArrayItem>::iterator it1 = m_array.begin();
-            if (scrambled_tail_intensity > 3) { scrambled_tail_intensity = 1; }
+            if (scrambled_tail_intensity > 3 || scrambled_tail_intensity <= 0) { scrambled_tail_intensity = 1; }
             switch (scrambled_tail_intensity)
             {
                 case 1:
@@ -255,7 +255,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         case 5:  // Scrambled Head
         {
             std::vector<ArrayItem>::iterator it = m_array.begin();
-            if (scrambled_head_intensity > 3) { scrambled_head_intensity = 1; }
+            if (scrambled_head_intensity > 3 || scrambled_head_intensity <= 0) { scrambled_head_intensity = 1; }
             switch (scrambled_head_intensity)
             {
                 case 1:
