@@ -155,7 +155,6 @@ bool WMain::RunAlgorithm()
 
         m_thread_terminate = false;
         m_thread->Create();
-        m_thread->SetPriority(WXTHREAD_MAX_PRIORITY);
 
         g_algo_running = true;
         m_thread->Run();
