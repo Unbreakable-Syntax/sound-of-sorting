@@ -245,14 +245,15 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
 
     wxMutexLocker lock(m_array.m_mutex);
     ASSERT(lock.IsOk());
-    int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
+    const int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
     if (step > 1)
     {
-        size_t i_step = step, last = size - 1;
+        size_t i_step = 0;
+        const size_t last = size - 1;
         for (size_t i = 0; i < size; ++i)
         {
             int clr = m_array.GetIndexColor(i);
-            if (i == i_step || i == 0 || i == last)
+            if (i == i_step || i == last)
             {
                 clr = clr % numBrushes;
                 dc.SetPen(pens[clr]);
