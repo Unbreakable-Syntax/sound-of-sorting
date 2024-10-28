@@ -655,14 +655,11 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                 int value = -(static_cast<int>(returnPerlinNoise(static_cast<float>(i) / n) * n));
                 m_array[i] = ArrayItem(std::min(value, n - 1));
             }
-            ArrayItem middle = m_array[n / 2];  // Fix 0-value leftmost portion
-            int index;
-            for (index = 0; index < n - 1; ++index)
+            for (int index = 0; index < n - 1; ++index) // Fix 0-value leftmost portion
             {
                 if (m_array[index] > m_array[index + 1]) { break; }
                 else { m_array[index] = m_array[index + 1]; }
             }
-            m_array[index] = middle;
             break;
         }
         default:
