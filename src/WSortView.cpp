@@ -252,7 +252,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         for (size_t i = 0; i < size; ++i)
         {
             int clr = m_array.GetIndexColor(i);
-            if (i == i_step || i == 0)
+            if (i == i_step || i == 0 || i == (size - 1))
             {
                 clr = clr % numBrushes;
                 dc.SetPen(pens[clr]);
