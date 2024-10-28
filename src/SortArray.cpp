@@ -216,10 +216,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                     for (size_t i = 0; i < m_array.size(); ++i)
                     {
                         m_array[i] = ArrayItem(i + 1);
-                        if (i <= half + (half / 2))
-                        {
-                            ++it1;
-                        }
+                        if (i <= half + (half / 2)) { ++it1; }
                     }
                     break;
                 }
@@ -228,10 +225,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                     for (size_t i = 0; i < m_array.size(); ++i)
                     {
                         m_array[i] = ArrayItem(i + 1);
-                        if (i <= (m_array.size() / 2) - 1)
-                        {
-                            ++it1;
-                        }
+                        if (i <= (m_array.size() / 2) - 1) { ++it1; }
                     }
                     break;
                 }
@@ -240,10 +234,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                     for (size_t i = 0; i < m_array.size(); ++i)
                     {
                         m_array[i] = ArrayItem(i + 1);
-                        if (i <= (m_array.size() / 4))
-                        {
-                            ++it1;
-                        }
+                        if (i <= (m_array.size() / 4)) { ++it1; }
                     }
                     break;
                 }
@@ -263,10 +254,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                     for (size_t i = 0; i < m_array.size(); ++i)
                     {
                         m_array[i] = ArrayItem(i + 1);
-                        if (i <= (m_array.size() / 4))
-                        {
-                            ++it;
-                        }
+                        if (i <= (m_array.size() / 4)) { ++it; }
                     }
                     break;
                 }
@@ -275,10 +263,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                     for (size_t i = 0; i < m_array.size(); ++i)
                     {
                         m_array[i] = ArrayItem(i + 1);
-                        if (i <= (m_array.size() / 2) - 1)
-                        {
-                            ++it;
-                        }
+                        if (i <= (m_array.size() / 2) - 1) { ++it; }
                     }
                     break;
                 }
@@ -288,10 +273,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                     for (size_t i = 0; i < m_array.size(); ++i)
                     {
                         m_array[i] = ArrayItem(i + 1);
-                        if (i <= half + (half / 2))
-                        {
-                            ++it;
-                        }
+                        if (i <= half + (half / 2)) { ++it; }
                     }
                     break;
                 }
