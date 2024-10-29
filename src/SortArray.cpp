@@ -521,16 +521,35 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         case 14:  // Many Similar
         {
             size_t size = m_array.size(), group_count = 0, divisor = 2;
-            if (size % 5 == 0) { divisor = 5; }
+            if (size % 16 == 0) { divisor = 16; }
+            else if (size % 15 == 0) { divisor = 15; }
+            else if (size % 14 == 0) { divisor = 14; }
+            else if (size % 13 == 0) { divisor = 13; }
+            else if (size % 12 == 0) { divisor = 12; }
+            else if (size % 11 == 0) { divisor = 11; }
+            else if (size % 10 == 0) { divisor = 10; }
+            else if (size % 9 == 0) { divisor = 9; }
+            else if (size % 8 == 0) { divisor = 8; }
+            else if (size % 7 == 0) { divisor = 7; }
+            else if (size % 6 == 0) { divisor = 6; }
+            else if (size % 5 == 0) { divisor = 5; }
             else if (size % 4 == 0) { divisor = 4; }
             else if (size % 3 == 0) { divisor = 3; }
             else  // Array size is a prime number, decrement and reevaluate!
             {
                 --size;
-                if (size % 5 == 0) { divisor = 5; }
+                if (size % 16 == 0) { divisor = 16; }
+                else if (size % 15 == 0) { divisor = 15; }
+                else if (size % 14 == 0) { divisor = 14; }
+                else if (size % 12 == 0) { divisor = 12; }
+                else if (size % 10 == 0) { divisor = 10; }
+                else if (size % 6 == 0) { divisor = 6; }
+                else if (size % 8 == 0) { divisor = 8; }
+                else if (size % 5 == 0) { divisor = 5; }
                 else if (size % 4 == 0) { divisor = 4; }
             }
             group_count = size / divisor;
+            if (divisor == 2) { ++group_count; }
             size_t repeat = 1;
             int val = 1;
             for (size_t i = 0; i < size; ++i)
