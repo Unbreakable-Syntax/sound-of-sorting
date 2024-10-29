@@ -520,30 +520,22 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         case 14:  // Many Similar
         {
-            size_t group_count = 0, size = m_array.size();
-            if (size % 10 == 0) { group_count = 10; }
-            else if (size % 9 == 0) { group_count = 9; }
-            else if (size % 8 == 0) { group_count = 8; }
-            else if (size % 7 == 0) { group_count = 7; }
-            else if (size % 6 == 0) { group_count = 6; }
-            else if (size % 5 == 0) { group_count = 5; }
-            else if (size % 4 == 0) { group_count = 4; }
-            else if (size % 2 != 0) { group_count = 3; }
-            else { group_count = 2; }
-            size_t n = m_array.size();
-            if (n <= 10)
+            size_t size = m_array.size(), group_count = 0, divisor = 2;
+            if (size % 5 == 0) { divisor = 5; }
+            else if (size % 4 == 0) { divisor = 4; }
+            else if (size % 3 == 0) { divisor = 3; }
+            else  // Array size is a prime number, decrement and reevaluate!
             {
-                if (n % 2 != 0) { group_count = 3; }
-                else { group_count = 2; }
+                --size;
+                if (size % 5 == 0) { divisor = 5; }
+                else if (size % 4 == 0) { divisor = 4; }
             }
+            group_count = size / divisor;
             size_t repeat = 1;
             int val = 1;
             for (size_t i = 0; i < size; ++i)
             {
-                if (repeat > group_count)
-                {
-                    ++val; repeat = 1;
-                }
+                if (repeat > group_count) { ++val; repeat = 1; }
                 m_array[i] = ArrayItem(val);
                 ++repeat;
             }
