@@ -678,6 +678,9 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                 int val = static_cast<int>(len * curveSum(floorLog, static_cast<double>(i) / len));
                 m_array[i] = ArrayItem(val);
             }
+            int half = len / 2;
+            // Fix zero first element by expanding the left portion
+            for (int i = 0; i < half; ++i) { m_array[i] = m_array[i + 1]; }
             break;
         }
         default:
