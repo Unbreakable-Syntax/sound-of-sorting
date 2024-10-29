@@ -169,6 +169,7 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Flipped Min Heapified"));
     list.Add(_("Bell Curve"));
     list.Add(_("Perlin Noise Curve"));
+    list.Add(_("Blancmange Curve"));
 }
 
 static void flippedminheapify(std::vector<ArrayItem>& m_array, int len, int root, int dist)
@@ -212,12 +213,18 @@ static float fade(float t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-static float lerp(float t, float a, float b) {
-    return a + t * (b - a);
-}
+static float lerp(float t, float a, float b) { return a + t * (b - a); }
 
-static float gradient(int hash, float x) {
-    return (hash & 1) == 0 ? x : -x;
+static float gradient(int hash, float x) { return (hash & 1) == 0 ? x : -x; }
+
+static double triangleWave(double x) { return abs(x - (int)(x + 0.5)); }
+
+static double curve(int n, double x) { return triangleWave((1 << n) * x) / (1 << n); }
+
+static double curveSum(int n, double x) {
+    double sum = 0;
+    while (n >= 0) { sum += curve(n, x); --n; }
+    return sum;
 }
 
 static float returnPerlinNoise(float x) {
@@ -389,7 +396,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                 {
                     m_array[i] = ArrayItem(val); ++val;
                 }
-                val = n / 2;
+                val = static_cast<int>(n) / 2;
                 for (size_t i = n / 2; i <= n - 1; ++i)
                 {
                     m_array[i] = ArrayItem(val); --val;
@@ -402,7 +409,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                 {
                     m_array[i] = ArrayItem(val); ++val;
                 }
-                val = n / 2;
+                val = static_cast<int>(n) / 2;
                 for (size_t i = (n / 2) + 1; i <= n - 1; ++i)
                 {
                     m_array[i] = ArrayItem(val); --val;
@@ -415,7 +422,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             size_t n = m_array.size();
             if (n % 2 == 0)
             {
-                int val = n / 2;
+                int val = static_cast<int>(n) / 2;
                 for (size_t i = 0; i < n / 2; ++i)
                 {
                     m_array[i] = ArrayItem(val); --val;
@@ -428,7 +435,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             else
             {
-                int val = n / 2;
+                int val = static_cast<int>(n) / 2;
                 for (size_t i = 0; i <= n / 2; ++i)
                 {
                     m_array[i] = ArrayItem(val);
@@ -444,7 +451,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         case 11:  // Wave
         {
-            double n = double(m_array.size());
+            double n = static_cast<double>(m_array.size());
             double pi = 3.14159265358979323846;
             for (size_t i = 0; i < m_array.size(); ++i)
             {
@@ -545,7 +552,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         case 15:  // Quicksort Killer
         {
-            int currentLen = m_array.size();
+            int currentLen = static_cast<int>(m_array.size());
             for (int i = 0; i < currentLen; ++i)
             {
                 m_array[i] = ArrayItem(i + 1);
@@ -605,7 +612,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         case 17:  // Ribbon
         {
             int min = 1;
-            int max = m_array.size();
+            int max = static_cast<int>(m_array.size());
             for (size_t i = 0; i < m_array.size(); ++i)
             {
                 if (i % 2 == 0) { m_array[i] = ArrayItem(min); }
@@ -624,7 +631,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         case 19:  // Flipped Min Heapified
         {
-            int n = m_array.size();
+            int n = static_cast<int>(m_array.size());
             for (int i = 0; i < n; ++i) { m_array[i] = ArrayItem(i + 1); }
             std::shuffle(m_array.begin(), m_array.end(), g);
             for (int i = n / 2; i >= 1; --i)
@@ -635,7 +642,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         case 20:  // Bell Curve
         {
-            int length = m_array.size();
+            int length = static_cast<int>(m_array.size());
             float mean = length / 2.0f;
             float std_dev = length / 6.4f;
             for (int i = 0; i < length; ++i) 
@@ -648,17 +655,28 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 21:
+        case 21:  // Perlin Npise Curve
         {
-            int n = m_array.size();
+            int n = static_cast<int>(m_array.size());
             for (int i = 0; i < n; ++i) {
                 int value = -(static_cast<int>(returnPerlinNoise(static_cast<float>(i) / n) * n));
                 m_array[i] = ArrayItem(std::min(value, n - 1));
             }
-            for (int index = 0; index < n - 1; ++index) // Fix 0-value leftmost portion
+            for (int index = 0; index < n - 1; ++index) // Fix zero first element by expanding the left curve
             {
                 if (m_array[index] > m_array[index + 1]) { break; }
                 else { m_array[index] = m_array[index + 1]; }
+            }
+            break;
+        }
+        case 22:  // Blancmange Curve
+        {
+            int len = static_cast<int>(m_array.size());
+            int floorLog = static_cast<int>(log(len) / log(2));
+            for (int i = 0; i < len; ++i)
+            {
+                int val = static_cast<int>(len * curveSum(floorLog, static_cast<double>(i) / len));
+                m_array[i] = ArrayItem(val);
             }
             break;
         }
