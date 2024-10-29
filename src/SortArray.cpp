@@ -655,7 +655,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             break;
         }
-        case 21:  // Perlin Npise Curve
+        case 21:  // Perlin Noise Curve
         {
             int n = static_cast<int>(m_array.size());
             for (int i = 0; i < n; ++i) {
@@ -664,7 +664,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
             }
             for (int index = 0; index < n - 1; ++index) // Fix zero first element by expanding the left curve
             {
-                if (m_array[index] > m_array[index + 1]) { break; }
+                if (m_array[index] >= m_array[index + 1]) { break; }
                 else { m_array[index] = m_array[index + 1]; }
             }
             break;
