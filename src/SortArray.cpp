@@ -536,7 +536,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         case 14:  // Many Similar
         {
             size_t size = m_array.size(), group_count = 0, divisor = groupCount(size);
-            bool isPrime = false;
+            bool isPrime = false, isDiv2Even = false;
             // If the size is an odd number, and groupCount returns 2, then the array size is a prime number
             if (divisor == 2 && size % 2 != 0)  
             {
@@ -544,14 +544,27 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
                 isPrime = true;
                 divisor = groupCount(size);
             }
+            // If the size is an even number, and the divisor returns 2, then decrement the size by 2 to pick a good group count
+            else if (divisor == 2 && size % 2 == 0) 
+            {
+                size -= 2;
+                isDiv2Even = true; 
+                divisor = groupCount(size);
+            }
             group_count = size / divisor;
-            if (divisor == 2) { ++group_count; }
             size_t repeat = 1, i = 0;
             if (isPrime == true)
             {
                 m_array[0] = ArrayItem(1);
                 size = m_array.size();
                 ++i;
+            }
+            if (isDiv2Even == true)
+            {
+                m_array[0] = ArrayItem(1);
+                m_array[1] = ArrayItem(1);
+                i += 2;
+                size = m_array.size();
             }
             int val = 1;
             for (; i < size; ++i)
