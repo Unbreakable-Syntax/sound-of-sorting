@@ -77,6 +77,8 @@ static const int perm[512] = {
     222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
 };
 
+static const size_t groupSizes[] = { 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3 };
+
 void ArrayItem::OnAccess(const ArrayItem& a)
 {
     SoundAccess(a.get_direct());
@@ -220,6 +222,18 @@ static float gradient(int hash, float x) { return (hash & 1) == 0 ? x : -x; }
 static double triangleWave(double x) { return abs(x - (int)(x + 0.5)); }
 
 static double curve(int n, double x) { return triangleWave((1 << n) * x) / (1 << n); }
+
+static size_t groupCount(size_t size)
+{
+    size_t divisor = 2, len = sizeof(groupSizes) / sizeof(groupSizes[0]);
+    for (size_t i = 0; i < len; ++i)
+    {
+        size_t cur = groupSizes[i];
+        if (cur == size) { continue; }
+        if (size % cur == 0) { divisor = cur; break; }
+    }
+    return divisor;
+}
 
 static double curveSum(int n, double x) {
     double sum = 0;
@@ -520,39 +534,26 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         }
         case 14:  // Many Similar
         {
-            size_t size = m_array.size(), group_count = 0, divisor = 2;
-            if (size % 16 == 0) { divisor = 16; }
-            else if (size % 15 == 0) { divisor = 15; }
-            else if (size % 14 == 0) { divisor = 14; }
-            else if (size % 13 == 0) { divisor = 13; }
-            else if (size % 12 == 0) { divisor = 12; }
-            else if (size % 11 == 0) { divisor = 11; }
-            else if (size % 10 == 0) { divisor = 10; }
-            else if (size % 9 == 0) { divisor = 9; }
-            else if (size % 8 == 0) { divisor = 8; }
-            else if (size % 7 == 0) { divisor = 7; }
-            else if (size % 6 == 0) { divisor = 6; }
-            else if (size % 5 == 0) { divisor = 5; }
-            else if (size % 4 == 0) { divisor = 4; }
-            else if (size % 3 == 0) { divisor = 3; }
-            else  // Array size is a prime number, decrement and reevaluate!
+            size_t size = m_array.size(), group_count = 0, divisor = groupCount(size);
+            bool isPrime = false;
+            // If the size is an odd number, and groupCount returns 2, then the array size is a prime number
+            if (divisor == 2 && size % 2 != 0)  
             {
                 --size;
-                if (size % 16 == 0) { divisor = 16; }
-                else if (size % 15 == 0) { divisor = 15; }
-                else if (size % 14 == 0) { divisor = 14; }
-                else if (size % 12 == 0) { divisor = 12; }
-                else if (size % 10 == 0) { divisor = 10; }
-                else if (size % 6 == 0) { divisor = 6; }
-                else if (size % 8 == 0) { divisor = 8; }
-                else if (size % 5 == 0) { divisor = 5; }
-                else if (size % 4 == 0) { divisor = 4; }
+                isPrime = true;
+                divisor = groupCount(size);
             }
             group_count = size / divisor;
             if (divisor == 2) { ++group_count; }
-            size_t repeat = 1;
+            size_t repeat = 1, i = 0;
+            if (isPrime == true)
+            {
+                m_array[0] = ArrayItem(1);
+                size = m_array.size();
+                ++i;
+            }
             int val = 1;
-            for (size_t i = 0; i < size; ++i)
+            for (; i < size; ++i)
             {
                 if (repeat > group_count) { ++val; repeat = 1; }
                 m_array[i] = ArrayItem(val);
