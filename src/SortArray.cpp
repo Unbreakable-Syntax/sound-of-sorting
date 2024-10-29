@@ -225,6 +225,7 @@ static double curve(int n, double x) { return triangleWave((1 << n) * x) / (1 <<
 
 static size_t groupCount(size_t size)
 {
+    if (size <= 1) { return 2; }
     size_t divisor = 2, len = sizeof(groupSizes) / sizeof(groupSizes[0]);
     for (size_t i = 0; i < len; ++i)
     {
