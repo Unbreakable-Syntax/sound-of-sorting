@@ -42,7 +42,7 @@ size_t m_swaps = 0;
 static int scrambled_tail_intensity = 1;
 static int scrambled_head_intensity = 1;
 
-static const int perm[512] = {
+static const std::array<int, 512> perm = {
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225,
     140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148,
     247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32,
@@ -77,7 +77,8 @@ static const int perm[512] = {
     222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
 };
 
-static const size_t groupSizes[] = { 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3 };
+
+static const std::array<size_t, 32> groupSizes = { 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3 };
 
 void ArrayItem::OnAccess(const ArrayItem& a)
 {
@@ -226,7 +227,7 @@ static double curve(int n, double x) { return triangleWave((1 << n) * x) / (1 <<
 static size_t groupCount(size_t size)
 {
     if (size <= 1) { return 2; }
-    size_t divisor = 2, len = sizeof(groupSizes) / sizeof(groupSizes[0]);
+    size_t divisor = 2, len = groupSizes.size();
     for (size_t i = 0; i < len; ++i)
     {
         size_t cur = groupSizes[i];
