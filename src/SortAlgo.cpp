@@ -143,6 +143,10 @@ const struct AlgoEntry g_algolist[] =
       _("Least significant digit radix sort, performed in O(1) space.") },
     { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX, 512,
       _("Most significant digit radix sort, which permutes items in-place by walking cycles.") },
+    { _("Rotate Radix Sort (MSD)"), &RotateRadixSortMSD, UINT_MAX, 512,
+      wxEmptyString },
+    { _("Rotate Radix Sort (LSD)"), &RotateRadixSortLSD, UINT_MAX, 512,
+      wxEmptyString },
     { _("American Flag Sort"), &AmericanFlagSort, UINT_MAX, inversion_count_instrumented,
       _("American Flag Sort is an efficient, in-place variant of radix sort that distributes items into hundreds of buckets.") },
     { _("std::sort (gcc)"), &StlSort, UINT_MAX, inversion_count_instrumented,
@@ -575,14 +579,14 @@ void shiftValue(SortArray& A, size_t a, size_t b, size_t len)
     }
 }
 
-void rotate(SortArray& A, size_t a, size_t m, size_t b)
+void rotate(SortArray& A, int a, int m, int b)
 {
-    size_t l = m - a, r = b - m;
+    int l = m - a, r = b - m;
     while (l > 0 && r > 0)
     {
         if (r < l)
         {
-            shiftValue(A, m - r, m, r);
+            shiftValue(A, static_cast<size_t>(m - r), static_cast<size_t>(m), static_cast<size_t>(r));
             b -= r;
             m -= r;
             l -= r;
@@ -590,7 +594,7 @@ void rotate(SortArray& A, size_t a, size_t m, size_t b)
 
         else
         {
-            shiftValue(A, a, m, l);
+            shiftValue(A, static_cast<size_t>(a), static_cast<size_t>(m), static_cast<size_t>(l));
             a += l;
             m += l;
             r -= l;
@@ -652,7 +656,7 @@ void weaveMerge(SortArray& A, size_t a, size_t m, size_t b)
     {
         m = (a1 + e) / 2;
         size_t p = 1 << static_cast<size_t>(log(m - a1) / log(2));
-        rotate(A, m - p, m, e - p);
+        rotate(A, static_cast<int>(m - p), static_cast<int>(m), static_cast<int>(e - p));
 
         m = e - p;
         f = m - p;
@@ -1514,7 +1518,7 @@ size_t maxLog(SortArray& A, size_t n, size_t base)
     return digit;
 }
 
-int getDigit(int a, double power, int radix)
+int getDigit2(int a, double power, int radix)
 {
     double digit = (a / static_cast<int>(pow(radix, power)) % radix);
     return static_cast<int>(digit);
@@ -1550,7 +1554,7 @@ void radixMSD(SortArray& A, size_t len, size_t min, size_t max, size_t radix, do
     for (size_t i = min; i < max; ++i)
     {
         int ele = A[i].get();
-        int digit = getDigit(ele, pow, radix);
+        int digit = getDigit2(ele, pow, radix);
         registers[digit].push_back(A[i]);
     }
 
@@ -1676,7 +1680,7 @@ void InPlaceRadixSortLSD(SortArray& A)
         for (size_t i = 0; i < n; ++i)
         {
             int ele = A[pos].get();
-            int digit = getDigit(ele, (double)p, bucket);
+            int digit = getDigit2(ele, (double)p, bucket);
             if (digit == 0) { ++pos; }
             else
             {
@@ -1687,6 +1691,128 @@ void InPlaceRadixSortLSD(SortArray& A)
                 }
             }
         }
+    }
+}
+
+// ****************************************************************************
+// *** Rotate Radix MSD/LSD Sort
+
+/*
+    Copyright (c) 2020-2021 aphitorite
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+static const int base = 4;
+
+int shift(int n, int q)
+{
+    while (q > 0)
+    {
+        n /= base;
+        --q;
+    }
+    return n;
+}
+
+int binSearch(SortArray& A, int a, int b, int d, int p)
+{
+    while (a < b)
+    {
+        int m = (a + b) / 2;
+        int ele = A[m];
+        int result = static_cast<int>(getDigit2(static_cast<size_t>(ele), static_cast<size_t>(p), static_cast<size_t>(base)));
+        if (result >= d) { b = m; }
+        else { a = m + 1; }
+    }
+    return a;
+}
+
+void rotateMerge(SortArray& A, int a, int m, int b, int da, int db, int p)
+{
+    if (b - a < 2 || db - da < 2) { return; }
+    int dm = (da + db) / 2;
+    int m1 = binSearch(A, a, m, dm, p);
+    int m2 = binSearch(A, m, b, dm, p);
+    rotate(A, m1, m, m2);
+    m = m1 + (m2 - m);
+    rotateMerge(A, m, m2, b, dm, db, p);
+    rotateMerge(A, a, m1, m, da, dm, p);
+}
+
+void rotateMergeSort(SortArray& A, int a, int b, int p)
+{
+    if (b - a < 2) { return; }
+    int m = (a + b) / 2;
+    rotateMergeSort(A, a, m, p);
+    rotateMergeSort(A, m, b, p);
+    rotateMerge(A, a, m, b, 0, base, p);
+}
+
+int dist(SortArray& A, int a, int b, int p)
+{
+    rotateMergeSort(A, a, b, p);
+    return binSearch(A, a, b, 1, p);
+}
+
+void RotateRadixSortMSD(SortArray& A)
+{
+    int len = static_cast<int>(A.size());
+    int q = static_cast<int>(maxLog(A, static_cast<size_t>(len), static_cast<size_t>(base)));
+    int m = 0, i = 0, b = len;
+    while (i < len)
+    {
+        int p = 0;
+        if (b - i < 1) { p = i; }
+        else { p = dist(A, i, b, q); }
+        if (q == 0)
+        {
+            m += base;
+            int t = m / base;
+            while (t % base == 0)
+            {
+                t /= base;
+                ++q;
+            }
+            i = b;
+            while (b < len)
+            {
+                int ele = A[b];
+                if (shift(ele, q + 1) == shift(m, q + 1)) { ++b; }
+                else { break; }
+            }
+        }
+        else
+        {
+            b = p;
+            --q;
+        }
+    }
+}
+
+void RotateRadixSortLSD(SortArray& A)
+{
+    int len = static_cast<int>(A.size());
+    int max = static_cast<int>(maxLog(A, static_cast<size_t>(len), static_cast<size_t>(base)));
+    for (int i = 0; i <= max; ++i)
+    {
+        rotateMergeSort(A, 0, len, i);
     }
 }
 
@@ -3032,6 +3158,9 @@ void PairwiseIterativeSort(SortArray& A)
     See the License for the specific language governing permissions and
     limitations under the License.
 */
+
+size_t getDigit(size_t num, size_t divisor, size_t buckets) { return (num / divisor) % buckets; }
+
 int getMaxNumberOfDigits(SortArray& A, size_t len, int buckets)
 {
     int max = std::numeric_limits<int>::min();
@@ -3043,11 +3172,6 @@ int getMaxNumberOfDigits(SortArray& A, size_t len, int buckets)
         if (temp > max) { max = temp; }
     }
     return max;
-}
-
-size_t getDigit(size_t num, size_t divisor, size_t buckets)
-{
-    return (num / divisor) % buckets;
 }
 
 void sort(SortArray& A, size_t start, size_t len, size_t divisor)
