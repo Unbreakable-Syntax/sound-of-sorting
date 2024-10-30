@@ -1264,6 +1264,7 @@ void IntroIteCircleSort(SortArray& A)
 {
     size_t len = A.size(), threshold = 0, n = 1, iterations = 0;
     for (; n < len; n *= 2, ++threshold) {}
+    threshold += threshold / 2;
     threshold /= 2;
     do
     {
