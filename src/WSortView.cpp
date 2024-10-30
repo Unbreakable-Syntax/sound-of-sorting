@@ -90,7 +90,7 @@ void WSortView::DoDelay(double delay)
     while (m_stepwise)
     {
         wxSemaError se = m_step_semaphore.WaitTimeout(200);
-        if (se == wxSEMA_NO_ERROR)
+        if (se == wxSEMA_NO_ERROR || wmain->m_thread_terminate)
             break;
         // else timeout, recheck m_stepwise and loop
         wxMilliSleep(1);
