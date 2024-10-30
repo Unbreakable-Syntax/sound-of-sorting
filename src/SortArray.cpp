@@ -261,7 +261,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         case 0:  // Shuffle of [1,n]
         {
             for (size_t i = 0; i < m_array.size(); ++i) { m_array[i] = ArrayItem(i + 1); }
-            std::shuffle(m_array.begin(), m_array.end(), g);
+            std::shuffle(MyIterator(m_array, 0), MyIterator(m_array, m_array.size()), g);
             break;
         }
         case 1:  // Ascending [1,n]
