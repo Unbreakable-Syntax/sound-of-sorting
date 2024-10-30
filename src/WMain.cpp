@@ -83,7 +83,7 @@ WMain::WMain(wxWindow* parent)
     // Set the audio format
     sdlaudiospec.freq = 44100;
     sdlaudiospec.format = AUDIO_S16SYS;
-    sdlaudiospec.channels = 1;    	/* 1 = mono, 2 = stereo */
+    sdlaudiospec.channels = 2;    	/* 1 = mono, 2 = stereo */
     sdlaudiospec.samples = 4096;  	/* Good low-latency value for callback */
     sdlaudiospec.callback = SoundCallback;
     sdlaudiospec.userdata = sortview;
@@ -171,7 +171,7 @@ void WMain::AbortAlgorithm()
     if (!m_thread) return;
 
     m_thread_terminate = true;
-    if (m_thread->IsPaused()) m_thread->Resume();
+    if (m_thread->IsPaused()) { m_thread->Resume(); }
     sortview->SetStepwise(false);
 
     m_thread->Wait();
