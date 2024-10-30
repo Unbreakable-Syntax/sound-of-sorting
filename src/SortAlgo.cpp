@@ -575,6 +575,7 @@ void shiftValue(SortArray& A, size_t a, size_t b, size_t len)
 {
     for (size_t i = 0; i < len; ++i)
     {
+        A[a + i].get();
         A.swap(a + i, b + i);
     }
 }
@@ -1736,7 +1737,7 @@ int binSearch(SortArray& A, int a, int b, int d, int p)
     while (a < b)
     {
         int m = (a + b) / 2;
-        int ele = A[m];
+        int ele = A[m].get();
         int result = static_cast<int>(getDigit2(static_cast<size_t>(ele), static_cast<size_t>(p), static_cast<size_t>(base)));
         if (result >= d) { b = m; }
         else { a = m + 1; }
@@ -1793,7 +1794,7 @@ void RotateRadixSortMSD(SortArray& A)
             i = b;
             while (b < len)
             {
-                int ele = A[b];
+                int ele = A[b].get();
                 if (shift(ele, q + 1) == shift(m, q + 1)) { ++b; }
                 else { break; }
             }
