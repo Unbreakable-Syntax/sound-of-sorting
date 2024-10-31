@@ -763,13 +763,13 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
     volatile ssize_t p = QuickSortSelectPivot(A, lo, hi+1);
-    size_t p1 = static_cast<size_t>(p);
+    ssize_t p1 = p;
 
     value_type pivot = A[p1];
     A.watch(&p, 2);
 
     volatile ssize_t i = lo, j = hi;
-    size_t j1 = static_cast<size_t>(j), i1 = static_cast<size_t>(i);
+    ssize_t j1 = j, i1 = i;
     A.watch(&i, 3);
     A.watch(&j, 3);
 
@@ -778,13 +778,13 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
         while (A[i1] < pivot)
         {
             i1++;
-            i = static_cast<ssize_t>(i1);
+            i = i1;
         }
 
         while (A[j1] > pivot)
         {
             j1--;
-            j = static_cast<ssize_t>(j1);
+            j = j1;
         }
 
         if (i1 <= j1)
@@ -794,21 +794,21 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
             // follow pivot if it is swapped
             if (p1 == i1) p1 = j1;
             else if (p1 == j1) p1 = i1;
-            p = static_cast<ssize_t>(p1);
+            p = p1;
 
             i1++, j1--;
-            i = static_cast<ssize_t>(i1);
-            j = static_cast<ssize_t>(j1);
+            i = i1;
+            j = j1;
         }
     }
 
     A.unwatch_all();
 
     if (lo < j)
-        QuickSortLR(A, lo, static_cast<ssize_t>(j1));
+        QuickSortLR(A, lo, j1);
 
     if (i < hi)
-        QuickSortLR(A, static_cast<ssize_t>(i1), hi);
+        QuickSortLR(A, i1, hi);
 }
 
 void QuickSortLR(SortArray& A)
@@ -831,7 +831,7 @@ size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
     A.mark(hi-1);
 
     volatile ssize_t i = lo;
-    size_t i1 = static_cast<size_t>(i);
+    ssize_t i1 = i;
     A.watch(&i, 3);
 
     for (size_t j = lo; j < hi-1; ++j)
@@ -839,7 +839,7 @@ size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
         if (A[j] <= pivot) {
             A.swap(i1, j);
             ++i1;
-            i = static_cast<ssize_t>(i1);
+            i = i1;
         }
     }
 
@@ -887,6 +887,8 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     // schema: |p ===  |i <<< | ??? |j >>> |q === |piv
     volatile ssize_t i = lo, j = hi-1;
     volatile ssize_t p = lo, q = hi-1;
+    ssize_t i1 = i, j1 = j;
+    ssize_t p1 = p, q1 = q;
 
     A.watch(&i, 3);
     A.watch(&j, 3);
@@ -894,29 +896,35 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     for (;;)
     {
         // partition on left
-        while (i <= j && (cmp = A[i].cmp(pivot)) <= 0)
+        while (i1 <= j1 && (cmp = A[i1].cmp(pivot)) <= 0)
         {
             if (cmp == 0) {
-                A.mark(p,4);
-                A.swap(i, p++);
+                A.mark(p1,4);
+                A.swap(i1, p1++);
+                p = p1;
             }
-            ++i;
+            ++i1;
+            i = i1;
         }
 
         // partition on right
-        while (i <= j && (cmp = A[j].cmp(pivot)) >= 0)
+        while (i1 <= j1 && (cmp = A[j1].cmp(pivot)) >= 0)
         {
             if (cmp == 0) {
-                A.mark(q,4);
-                A.swap(j, q--);
+                A.mark(q1,4);
+                A.swap(j1, q1--);
+                q = q1;
             }
-            --j;
+            --j1;
+            j = j1;
         }
 
         if (i > j) break;
 
         // swap item between < > regions
-        A.swap(i++, j--);
+        A.swap(i1++, j1--);
+        i = i1;
+        j = j1;
     }
 
     // swap pivot to right place
@@ -927,16 +935,20 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     ssize_t num_greater = q - j;
 
     // swap equal ranges into center, but avoid swapping equal elements
-    j = i-1; i = i+1;
+    j1 = i1-1; i1 = i1+1;
+    i = i1;
+    j = j1;
 
     ssize_t pe = lo + std::min(p-lo, num_less);
-    for (ssize_t k = lo; k < pe; k++, j--) {
+    for (ssize_t k = lo; k < pe; k++, j1--) {
+        j = j1;
         A.swap(k,j);
         A.mark_swap(k,j);
     }
 
     ssize_t qe = hi-1 - std::min(hi-1-q, num_greater-1); // one already greater at end
-    for (ssize_t k = hi-1; k > qe; k--, i++) {
+    for (ssize_t k = hi-1; k > qe; k--, i1++) {
+        i = i1;
         A.swap(i,k);
         A.mark_swap(i,k);
     }
@@ -968,21 +980,21 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t 
     A.mark(hi-1);
 
     volatile ssize_t i = lo, k = hi-1;
-    size_t i1 = static_cast<size_t>(i), k1 = static_cast<size_t>(k);
+    ssize_t i1 = i, k1 = k;
     A.watch(&i, 3);
 
-    for (size_t j = lo; j < k1; ++j)
+    for (ssize_t j = lo; j < k1; ++j)
     {
         int cmp = A[j].cmp(pivot); // ternary comparison
         if (cmp == 0) {
             A.swap(--k1, j);
-            k = static_cast<ssize_t>(k1);
+            k = k1;
             --j; // reclassify A[j]
             A.mark(k1, 4);
         }
         else if (cmp < 0) {
             A.swap(i1++, j);
-            i = static_cast<ssize_t>(i1);
+            i = i1;
         }
     }
 
@@ -990,11 +1002,10 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t 
     // in the first step of the following swap loop.
     A.unwatch_all();
 
-    ssize_t j = i + (hi-k);
-    size_t hi1 = static_cast<size_t>(hi);
-    for (size_t s = 0; s < hi1-k1; ++s) {
-        A.swap(i1 + s, hi1 - 1 - s);
-        A.mark_swap(i1 + s, hi1 - 1 - s);
+    ssize_t j = i1 + (hi - k1);
+    for (ssize_t s = 0; s < hi - k1; ++s) {
+        A.swap(i1 + s, hi - 1 - s);
+        A.mark_swap(i1 + s, hi - 1 - s);
     }
     A.unmark_all();
 
@@ -1039,7 +1050,7 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
         volatile ssize_t l = left + 1;
         volatile ssize_t g = right - 1;
         volatile ssize_t k = l;
-        size_t l1 = static_cast<size_t>(l), g1 = static_cast<size_t>(g), k1 = static_cast<size_t>(k);
+        ssize_t l1 = l, g1 = g, k1 = k;
 
         a.watch(&l, 3);
         a.watch(&g, 3);
@@ -1050,31 +1061,31 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
             if (a[k1] < p) {
                 a.swap(k1, l1);
                 ++l1;
-                l = static_cast<ssize_t>(l1);
+                l = l1;
             }
             else if (a[k1] >= q) {
                 while (a[g1] > q && k1 < g1)
                 {
                     --g1;
-                    g = static_cast<ssize_t>(g1);
+                    g = g1;
                 }
                 a.swap(k1, g1);
                 --g1;
-                g = static_cast<ssize_t>(g1);
+                g = g1;
 
                 if (a[k1] < p) {
                     a.swap(k1, l1);
                     ++l1;
-                    l = static_cast<ssize_t>(l1);
+                    l = l1;
                 }
             }
             ++k1;
-            k = static_cast<ssize_t>(k1);
+            k = k;
         }
         --l1;
         ++g1;
-        l = static_cast<ssize_t>(l1);
-        g = static_cast<ssize_t>(g1);
+        l = l1;
+        g = g1;
         a.swap(left, l1);
         a.swap(right, g1);
 
@@ -3092,27 +3103,27 @@ void SlowSort(SortArray& A)
 void CycleSort(SortArray& array, ssize_t n)
 {
     volatile ssize_t cycleStart = 0;
-    size_t cycleStart1 = static_cast<size_t>(cycleStart), n1 = static_cast<size_t>(n);
+    ssize_t cycleStart1 = cycleStart;
     array.watch(&cycleStart, 16);
 
     volatile ssize_t rank = 0;
-    size_t rank1 = static_cast<size_t>(rank);
+    ssize_t rank1 = rank;
     array.watch(&rank, 3);
 
     // Loop through the array to find cycles to rotate.
-    for (cycleStart1 = 0; cycleStart1 < n1 - 1; ++cycleStart1)
+    for (cycleStart1 = 0; cycleStart1 < n - 1; ++cycleStart1)
     {
-        cycleStart = static_cast<ssize_t>(cycleStart1);
+        cycleStart = cycleStart1;
         value_type& item = array.get_mutable(cycleStart1);
         do {
             // Find where to put the item.
             rank1 = cycleStart1;
-            for (size_t i = cycleStart1 + 1; i < n1; ++i)
+            for (ssize_t i = cycleStart1 + 1; i < n; ++i)
             {
                 if (array[i] < item)
                 {
                     rank1++;
-                    rank = static_cast<ssize_t>(rank1);
+                    rank = rank1;
                 }
             }
 
@@ -3126,7 +3137,7 @@ void CycleSort(SortArray& array, ssize_t n)
             while (item == array[rank1])
             {
                 rank1++;
-                rank = static_cast<ssize_t>(rank1);
+                rank = rank1;
             }
 
             // Put item into right place and colorize
