@@ -762,53 +762,42 @@ wxArrayString QuickSortPivotText()
 void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
-    volatile ssize_t p = QuickSortSelectPivot(A, lo, hi+1);
-    ssize_t p1 = p;
+    volatile ssize_t p = QuickSortSelectPivot(A, lo, hi + 1);
 
-    value_type pivot = A[p1];
+    value_type pivot = A[p];
     A.watch(&p, 2);
 
     volatile ssize_t i = lo, j = hi;
-    ssize_t j1 = j, i1 = i;
     A.watch(&i, 3);
     A.watch(&j, 3);
 
-    while (i1 <= j1)
+    while (i <= j)
     {
-        while (A[i1] < pivot)
-        {
-            i1++;
-            i = i1;
-        }
+        while (A[i] < pivot)
+            i++;
 
-        while (A[j1] > pivot)
-        {
-            j1--;
-            j = j1;
-        }
+        while (A[j] > pivot)
+            j--;
 
-        if (i1 <= j1)
+        if (i <= j)
         {
-            A.swap(i1, j1);
+            A.swap(i, j);
 
             // follow pivot if it is swapped
-            if (p1 == i1) p1 = j1;
-            else if (p1 == j1) p1 = i1;
-            p = p1;
+            if (p == i) p = j;
+            else if (p == j) p = i;
 
-            i1++, j1--;
-            i = i1;
-            j = j1;
+            i++, j--;
         }
     }
 
     A.unwatch_all();
 
     if (lo < j)
-        QuickSortLR(A, lo, j1);
+        QuickSortLR(A, lo, j);
 
     if (i < hi)
-        QuickSortLR(A, i1, hi);
+        QuickSortLR(A, i, hi);
 }
 
 void QuickSortLR(SortArray& A)
@@ -827,27 +816,25 @@ size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
     size_t p = QuickSortSelectPivot(A, lo, hi);
 
     value_type pivot = A[p];
-    A.swap(p, hi-1);
-    A.mark(hi-1);
+    A.swap(p, hi - 1);
+    A.mark(hi - 1);
 
     volatile ssize_t i = lo;
-    ssize_t i1 = i;
     A.watch(&i, 3);
 
-    for (size_t j = lo; j < hi-1; ++j)
+    for (size_t j = lo; j < hi - 1; ++j)
     {
         if (A[j] <= pivot) {
-            A.swap(i1, j);
-            ++i1;
-            i = i1;
+            A.swap(i, j);
+            ++i;
         }
     }
 
-    A.swap(i1, hi-1);
-    A.unmark(hi-1);
+    A.swap(i, hi - 1);
+    A.unmark(hi - 1);
     A.unwatch_all();
 
-    return i1;
+    return i;
 }
 
 void QuickSortLL(SortArray& A, size_t lo, size_t hi)
@@ -878,17 +865,15 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     int cmp;
 
     // pick pivot and swap to back
-    ssize_t piv = QuickSortSelectPivot(A, lo, hi+1);
+    ssize_t piv = QuickSortSelectPivot(A, lo, hi + 1);
     A.swap(piv, hi);
     A.mark(hi);
 
     const value_type& pivot = A[hi];
 
     // schema: |p ===  |i <<< | ??? |j >>> |q === |piv
-    volatile ssize_t i = lo, j = hi-1;
-    volatile ssize_t p = lo, q = hi-1;
-    ssize_t i1 = i, j1 = j;
-    ssize_t p1 = p, q1 = q;
+    volatile ssize_t i = lo, j = hi - 1;
+    volatile ssize_t p = lo, q = hi - 1;
 
     A.watch(&i, 3);
     A.watch(&j, 3);
@@ -896,61 +881,51 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     for (;;)
     {
         // partition on left
-        while (i1 <= j1 && (cmp = A[i1].cmp(pivot)) <= 0)
+        while (i <= j && (cmp = A[i].cmp(pivot)) <= 0)
         {
             if (cmp == 0) {
-                A.mark(p1,4);
-                A.swap(i1, p1++);
-                p = p1;
+                A.mark(p, 4);
+                A.swap(i, p++);
             }
-            ++i1;
-            i = i1;
+            ++i;
         }
 
         // partition on right
-        while (i1 <= j1 && (cmp = A[j1].cmp(pivot)) >= 0)
+        while (i <= j && (cmp = A[j].cmp(pivot)) >= 0)
         {
             if (cmp == 0) {
-                A.mark(q1,4);
-                A.swap(j1, q1--);
-                q = q1;
+                A.mark(q, 4);
+                A.swap(j, q--);
             }
-            --j1;
-            j = j1;
+            --j;
         }
 
         if (i > j) break;
 
         // swap item between < > regions
-        A.swap(i1++, j1--);
-        i = i1;
-        j = j1;
+        A.swap(i++, j--);
     }
 
     // swap pivot to right place
-    A.swap(i,hi);
-    A.mark_swap(i,hi);
+    A.swap(i, hi);
+    A.mark_swap(i, hi);
 
     ssize_t num_less = i - p;
     ssize_t num_greater = q - j;
 
     // swap equal ranges into center, but avoid swapping equal elements
-    j1 = i1-1; i1 = i1+1;
-    i = i1;
-    j = j1;
+    j = i - 1; i = i + 1;
 
-    ssize_t pe = lo + std::min(p-lo, num_less);
-    for (ssize_t k = lo; k < pe; k++, j1--) {
-        j = j1;
-        A.swap(k,j);
-        A.mark_swap(k,j);
+    ssize_t pe = lo + std::min(p - lo, num_less);
+    for (ssize_t k = lo; k < pe; k++, j--) {
+        A.swap(k, j);
+        A.mark_swap(k, j);
     }
 
-    ssize_t qe = hi-1 - std::min(hi-1-q, num_greater-1); // one already greater at end
-    for (ssize_t k = hi-1; k > qe; k--, i1++) {
-        i = i1;
-        A.swap(i,k);
-        A.mark_swap(i,k);
+    ssize_t qe = hi - 1 - std::min(hi - 1 - q, num_greater - 1); // one already greater at end
+    for (ssize_t k = hi - 1; k > qe; k--, i++) {
+        A.swap(i, k);
+        A.mark_swap(i, k);
     }
 
     A.unwatch_all();
@@ -970,31 +945,28 @@ void QuickSortTernaryLR(SortArray& A)
 
 // by myself (Timo Bingmann)
 
-std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t hi)
+std::pair<ssize_t, ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and swap to back
     ssize_t p = QuickSortSelectPivot(A, lo, hi);
 
     value_type pivot = A[p];
-    A.swap(p, hi-1);
-    A.mark(hi-1);
+    A.swap(p, hi - 1);
+    A.mark(hi - 1);
 
-    volatile ssize_t i = lo, k = hi-1;
-    ssize_t i1 = i, k1 = k;
+    volatile ssize_t i = lo, k = hi - 1;
     A.watch(&i, 3);
 
-    for (ssize_t j = lo; j < k1; ++j)
+    for (ssize_t j = lo; j < k; ++j)
     {
         int cmp = A[j].cmp(pivot); // ternary comparison
         if (cmp == 0) {
-            A.swap(--k1, j);
-            k = k1;
+            A.swap(--k, j);
             --j; // reclassify A[j]
-            A.mark(k1, 4);
+            A.mark(k, 4);
         }
         else if (cmp < 0) {
-            A.swap(i1++, j);
-            i = i1;
+            A.swap(i++, j);
         }
     }
 
@@ -1002,14 +974,15 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t 
     // in the first step of the following swap loop.
     A.unwatch_all();
 
-    ssize_t j = i1 + (hi - k1);
-    for (ssize_t s = 0; s < hi - k1; ++s) {
-        A.swap(i1 + s, hi - 1 - s);
-        A.mark_swap(i1 + s, hi - 1 - s);
+    ssize_t j = i + (hi - k);
+
+    for (ssize_t s = 0; s < hi - k; ++s) {
+        A.swap(i + s, hi - 1 - s);
+        A.mark_swap(i + s, hi - 1 - s);
     }
     A.unmark_all();
 
-    return std::make_pair((ssize_t)i,j);
+    return std::make_pair((ssize_t)i, j);
 }
 
 void QuickSortTernaryLL(SortArray& A, size_t lo, size_t hi)
@@ -1050,51 +1023,40 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
         volatile ssize_t l = left + 1;
         volatile ssize_t g = right - 1;
         volatile ssize_t k = l;
-        ssize_t l1 = l, g1 = g, k1 = k;
 
         a.watch(&l, 3);
         a.watch(&g, 3);
         a.watch(&k, 3);
 
-        while (k1 <= g1)
+        while (k <= g)
         {
-            if (a[k1] < p) {
-                a.swap(k1, l1);
-                ++l1;
-                l = l1;
+            if (a[k] < p) {
+                a.swap(k, l);
+                ++l;
             }
-            else if (a[k1] >= q) {
-                while (a[g1] > q && k1 < g1)
-                {
-                    --g1;
-                    g = g1;
-                }
-                a.swap(k1, g1);
-                --g1;
-                g = g1;
+            else if (a[k] >= q) {
+                while (a[g] > q && k < g)  --g;
+                a.swap(k, g);
+                --g;
 
-                if (a[k1] < p) {
-                    a.swap(k1, l1);
-                    ++l1;
-                    l = l1;
+                if (a[k] < p) {
+                    a.swap(k, l);
+                    ++l;
                 }
             }
-            ++k1;
-            k = k;
+            ++k;
         }
-        --l1;
-        ++g1;
-        l = l1;
-        g = g1;
-        a.swap(left, l1);
-        a.swap(right, g1);
+        --l;
+        ++g;
+        a.swap(left, l);
+        a.swap(right, g);
 
         a.unmark_all();
         a.unwatch_all();
 
-        dualPivotYaroslavskiy(a, left, static_cast<int>(l1 - 1));
-        dualPivotYaroslavskiy(a, static_cast<int>(l1 + 1), static_cast<int>(g1 - 1));
-        dualPivotYaroslavskiy(a, static_cast<int>(g1 + 1), right);
+        dualPivotYaroslavskiy(a, left, l - 1);
+        dualPivotYaroslavskiy(a, l + 1, g - 1);
+        dualPivotYaroslavskiy(a, g + 1, right);
     }
 }
 
@@ -3103,50 +3065,41 @@ void SlowSort(SortArray& A)
 void CycleSort(SortArray& array, ssize_t n)
 {
     volatile ssize_t cycleStart = 0;
-    ssize_t cycleStart1 = cycleStart;
     array.watch(&cycleStart, 16);
 
     volatile ssize_t rank = 0;
-    ssize_t rank1 = rank;
     array.watch(&rank, 3);
 
     // Loop through the array to find cycles to rotate.
-    for (cycleStart1 = 0; cycleStart1 < n - 1; ++cycleStart1)
+    for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
     {
-        cycleStart = cycleStart1;
-        value_type& item = array.get_mutable(cycleStart1);
+        value_type& item = array.get_mutable(cycleStart);
+
         do {
             // Find where to put the item.
-            rank1 = cycleStart1;
-            for (ssize_t i = cycleStart1 + 1; i < n; ++i)
+            rank = cycleStart;
+            for (ssize_t i = cycleStart + 1; i < n; ++i)
             {
                 if (array[i] < item)
-                {
-                    rank1++;
-                    rank = rank1;
-                }
+                    rank++;
             }
 
             // If the item is already there, this is a 1-cycle.
-            if (rank1 == cycleStart1) {
-                array.mark(rank1, 2);
+            if (rank == cycleStart) {
+                array.mark(rank, 2);
                 break;
             }
 
             // Otherwise, put the item after any duplicates.
-            while (item == array[rank1])
-            {
-                rank1++;
-                rank = rank1;
-            }
+            while (item == array[rank])
+                rank++;
 
             // Put item into right place and colorize
-            counted_swap(array.get_mutable(rank1), item);
-            array.mark(rank1, 2);
+            std::swap(array.get_mutable(rank), item);
+            array.mark(rank, 2);
 
             // Continue for rest of the cycle.
-        }
-        while (rank1 != cycleStart1);
+        } while (rank != cycleStart);
     }
 
     array.unwatch_all();
