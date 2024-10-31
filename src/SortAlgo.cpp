@@ -179,6 +179,8 @@ const struct AlgoEntry g_algolist[] =
       _("An optimized variant of Pancake Sort that performs 1/2 as many flips.") },
     { _("Adjacency Pancake Sort"), &AdjacencyPancakeSort, UINT_MAX, UINT_MAX,
       _("An improvement upon Pancake Sort, which performs only 5/3 N + O(1) flips.") },
+    { _("Time Sort"), &TimeSortMul10, 10, UINT_MAX,
+      wxEmptyString },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
@@ -763,41 +765,52 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
     volatile ssize_t p = QuickSortSelectPivot(A, lo, hi+1);
+    size_t p1 = static_cast<size_t>(p);
 
-    value_type pivot = A[p];
+    value_type pivot = A[p1];
     A.watch(&p, 2);
 
     volatile ssize_t i = lo, j = hi;
+    size_t j1 = static_cast<size_t>(j), i1 = static_cast<size_t>(i);
     A.watch(&i, 3);
     A.watch(&j, 3);
 
-    while (i <= j)
+    while (i1 <= j1)
     {
-        while (A[i] < pivot)
-            i++;
-
-        while (A[j] > pivot)
-            j--;
-
-        if (i <= j)
+        while (A[i1] < pivot)
         {
-            A.swap(i,j);
+            i1++;
+            i = static_cast<ssize_t>(i1);
+        }
+
+        while (A[j1] > pivot)
+        {
+            j1--;
+            j = static_cast<ssize_t>(j1);
+        }
+
+        if (i1 <= j1)
+        {
+            A.swap(i1, j1);
 
             // follow pivot if it is swapped
-            if (p == i) p = j;
-            else if (p == j) p = i;
+            if (p1 == i1) p1 = j1;
+            else if (p1 == j1) p1 = i1;
+            p = static_cast<ssize_t>(p1);
 
-            i++, j--;
+            i1++, j1--;
+            i = static_cast<ssize_t>(i1);
+            j = static_cast<ssize_t>(j1);
         }
     }
 
     A.unwatch_all();
 
     if (lo < j)
-        QuickSortLR(A, lo, j);
+        QuickSortLR(A, lo, static_cast<ssize_t>(j1));
 
     if (i < hi)
-        QuickSortLR(A, i, hi);
+        QuickSortLR(A, static_cast<ssize_t>(i1), hi);
 }
 
 void QuickSortLR(SortArray& A)
@@ -820,21 +833,23 @@ size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
     A.mark(hi-1);
 
     volatile ssize_t i = lo;
+    size_t i1 = static_cast<size_t>(i);
     A.watch(&i, 3);
 
     for (size_t j = lo; j < hi-1; ++j)
     {
         if (A[j] <= pivot) {
-            A.swap(i, j);
-            ++i;
+            A.swap(i1, j);
+            ++i1;
+            i = static_cast<ssize_t>(i1);
         }
     }
 
-    A.swap(i, hi-1);
+    A.swap(i1, hi-1);
     A.unmark(hi-1);
     A.unwatch_all();
 
-    return i;
+    return i1;
 }
 
 void QuickSortLL(SortArray& A, size_t lo, size_t hi)
@@ -955,18 +970,21 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t 
     A.mark(hi-1);
 
     volatile ssize_t i = lo, k = hi-1;
+    size_t i1 = static_cast<size_t>(i), k1 = static_cast<size_t>(k);
     A.watch(&i, 3);
 
-    for (ssize_t j = lo; j < k; ++j)
+    for (size_t j = lo; j < k1; ++j)
     {
         int cmp = A[j].cmp(pivot); // ternary comparison
         if (cmp == 0) {
-            A.swap(--k, j);
+            A.swap(--k1, j);
+            k = static_cast<ssize_t>(k1);
             --j; // reclassify A[j]
-            A.mark(k,4);
+            A.mark(k1, 4);
         }
         else if (cmp < 0) {
-            A.swap(i++, j);
+            A.swap(i1++, j);
+            i = static_cast<ssize_t>(i1);
         }
     }
 
@@ -975,10 +993,10 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t 
     A.unwatch_all();
 
     ssize_t j = i + (hi-k);
-
-    for (ssize_t s = 0; s < hi-k; ++s) {
-        A.swap(i+s, hi-1-s);
-        A.mark_swap(i+s, hi-1-s);
+    size_t hi1 = static_cast<size_t>(hi);
+    for (size_t s = 0; s < hi1-k1; ++s) {
+        A.swap(i1 + s, hi1 - 1 - s);
+        A.mark_swap(i1 + s, hi1 - 1 - s);
     }
     A.unmark_all();
 
@@ -1023,40 +1041,51 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
         volatile ssize_t l = left + 1;
         volatile ssize_t g = right - 1;
         volatile ssize_t k = l;
+        size_t l1 = static_cast<size_t>(l), g1 = static_cast<size_t>(g), k1 = static_cast<size_t>(k);
 
         a.watch(&l, 3);
         a.watch(&g, 3);
         a.watch(&k, 3);
 
-        while (k <= g)
+        while (k1 <= g1)
         {
-            if (a[k] < p) {
-                a.swap(k, l);
-                ++l;
+            if (a[k1] < p) {
+                a.swap(k1, l1);
+                ++l1;
+                l = static_cast<ssize_t>(l1);
             }
-            else if (a[k] >= q) {
-                while (a[g] > q && k < g)  --g;
-                a.swap(k, g);
-                --g;
+            else if (a[k1] >= q) {
+                while (a[g1] > q && k1 < g1)
+                {
+                    --g1;
+                    g = static_cast<ssize_t>(g1);
+                }
+                a.swap(k1, g1);
+                --g1;
+                g = static_cast<ssize_t>(g1);
 
-                if (a[k] < p) {
-                    a.swap(k, l);
-                    ++l;
+                if (a[k1] < p) {
+                    a.swap(k1, l1);
+                    ++l1;
+                    l = static_cast<ssize_t>(l1);
                 }
             }
-            ++k;
+            ++k1;
+            k = static_cast<ssize_t>(k1);
         }
-        --l;
-        ++g;
-        a.swap(left, l);
-        a.swap(right, g);
+        --l1;
+        ++g1;
+        l = static_cast<ssize_t>(l1);
+        g = static_cast<ssize_t>(g1);
+        a.swap(left, l1);
+        a.swap(right, g1);
 
         a.unmark_all();
         a.unwatch_all();
 
-        dualPivotYaroslavskiy(a, left, l - 1);
-        dualPivotYaroslavskiy(a, l + 1, g - 1);
-        dualPivotYaroslavskiy(a, g + 1, right);
+        dualPivotYaroslavskiy(a, left, static_cast<int>(l1 - 1));
+        dualPivotYaroslavskiy(a, static_cast<int>(l1 + 1), static_cast<int>(g1 - 1));
+        dualPivotYaroslavskiy(a, static_cast<int>(g1 + 1), right);
     }
 }
 
@@ -3065,42 +3094,50 @@ void SlowSort(SortArray& A)
 void CycleSort(SortArray& array, ssize_t n)
 {
     volatile ssize_t cycleStart = 0;
+    size_t cycleStart1 = static_cast<size_t>(cycleStart), n1 = static_cast<size_t>(n);
     array.watch(&cycleStart, 16);
 
     volatile ssize_t rank = 0;
+    size_t rank1 = static_cast<size_t>(rank);
     array.watch(&rank, 3);
 
     // Loop through the array to find cycles to rotate.
-    for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
+    for (cycleStart1 = 0; cycleStart1 < n1 - 1; ++cycleStart1)
     {
-        value_type& item = array.get_mutable(cycleStart);
-
+        cycleStart = static_cast<ssize_t>(cycleStart1);
+        value_type& item = array.get_mutable(cycleStart1);
         do {
             // Find where to put the item.
-            rank = cycleStart;
-            for (ssize_t i = cycleStart + 1; i < n; ++i)
+            rank1 = cycleStart1;
+            for (size_t i = cycleStart1 + 1; i < n1; ++i)
             {
                 if (array[i] < item)
-                    rank++;
+                {
+                    rank1++;
+                    rank = static_cast<ssize_t>(rank1);
+                }
             }
 
             // If the item is already there, this is a 1-cycle.
-            if (rank == cycleStart) {
-                array.mark(rank, 2);
+            if (rank1 == cycleStart1) {
+                array.mark(rank1, 2);
                 break;
             }
 
             // Otherwise, put the item after any duplicates.
-            while (item == array[rank])
-                rank++;
+            while (item == array[rank1])
+            {
+                rank1++;
+                rank = static_cast<ssize_t>(rank1);
+            }
 
             // Put item into right place and colorize
-            counted_swap(array.get_mutable(rank), item);
-            array.mark(rank, 2);
+            counted_swap(array.get_mutable(rank1), item);
+            array.mark(rank1, 2);
 
             // Continue for rest of the cycle.
         }
-        while (rank != cycleStart);
+        while (rank1 != cycleStart1);
     }
 
     array.unwatch_all();
