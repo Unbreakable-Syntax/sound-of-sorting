@@ -115,7 +115,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Circle Sort"), &CircleSort, UINT_MAX, UINT_MAX,
       _("Circle Sort is a recursive sorting algorithm that works by comparing and swapping elements in a circular manner.") },
     { _("Iterative Circle Sort"), &CircleSort2, UINT_MAX, UINT_MAX,
-      _("A variant of Circle Sort that avoids recursion overhead.") },
+      _("A variant of Circle Sort that has less recursion overhead.") },
     { _("Introspective Circle Sort"), &IntroCircleSort, UINT_MAX, UINT_MAX,
       _("A variant of Circle Sort that switches to Insertion Sort when a certain threshold has been reached.") },
     { _("Introspective Iterative Circle Sort"), &IntroIteCircleSort, UINT_MAX, UINT_MAX,
@@ -1181,45 +1181,49 @@ void DualCocktailShakerSort(SortArray& A)
 // ****************************************************************************
 // *** Circle Sort
 
-bool CircleSortRec(SortArray& A, size_t low, size_t high)
+bool CircleSortRec(SortArray& A, size_t low, size_t high, size_t len)
 {
     bool swapped = false;
     if (low == high) { return false; }
     size_t lo = low, hi = high;
     while (lo < hi)
     {
-        if (A[lo] > A[hi])
+        if (hi < len && A[lo] > A[hi])
         {
             A.swap(lo, hi);
             swapped = true;
         }
         ++lo; --hi;
     }
-    if (lo == hi)
-    {
-        if (A[lo] > A[hi + 1])
-        {
-            A.swap(lo, hi + 1);
-            swapped = true;
-        }
-    }
+
     size_t mid = (high - low) / 2;
-    bool firstHalf = CircleSortRec(A, low, low + mid);
-    bool secondHalf = CircleSortRec(A, low + mid + 1, high);
+    bool firstHalf = CircleSortRec(A, low, low + mid, len);
+    bool secondHalf = false;
+    if (low + mid + 1 < len)
+    {
+        secondHalf = CircleSortRec(A, low + mid + 1, high, len);
+    }
     return swapped || firstHalf || secondHalf;
 }
 
-bool CircleSortIte(SortArray& A, size_t length)
+void CircleSort(SortArray& A)
+{
+    size_t len = A.size(), n = 1;
+    for (; n < len; n *= 2) {}
+    while (CircleSortRec(A, 0, n - 1, len)) {}
+}
+
+bool CircleSortIte(SortArray& A, size_t length, size_t arr_len)
 {
     bool swapped = false;
     for (size_t gap = length / 2; gap > 0; gap /= 2)
     {
-        for (size_t start = 0; start + gap < length; start += 2 * gap - 1)
+        for (size_t start = 0; start + gap < arr_len; start += 2 * gap)
         {
             size_t high = start + 2 * gap - 1, low = start;
             while (low < high)
             {
-                if (high < length && A[low] > A[high])
+                if (high < arr_len && A[low] > A[high])
                 {
                     A.swap(low, high);
                     swapped = true;
@@ -1231,16 +1235,11 @@ bool CircleSortIte(SortArray& A, size_t length)
     return swapped;
 }
 
-void CircleSort(SortArray& A)
-{
-    size_t n = A.size();
-    while (CircleSortRec(A, 0, n - 1)) {}
-}
-
 void CircleSort2(SortArray& A)
 {
-    size_t len = A.size();
-    while (CircleSortIte(A, len)) {}
+    size_t len = A.size(), n = 1;
+    for (; n < len; n *= 2) {}
+    while (CircleSortIte(A, n, len)) {}
 }
 
 void IntroCircleSort(SortArray& A)
@@ -1257,14 +1256,13 @@ void IntroCircleSort(SortArray& A)
             break;
         }
     } 
-    while (CircleSortRec(A, 0, len - 1));
+    while (CircleSortRec(A, 0, n - 1, len));
 }
 
 void IntroIteCircleSort(SortArray& A)
 {
     size_t len = A.size(), threshold = 0, n = 1, iterations = 0;
     for (; n < len; n *= 2, ++threshold) {}
-    threshold += threshold / 2;
     threshold /= 2;
     do
     {
@@ -1274,7 +1272,7 @@ void IntroIteCircleSort(SortArray& A)
             InsertSort(A, 0, len);
             break;
         }
-    } while (CircleSortIte(A, len));
+    } while (CircleSortIte(A, n, len));
 }
 
 // ****************************************************************************
