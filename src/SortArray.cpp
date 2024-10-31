@@ -215,7 +215,7 @@ static float fade(float t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-static float lerp(float t, float a, float b) { return a + t * (b - a); }
+static float mlerp(float t, float a, float b) { return a + t * (b - a); }
 
 static float gradient(int hash, float x) { return (hash & 1) == 0 ? x : -x; }
 
@@ -246,7 +246,7 @@ static float returnPerlinNoise(float x) {
     int X = static_cast<int>(floor(x)) & 255;
     x -= floor(x);
     float u = fade(x);
-    return lerp(u, gradient(perm[X], x), gradient(perm[X + 1], x - 1)) * 2;
+    return mlerp(u, gradient(perm[X], x), gradient(perm[X + 1], x - 1)) * 2;
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
