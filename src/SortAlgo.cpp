@@ -1251,7 +1251,7 @@ void IntroCircleSort(SortArray& A)
         ++iterations;
         if (iterations >= threshold)
         {
-            BinaryInsertSort(A, 0, len);
+            InsertSort(A, 0, len);
             break;
         }
     } 
@@ -1268,7 +1268,7 @@ void IntroIteCircleSort(SortArray& A)
         ++iterations;
         if (iterations >= threshold)
         {
-            BinaryInsertSort(A, 0, len);
+            InsertSort(A, 0, len);
             break;
         }
     } while (CircleSortIte(A, n, len));
