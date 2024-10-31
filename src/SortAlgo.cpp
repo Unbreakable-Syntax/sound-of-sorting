@@ -179,8 +179,6 @@ const struct AlgoEntry g_algolist[] =
       _("An optimized variant of Pancake Sort that performs 1/2 as many flips.") },
     { _("Adjacency Pancake Sort"), &AdjacencyPancakeSort, UINT_MAX, UINT_MAX,
       _("An improvement upon Pancake Sort, which performs only 5/3 N + O(1) flips.") },
-    { _("Time Sort"), &TimeSortMul10, 10, UINT_MAX,
-      wxEmptyString },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
