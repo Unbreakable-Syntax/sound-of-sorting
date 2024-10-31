@@ -93,6 +93,9 @@ void OptimizedGnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
 void TargetedBubbleSort(class SortArray& a);
 void CircleSort(class SortArray& a);
+void CircleSort2(class SortArray& a);
+void IntroCircleSort(class SortArray& a);
+void IntroIteCircleSort(class SortArray& a);
 
 void ShellSort(SortArray& a);
 void HeapSort(class SortArray& a);

@@ -1195,7 +1195,6 @@ bool CircleSortRec(SortArray& A, size_t low, size_t high, size_t len)
         }
         ++lo; --hi;
     }
-
     size_t mid = (high - low) / 2;
     bool firstHalf = CircleSortRec(A, low, low + mid, len);
     bool secondHalf = false;
@@ -1252,7 +1251,7 @@ void IntroCircleSort(SortArray& A)
         ++iterations;
         if (iterations >= threshold)
         {
-            InsertSort(A, 0, len);
+            BinaryInsertSort(A, 0, len);
             break;
         }
     } 
@@ -1269,7 +1268,7 @@ void IntroIteCircleSort(SortArray& A)
         ++iterations;
         if (iterations >= threshold)
         {
-            InsertSort(A, 0, len);
+            BinaryInsertSort(A, 0, len);
             break;
         }
     } while (CircleSortIte(A, n, len));
