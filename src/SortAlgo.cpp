@@ -772,7 +772,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         else if (p == piv_lo_mid) { return lo_mid; }
         else if (p == piv_mid) { return mid; }
         else if (p == piv_mid_hi) { return mid_hi; }
-        else if (p == piv_hi) { return high; }
+        else { return high; }
     }
 
     if (g_quicksort_pivot == PIVOT_NINTHER)
