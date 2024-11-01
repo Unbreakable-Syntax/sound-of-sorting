@@ -708,6 +708,18 @@ void WeaveMergeSort(SortArray& A)
 
 QuickSortPivotType g_quicksort_pivot = PIVOT_FIRST;
 
+ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_t hi)
+{
+    // cases if two are equal
+    if (A[lo] == A[mid]) return lo;
+    if (A[lo] == A[hi - 1] || A[mid] == A[hi - 1]) return hi - 1;
+
+    // cases if three are different
+    return A[lo] < A[mid]
+        ? (A[mid] < A[hi - 1] ? mid : (A[lo] < A[hi - 1] ? hi - 1 : lo))
+        : (A[mid] > A[hi - 1] ? mid : (A[lo] < A[hi - 1] ? lo : hi - 1));
+}
+
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
 ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
@@ -727,15 +739,17 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
     if (g_quicksort_pivot == PIVOT_MEDIAN3)
     {
         ssize_t mid = (lo + hi) / 2;
+        return SingleMedianOfThree(A, lo, mid, hi);
+    }
 
-        // cases if two are equal
-        if (A[lo] == A[mid]) return lo;
-        if (A[lo] == A[hi-1] || A[mid] == A[hi-1]) return hi-1;
-
-        // cases if three are different
-        return A[lo] < A[mid]
-            ? (A[mid] < A[hi-1] ? mid : (A[lo] < A[hi-1] ? hi-1 : lo))
-            : (A[mid] > A[hi-1] ? mid : (A[lo] < A[hi-1] ? lo : hi-1));
+    if (g_quicksort_pivot == PIVOT_NINTHER)
+    {
+        if (A.size() < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+        ssize_t segment_size = (hi - lo) / 9;
+        ssize_t g1 = SingleMedianOfThree(A, lo, lo + segment_size, (lo + segment_size * 2) + 1);
+        ssize_t g2 = SingleMedianOfThree(A, lo + 3 * segment_size, lo + 4 * segment_size, (lo + 5 * segment_size) + 1);
+        ssize_t g3 = SingleMedianOfThree(A, lo + 6 * segment_size, lo + 7 * segment_size, (lo + 8 * segment_size) + 1);
+        return SingleMedianOfThree(A, g1, g2, g3);
     }
 
     return lo;
@@ -750,6 +764,7 @@ wxArrayString QuickSortPivotText()
     sl.Add( _("Middle Item") );
     sl.Add( _("Random Item") );
     sl.Add( _("Median of Three") );
+    sl.Add( _("Ninthers"));
 
     return sl;
 }
