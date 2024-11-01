@@ -760,7 +760,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
 
     if (g_quicksort_pivot == PIVOT_MEDIAN5)
     {
-        if (A.size() < 5) { SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+        if (A.size() < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
         ssize_t segment = (hi - lo) / 5;
         ssize_t lo_mid = lo + segment, mid = lo + 2 * segment, mid_hi = lo + 3 * segment, high = lo + 4 * segment;
         value_type piv_lo = A[lo], piv_lo_mid = A[lo_mid], piv_mid = A[mid], piv_mid_hi = A[mid_hi], piv_hi = A[high];
