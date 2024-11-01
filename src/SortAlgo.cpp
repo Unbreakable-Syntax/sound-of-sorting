@@ -39,6 +39,7 @@
 #include <inttypes.h>
 #include <random>
 #include <vector>
+#include <array>
 #include <cmath>
 
 typedef ArrayItem value_type;
@@ -720,6 +721,21 @@ ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_t hi)
         : (A[mid] > A[hi - 1] ? mid : (A[lo] < A[hi - 1] ? lo : hi - 1));
 }
 
+void PivotInsertionSort(std::array<value_type, 5>& arr)
+{
+    for (size_t i = 1; i < arr.size(); ++i)
+    {
+        value_type key = arr[i];
+        size_t j = i;
+        while (j >= 1 && arr[j - 1] > key)
+        {
+            arr[j] = arr[j - 1];
+            --j;
+        }
+        arr[j] = key;
+    }
+}
+
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
 ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
@@ -740,6 +756,23 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
     {
         ssize_t mid = (lo + hi) / 2;
         return SingleMedianOfThree(A, lo, mid, hi);
+    }
+
+    if (g_quicksort_pivot == PIVOT_MEDIAN5)
+    {
+        if (A.size() < 5) { SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+        ssize_t segment = (hi - lo) / 5;
+        ssize_t lo_mid = lo + segment, mid = lo + 2 * segment, mid_hi = lo + 3 * segment, high = lo + 4 * segment;
+        value_type piv_lo = A[lo], piv_lo_mid = A[lo_mid], piv_mid = A[mid], piv_mid_hi = A[mid_hi], piv_hi = A[high];
+        std::array<value_type, 5> nums = { piv_lo, piv_lo_mid, piv_mid, piv_mid_hi, piv_hi };
+        PivotInsertionSort(nums);
+        value_type p = nums[2];  // If Quick Sort asks for the pivot *element*, then this should be returned immediately
+        // Otherwise, check what index does p belong to
+        if (p == piv_lo) { return lo; }
+        else if (p == piv_lo_mid) { return lo_mid; }
+        else if (p == piv_mid) { return mid; }
+        else if (p == piv_mid_hi) { return mid_hi; }
+        else if (p == piv_hi) { return high; }
     }
 
     if (g_quicksort_pivot == PIVOT_NINTHER)
@@ -764,7 +797,8 @@ wxArrayString QuickSortPivotText()
     sl.Add( _("Middle Item") );
     sl.Add( _("Random Item") );
     sl.Add( _("Median of Three") );
-    sl.Add( _("Ninthers"));
+    sl.Add( _("Median of Five") );
+    sl.Add( _("Ninther"));
 
     return sl;
 }
@@ -883,7 +917,7 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     ssize_t piv = QuickSortSelectPivot(A, lo, hi + 1);
     A.swap(piv, hi);
     A.mark(hi);
-
+    
     const value_type& pivot = A[hi];
 
     // schema: |p ===  |i <<< | ??? |j >>> |q === |piv

@@ -73,7 +73,7 @@ void BufferPartitionMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 
-enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3, PIVOT_NINTHER };
+enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3, PIVOT_MEDIAN5, PIVOT_NINTHER };
 extern QuickSortPivotType g_quicksort_pivot;
 
 void QuickSortLR(class SortArray& a);
