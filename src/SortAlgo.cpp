@@ -901,6 +901,26 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             ssize_t g3 = SingleMedianOfThree(A, lo + 6 * segment_size, lo + 7 * segment_size, (lo + 8 * segment_size) + 1);
             return SingleMedianOfThree(A, g1, g2, g3);
         }
+        case PIVOT_RANDOMNINTHER:
+        {
+            if (lo > hi)
+            {
+                ssize_t temp = lo;
+                lo = hi;
+                hi = temp;
+            }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
+            if (A.size() < 9)
+            {
+                return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
+            }
+            ssize_t lo1 = dist(gen1), lo2 = dist(gen1), lo3 = dist(gen1), lo4 = dist(gen1), lo5 = dist(gen1);
+            ssize_t lo6 = dist(gen1), lo7 = dist(gen1), lo8 = dist(gen1), lo9 = dist(gen1);
+            ssize_t g1 = SingleMedianOfThree(A, lo1, lo2, lo3 + 1);
+            ssize_t g2 = SingleMedianOfThree(A, lo4, lo5, lo6 + 1);
+            ssize_t g3 = SingleMedianOfThree(A, lo7, lo8, lo9 + 1);
+            return SingleMedianOfThree(A, g1, g2, g3 + 1);
+        }
         case PIVOT_MEDIAN9RANDOM:
         {
             if (lo > hi)
@@ -953,6 +973,7 @@ wxArrayString QuickSortPivotText()
     sl.Add(_("Median of Seven"));
     sl.Add(_("Random Median of Seven"));
     sl.Add(_("Ninther"));
+    sl.Add(_("Random Ninther"));
     sl.Add(_("Random Median of Nine"));
     return sl;
 }
