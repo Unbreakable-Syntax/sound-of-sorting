@@ -822,11 +822,11 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 lo = hi;
                 hi = temp;
             }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             if (hi - lo < 5)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
-            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             std::array<ssize_t, 5> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
             PivotInsertionSort5(A, samples);
             return samples[2];
@@ -847,11 +847,11 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 lo = hi;
                 hi = temp;
             }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             if (hi - lo < 7)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
-            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             std::array<ssize_t, 7> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
             PivotInsertionSort7(A, samples);
             return samples[3];
@@ -873,11 +873,11 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 lo = hi;
                 hi = temp;
             }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             if (hi - lo < 9)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
-            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             ssize_t lo1 = dist(gen1), lo2 = dist(gen1), lo3 = dist(gen1), lo4 = dist(gen1), lo5 = dist(gen1);
             ssize_t lo6 = dist(gen1), lo7 = dist(gen1), lo8 = dist(gen1), lo9 = dist(gen1);
             ssize_t g1 = SingleMedianOfThree(A, lo1, lo2, lo3 + 1);
@@ -901,11 +901,11 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 lo = hi;
                 hi = temp;
             }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             if (hi - lo < 9)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
-            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
             std::array<ssize_t, 9> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
             PivotInsertionSort9(A, samples);
             return samples[4];
