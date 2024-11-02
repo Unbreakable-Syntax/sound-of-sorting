@@ -736,70 +736,224 @@ void PivotInsertionSort5(std::array<value_type, 5>& arr)
     }
 }
 
+void PivotInsertionSort7(std::array<value_type, 7>& arr)
+{
+    for (size_t i = 1; i < arr.size(); ++i)
+    {
+        value_type key = arr[i];
+        size_t j = i;
+        while (j > 0 && arr[j - 1] > key)
+        {
+            arr[j] = arr[j - 1];
+            --j;
+        }
+        arr[j] = key;
+    }
+}
+
+void PivotInsertionSort9(std::array<value_type, 9>& arr)
+{
+    for (size_t i = 1; i < arr.size(); ++i)
+    {
+        value_type key = arr[i];
+        size_t j = i;
+        while (j > 0 && arr[j - 1] > key)
+        {
+            arr[j] = arr[j - 1];
+            --j;
+        }
+        arr[j] = key;
+    }
+}
+
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
+std::random_device rd1;  // Seed generator
+std::mt19937 gen1(rd1()); // Mersenne Twister engine
 ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
 {
-    if (g_quicksort_pivot == PIVOT_FIRST)
-        return lo;
-
-    if (g_quicksort_pivot == PIVOT_LAST)
-        return hi-1;
-
-    if (g_quicksort_pivot == PIVOT_MID)
-        return (lo + hi) / 2;
-
-    if (g_quicksort_pivot == PIVOT_RANDOM)
-        return lo + (rand() % (hi - lo));
-
-    if (g_quicksort_pivot == PIVOT_MEDIAN3)
+    switch (g_quicksort_pivot)
     {
-        ssize_t mid = (lo + hi) / 2;
-        return SingleMedianOfThree(A, lo, mid, hi);
-    }
-
-    if (g_quicksort_pivot == PIVOT_MEDIAN5)
-    {
-        if (A.size() < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
-        ssize_t segment = (hi - lo) / 5;
-        ssize_t lo_mid = lo + segment, mid = lo + 2 * segment, mid_hi = lo + 3 * segment, high = lo + 4 * segment;
-        value_type piv_lo = A[lo], piv_lo_mid = A[lo_mid], piv_mid = A[mid], piv_mid_hi = A[mid_hi], piv_hi = A[high];
-        std::array<value_type, 5> nums = { piv_lo, piv_lo_mid, piv_mid, piv_mid_hi, piv_hi };
-        PivotInsertionSort5(nums);
-        value_type p = nums[2];  // If Quick Sort asks for the pivot *element*, then this should be returned immediately
-        // Otherwise, check what index does p belong to
-        if (p == piv_lo) { return lo; }
-        else if (p == piv_lo_mid) { return lo_mid; }
-        else if (p == piv_mid) { return mid; }
-        else if (p == piv_mid_hi) { return mid_hi; }
-        else { return high; }
-    }
-
-    if (g_quicksort_pivot == PIVOT_NINTHER)
-    {
-        if (A.size() < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
-        ssize_t segment_size = (hi - lo) / 9;
-        ssize_t g1 = SingleMedianOfThree(A, lo, lo + segment_size, (lo + segment_size * 2) + 1);
-        ssize_t g2 = SingleMedianOfThree(A, lo + 3 * segment_size, lo + 4 * segment_size, (lo + 5 * segment_size) + 1);
-        ssize_t g3 = SingleMedianOfThree(A, lo + 6 * segment_size, lo + 7 * segment_size, (lo + 8 * segment_size) + 1);
-        return SingleMedianOfThree(A, g1, g2, g3);
-    }
-
-    return lo;
+        case PIVOT_FIRST:
+        {
+            return lo;
+        }
+        case PIVOT_LAST:
+        {
+            return hi - 1;
+        }
+        case PIVOT_MID:
+        {
+            return (lo + hi) / 2;
+        }
+        case PIVOT_RANDOM:
+        {
+            return lo + (rand() % (hi - lo));
+        }
+        case PIVOT_MEDIAN3:
+        {
+            ssize_t mid = (lo + hi) / 2;
+            return SingleMedianOfThree(A, lo, mid, hi);
+        }
+        case PIVOT_MEDIAN3RANDOM:
+        {
+            if (lo > hi)
+            {
+                ssize_t temp = lo;
+                lo = hi;
+                hi = temp;
+            }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
+            return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
+        }
+        case PIVOT_MEDIAN5:
+        {
+            if (A.size() < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+            ssize_t segment = (hi - lo) / 5;
+            ssize_t lo_mid = lo + segment, mid = lo + 2 * segment, mid_hi = lo + 3 * segment, high = lo + 4 * segment;
+            value_type piv_lo = A[lo], piv_lo_mid = A[lo_mid], piv_mid = A[mid], piv_mid_hi = A[mid_hi], piv_hi = A[high];
+            std::array<value_type, 5> nums = { piv_lo, piv_lo_mid, piv_mid, piv_mid_hi, piv_hi };
+            PivotInsertionSort5(nums);
+            value_type p = nums[2];  // If Quick Sort asks for the pivot *element*, then this should be returned immediately
+            // Otherwise, check what index does p belong to
+            if (p == piv_lo) { return lo; }
+            else if (p == piv_lo_mid) { return lo_mid; }
+            else if (p == piv_mid) { return mid; }
+            else if (p == piv_mid_hi) { return mid_hi; }
+            else { return high; }
+        }
+        case PIVOT_MEDIAN5RANDOM:
+        {
+            if (lo > hi)
+            {
+                ssize_t temp = lo;
+                lo = hi;
+                hi = temp;
+            }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
+            if (A.size() < 5)
+            {
+                return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
+            }
+            ssize_t lo1 = dist(gen1), lo2 = dist(gen1), lo3 = dist(gen1), lo4 = dist(gen1), lo5 = dist(gen1);
+            value_type piv1 = A[lo1], piv2 = A[lo2], piv3 = A[lo3], piv4 = A[lo4], piv5 = A[lo5];
+            std::array<value_type, 5> samples = { piv1, piv2, piv3, piv4, piv5 };
+            PivotInsertionSort5(samples);
+            value_type p = samples[2];
+            if (p == piv1) { return lo1; }
+            else if (p == piv2) { return lo2; }
+            else if (p == piv3) { return lo3; }
+            else if (p == piv4) { return lo4; }
+            else { return lo5; }
+        }
+        case PIVOT_MEDIAN7:
+        {
+            if (A.size() < 7) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+            ssize_t segment = (hi - lo) / 7;
+            ssize_t lo2 = lo + segment, lo3 = lo + segment * 2, lo4 = lo + segment * 3, lo5 = lo + segment * 4;
+            ssize_t lo6 = lo + segment * 5, lo7 = lo + segment * 6;
+            value_type piv1 = A[lo], piv2 = A[lo2], piv3 = A[lo3], piv4 = A[lo4], piv5 = A[lo5], piv6 = A[lo6], piv7 = A[lo7];
+            std::array<value_type, 7> samples = { piv1, piv2, piv3, piv4, piv5, piv6, piv7 };
+            PivotInsertionSort7(samples);
+            value_type p = samples[3];
+            if (p == piv1) { return lo; }
+            else if (p == piv2) { return lo2; }
+            else if (p == piv3) { return lo3; }
+            else if (p == piv4) { return lo4; }
+            else if (p == piv5) { return lo5; }
+            else if (p == piv6) { return lo6; }
+            else { return lo7; }
+        }
+        case PIVOT_MEDIAN7RANDOM:
+        {
+            if (lo > hi)
+            {
+                ssize_t temp = lo;
+                lo = hi;
+                hi = temp;
+            }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
+            if (A.size() < 7)
+            {
+                return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
+            }
+            ssize_t lo1 = dist(gen1), lo2 = dist(gen1), lo3 = dist(gen1), lo4 = dist(gen1), lo5 = dist(gen1);
+            ssize_t lo6 = dist(gen1), lo7 = dist(gen1);
+            value_type piv1 = A[lo1], piv2 = A[lo2], piv3 = A[lo3], piv4 = A[lo4], piv5 = A[lo5];
+            value_type piv6 = A[lo6], piv7 = A[lo7];
+            std::array<value_type, 7> samples = { piv1, piv2, piv3, piv4, piv5, piv6, piv7 };
+            PivotInsertionSort7(samples);
+            value_type p = samples[3];
+            if (p == piv1) { return lo1; }
+            else if (p == piv2) { return lo2; }
+            else if (p == piv3) { return lo3; }
+            else if (p == piv4) { return lo4; }
+            else if (p == piv5) { return lo5; }
+            else if (p == piv6) { return lo6; }
+            else { return lo7; }
+        }
+        case PIVOT_NINTHER:
+        {
+            if (A.size() < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+            ssize_t segment_size = (hi - lo) / 9;
+            ssize_t g1 = SingleMedianOfThree(A, lo, lo + segment_size, (lo + segment_size * 2) + 1);
+            ssize_t g2 = SingleMedianOfThree(A, lo + 3 * segment_size, lo + 4 * segment_size, (lo + 5 * segment_size) + 1);
+            ssize_t g3 = SingleMedianOfThree(A, lo + 6 * segment_size, lo + 7 * segment_size, (lo + 8 * segment_size) + 1);
+            return SingleMedianOfThree(A, g1, g2, g3);
+        }
+        case PIVOT_MEDIAN9RANDOM:
+        {
+            if (lo > hi)
+            {
+                ssize_t temp = lo;
+                lo = hi;
+                hi = temp;
+            }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
+            if (A.size() < 9)
+            {
+                return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
+            }
+            ssize_t lo1 = dist(gen1), lo2 = dist(gen1), lo3 = dist(gen1), lo4 = dist(gen1), lo5 = dist(gen1);
+            ssize_t lo6 = dist(gen1), lo7 = dist(gen1), lo8 = dist(gen1), lo9 = dist(gen1);
+            value_type piv1 = A[lo1], piv2 = A[lo2], piv3 = A[lo3], piv4 = A[lo4], piv5 = A[lo5];
+            value_type piv6 = A[lo6], piv7 = A[lo7], piv8 = A[lo8], piv9 = A[lo9];
+            std::array<value_type, 9> samples = { piv1, piv2, piv3, piv4, piv5, piv6, piv7, piv8, piv9};
+            PivotInsertionSort9(samples);
+            value_type p = samples[5];
+            if (p == piv1) { return lo1; }
+            else if (p == piv2) { return lo2; }
+            else if (p == piv3) { return lo3; }
+            else if (p == piv4) { return lo4; }
+            else if (p == piv5) { return lo5; }
+            else if (p == piv6) { return lo6; }
+            else if (p == piv7) { return lo7; }
+            else if (p == piv8) { return lo8; }
+            else { return lo9; }
+        }
+        default:
+        {
+            return lo;
+        }
+    }        
 }
 
 wxArrayString QuickSortPivotText()
 {
     wxArrayString sl;
 
-    sl.Add( _("First Item") );
-    sl.Add( _("Last Item") );
-    sl.Add( _("Middle Item") );
-    sl.Add( _("Random Item") );
-    sl.Add( _("Median of Three") );
-    sl.Add( _("Median of Five") );
-    sl.Add( _("Ninther"));
-
+    sl.Add(_("First Item"));
+    sl.Add(_("Last Item"));
+    sl.Add(_("Middle Item"));
+    sl.Add(_("Random Item"));
+    sl.Add(_("Median of Three"));
+    sl.Add(_("Random Median of Three"));
+    sl.Add(_("Median of Five"));
+    sl.Add(_("Random Median of Five"));
+    sl.Add(_("Median of Seven"));
+    sl.Add(_("Random Median of Seven"));
+    sl.Add(_("Ninther"));
+    sl.Add(_("Random Median of Nine"));
     return sl;
 }
 
