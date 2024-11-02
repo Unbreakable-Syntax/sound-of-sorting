@@ -900,7 +900,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             }
             std::array<ssize_t, 9> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
             PivotInsertionSort9(A, samples);
-            return samples[5];
+            return samples[4];
         }
         default:
         {
