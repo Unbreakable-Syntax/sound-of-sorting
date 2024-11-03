@@ -196,6 +196,9 @@ const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]);
 
 const struct AlgoEntry* g_algolist_end = g_algolist + g_algolist_size;
 
+std::random_device rd1;
+std::mt19937 gen1(rd1());
+
 // ****************************************************************************
 // *** Selection Sort
 
@@ -709,7 +712,7 @@ void WeaveMergeSort(SortArray& A)
 
 QuickSortPivotType g_quicksort_pivot = PIVOT_FIRST;
 
-ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_t hi)
+static ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_t hi)
 {
     // cases if two are equal
     if (A[lo] == A[mid]) return lo;
@@ -721,7 +724,7 @@ ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_t hi)
         : (A[mid] > A[hi - 1] ? mid : (A[lo] < A[hi - 1] ? lo : hi - 1));
 }
 
-void PivotInsertionSort5(SortArray& A, std::array<ssize_t, 5>& arr)
+static void PivotInsertionSort5(SortArray& A, std::array<ssize_t, 5>& arr)
 {
     for (size_t i = 1; i < arr.size(); ++i)
     {
@@ -736,7 +739,7 @@ void PivotInsertionSort5(SortArray& A, std::array<ssize_t, 5>& arr)
     }
 }
 
-void PivotInsertionSort7(SortArray& A, std::array<ssize_t, 7>& arr)
+static void PivotInsertionSort7(SortArray& A, std::array<ssize_t, 7>& arr)
 {
     for (size_t i = 1; i < arr.size(); ++i)
     {
@@ -751,7 +754,7 @@ void PivotInsertionSort7(SortArray& A, std::array<ssize_t, 7>& arr)
     }
 }
 
-void PivotInsertionSort9(SortArray& A, std::array<ssize_t, 9>& arr)
+static void PivotInsertionSort9(SortArray& A, std::array<ssize_t, 9>& arr)
 {
     for (size_t i = 1; i < arr.size(); ++i)
     {
@@ -764,12 +767,29 @@ void PivotInsertionSort9(SortArray& A, std::array<ssize_t, 9>& arr)
         }
         arr[j] = key;
     }
+}
+
+static ssize_t MedianOfFive(SortArray& A, ssize_t lo, ssize_t hi)
+{
+    if (hi - lo < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+    ssize_t segment = (hi - lo) / 5;
+    std::array<ssize_t, 5> nums = { lo, lo + segment,  lo + 2 * segment, lo + 3 * segment, lo + 4 * segment };
+    PivotInsertionSort5(A, nums);
+    return nums[2];
+}
+
+static ssize_t NintherPivot(SortArray& A, ssize_t lo, ssize_t hi)
+{
+    if (hi - lo < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+    ssize_t segment_size = (hi - lo) / 9;
+    ssize_t g1 = SingleMedianOfThree(A, lo, lo + segment_size, (lo + segment_size * 2) + 1);
+    ssize_t g2 = SingleMedianOfThree(A, lo + 3 * segment_size, lo + 4 * segment_size, (lo + 5 * segment_size) + 1);
+    ssize_t g3 = SingleMedianOfThree(A, lo + 6 * segment_size, lo + 7 * segment_size, (lo + 8 * segment_size) + 1);
+    return SingleMedianOfThree(A, g1, g2, g3 + 1);
 }
 
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
-std::random_device rd1;  // Seed generator
-std::mt19937 gen1(rd1()); // Mersenne Twister engine
 ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
 {
     switch (g_quicksort_pivot)
@@ -808,11 +828,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         }
         case PIVOT_MEDIAN5:
         {
-            if (hi - lo < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
-            ssize_t segment = (hi - lo) / 5;
-            std::array<ssize_t, 5> nums = { lo, lo + segment,  lo + 2 * segment, lo + 3 * segment, lo + 4 * segment };
-            PivotInsertionSort5(A, nums);
-            return nums[2];
+            return MedianOfFive(A, lo, hi);
         }
         case PIVOT_MEDIAN5RANDOM:
         {
@@ -858,12 +874,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         }
         case PIVOT_NINTHER:
         {
-            if (hi - lo < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
-            ssize_t segment_size = (hi - lo) / 9;
-            ssize_t g1 = SingleMedianOfThree(A, lo, lo + segment_size, (lo + segment_size * 2) + 1);
-            ssize_t g2 = SingleMedianOfThree(A, lo + 3 * segment_size, lo + 4 * segment_size, (lo + 5 * segment_size) + 1);
-            ssize_t g3 = SingleMedianOfThree(A, lo + 6 * segment_size, lo + 7 * segment_size, (lo + 8 * segment_size) + 1);
-            return SingleMedianOfThree(A, g1, g2, g3 + 1);
+            return NintherPivot(A, lo, hi);
         }
         case PIVOT_RANDOMNINTHER:
         {
@@ -2271,9 +2282,7 @@ void BogoSort(SortArray& A)
         if (BogoCheckSorted(A)) break;
 
         // pick a random permutation of indexes
-        std::random_device rd;
-        std::mt19937 g(rd());
-        std::shuffle(perm.begin(), perm.end(), g);
+        std::shuffle(perm.begin(), perm.end(), gen1);
 
         // permute array in-place
         std::vector<char> pmark(A.size(), 0);
