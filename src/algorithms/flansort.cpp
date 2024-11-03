@@ -46,8 +46,8 @@ const int MIN_INSERT = 32;
 const int G = 7;
 const int R = 3;
 
-std::random_device rd;
-std::mt19937 eng(rd());
+extern std::random_device rd1;
+extern std::mt19937 gen1;
 
 void shiftBW(SortArray& A, int a, int m, int b)
 {
@@ -66,7 +66,7 @@ int randGapSearch(SortArray& A, int a, int b, int val)
 		else if (randCnt++ < 1)
 		{
 			std::uniform_int_distribution<> distr(0, ((b - a) / s) - 1);
-			m = a + distr(eng) * s;
+			m = a + distr(gen1) * s;
 			ele = A[m].get();
 			if (val < ele) { b = m; }
 			else if (val > ele) { a = m + s; }
