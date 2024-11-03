@@ -921,6 +921,24 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             PivotInsertionSort9(A, samples);
             return samples[4];
         }
+        case PIVOT_MEDIAN15:
+        {
+            if (hi - lo < 15) { return MedianOfFive(A, lo, hi); }
+            ssize_t segment = (hi - lo) / 3;
+            ssize_t g1 = MedianOfFive(A, lo, lo + segment);
+            ssize_t g2 = MedianOfFive(A, lo + segment, lo + segment * 2);
+            ssize_t g3 = MedianOfFive(A, lo + segment * 2, hi);
+            return SingleMedianOfThree(A, g1, g2, g3 + 1);
+        }
+        case PIVOT_THREENINTHER:
+        {
+            if (hi - lo < 27) { return NintherPivot(A, lo, hi); }
+            ssize_t segment = (hi - lo) / 3;
+            ssize_t g1 = NintherPivot(A, lo, lo + segment);
+            ssize_t g2 = NintherPivot(A, lo + segment, lo + segment * 2);
+            ssize_t g3 = NintherPivot(A, lo + segment * 2, hi);
+            return SingleMedianOfThree(A, g1, g2, g3 + 1);
+        }
         default:
         {
             return lo;
@@ -946,6 +964,8 @@ wxArrayString QuickSortPivotText()
     sl.Add(_("Random Ninther"));
     sl.Add(_("Median of Nine"));
     sl.Add(_("Random Median of Nine"));
+    sl.Add(_("Median of Fifteen"));
+    sl.Add(_("Median of Three Ninther"));
     return sl;
 }
 
