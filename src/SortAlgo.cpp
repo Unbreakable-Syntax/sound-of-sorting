@@ -727,7 +727,7 @@ static ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_
 template <size_t N>
 static void PivotInsertionSort(SortArray& A, std::array<ssize_t, N>& arr)
 {
-    for (size_t i = 1; i < arr.size(); ++i)
+    for (size_t i = 1; i < N; ++i)
     {
         ssize_t key = arr[i];
         size_t j = i;
