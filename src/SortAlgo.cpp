@@ -724,37 +724,8 @@ static ssize_t SingleMedianOfThree(SortArray& A, ssize_t lo, ssize_t mid, ssize_
         : (A[mid] > A[hi - 1] ? mid : (A[lo] < A[hi - 1] ? lo : hi - 1));
 }
 
-static void PivotInsertionSort5(SortArray& A, std::array<ssize_t, 5>& arr)
-{
-    for (size_t i = 1; i < arr.size(); ++i)
-    {
-        ssize_t key = arr[i];
-        size_t j = i;
-        while (j > 0 && A[arr[j - 1]] > A[key])
-        {
-            arr[j] = arr[j - 1];
-            --j;
-        }
-        arr[j] = key;
-    }
-}
-
-static void PivotInsertionSort7(SortArray& A, std::array<ssize_t, 7>& arr)
-{
-    for (size_t i = 1; i < arr.size(); ++i)
-    {
-        ssize_t key = arr[i];
-        size_t j = i;
-        while (j > 0 && A[arr[j - 1]] > A[key])
-        {
-            arr[j] = arr[j - 1];
-            --j;
-        }
-        arr[j] = key;
-    }
-}
-
-static void PivotInsertionSort9(SortArray& A, std::array<ssize_t, 9>& arr)
+template <size_t N>
+static void PivotInsertionSort(SortArray& A, std::array<ssize_t, N>& arr)
 {
     for (size_t i = 1; i < arr.size(); ++i)
     {
@@ -774,7 +745,7 @@ static ssize_t MedianOfFive(SortArray& A, ssize_t lo, ssize_t hi)
     if (hi - lo < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
     ssize_t segment = (hi - lo) / 5;
     std::array<ssize_t, 5> nums = { lo, lo + segment,  lo + 2 * segment, lo + 3 * segment, lo + 4 * segment };
-    PivotInsertionSort5(A, nums);
+    PivotInsertionSort(A, nums);
     return nums[2];
 }
 
@@ -844,7 +815,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
             std::array<ssize_t, 5> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
-            PivotInsertionSort5(A, samples);
+            PivotInsertionSort(A, samples);
             return samples[2];
         }
         case PIVOT_MEDIAN7:
@@ -852,7 +823,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             if (hi - lo < 7) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
             ssize_t segment = (hi - lo) / 7;
             std::array<ssize_t, 7> samples = { lo, lo + segment, lo + segment * 2, lo + segment * 3, lo + segment * 4, lo + segment * 5, lo + segment * 6 };
-            PivotInsertionSort7(A, samples);
+            PivotInsertionSort(A, samples);
             return samples[3];
         }
         case PIVOT_MEDIAN7RANDOM:
@@ -869,7 +840,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
             std::array<ssize_t, 7> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
-            PivotInsertionSort7(A, samples);
+            PivotInsertionSort(A, samples);
             return samples[3];
         }
         case PIVOT_NINTHER:
@@ -901,7 +872,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             if (hi - lo < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
             ssize_t segment = (hi - lo) / 9;
             std::array<ssize_t, 9> samples = { lo, lo + segment, lo + segment * 2, lo + segment * 3, lo + segment * 4, lo + segment * 5, lo + segment * 6, lo + segment * 7, lo + segment * 8 };
-            PivotInsertionSort9(A, samples);
+            PivotInsertionSort(A, samples);
             return samples[4];
         }
         case PIVOT_MEDIAN9RANDOM:
@@ -918,7 +889,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
             std::array<ssize_t, 9> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
-            PivotInsertionSort9(A, samples);
+            PivotInsertionSort(A, samples);
             return samples[4];
         }
         case PIVOT_MEDIAN15:
