@@ -97,7 +97,7 @@ void ArrayItem::OnComparison(const ArrayItem& a, const ArrayItem& b)
 
 SortArray::SortArray()
     : m_calc_inversions(false),
-      m_delay(nullptr)
+    m_delay(nullptr)
 {
 }
 
@@ -929,7 +929,7 @@ unsigned short SortArray::InWatchList(ssize_t idx) const
 
         // compare watched value
         // std::atomic_ref(*m_watch[i].first).load() <-- C++20
-        if (*m_watch[i].first!= idx) continue;
+        if (m_watch[i].first->load() != idx) continue;
 
         return m_watch[i].second;
     }
@@ -939,7 +939,6 @@ unsigned short SortArray::InWatchList(ssize_t idx) const
 int SortArray::GetIndexColor(size_t idx)
 {
     int clr, acl = InAccessList(idx);
-
     // select color
     if (idx == m_access1.index)
     {

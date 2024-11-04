@@ -25,6 +25,7 @@
 #define SORT_ARRAY_HEADER
 
 #include <vector>
+#include <atomic>
 #include <algorithm>
 #include <stdlib.h>
 
@@ -313,7 +314,7 @@ protected:
     std::vector<unsigned char>   m_mark;
 
     /// custom watched index pointers in the array, set by algorithm
-    std::vector< std::pair<ssize_t*,unsigned char> > m_watch;
+    std::vector< std::pair<std::atomic<ssize_t>*,unsigned char> > m_watch;
 
     /// flag for sorted array
     bool        m_is_sorted;
@@ -376,7 +377,7 @@ public:
     void FinishFill();
 
     /// save access to array, forwards to sound system
-    void SaveAccess(size_t i);
+    // void SaveAccess(size_t i);
 
     /// check if index matches one of the watched pointers
     short InAccessList(ssize_t idx);
@@ -573,12 +574,13 @@ public:
     }
 
     // Highly experimental method to _track_ array live indexes.
-    void watch(ssize_t* idxptr, unsigned char color = 2)
+    // The index must be created as std::atomic to ensure thread safety
+    void watch(std::atomic<ssize_t>* idxptr, unsigned char color = 2)
     {
         wxMutexLocker lock(m_mutex);
         ASSERT(lock.IsOk());
 
-        m_watch.push_back( std::make_pair(idxptr,color) );
+        m_watch.push_back( std::make_pair(idxptr, color));
     }
 
     /// Release all tracked live array indexes.

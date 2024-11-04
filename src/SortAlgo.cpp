@@ -208,8 +208,11 @@ void DoubleSelectionSort(SortArray& A)
     size_t right = A.size() - 1, n = right;
     ssize_t max_idx = 0;
     ssize_t low_idx = 0;
-    A.watch(&max_idx, 4);
-    A.watch(&low_idx, 5);
+    std::atomic<ssize_t> max_i, low_i;
+    max_i.store(max_idx);
+    low_i.store(low_idx);
+    A.watch(&max_i, 4);
+    A.watch(&low_i, 5);
     while (left < right)
     {
         max_idx = right;
@@ -220,11 +223,13 @@ void DoubleSelectionSort(SortArray& A)
             { 
                 A.mark_swap(i, low_idx); 
                 low_idx = i; 
+                low_i.store(i);
             }
             else if (A[i] > A[max_idx])
             { 
                 A.mark_swap(i, max_idx);
                 max_idx = i;
+                max_i.store(i);
             }
         }
         A.swap(left, low_idx);
@@ -243,17 +248,21 @@ void DoubleSelectionSort(SortArray& A)
 void SelectionSort(SortArray& A)
 {
     ssize_t jMin = 0;
-    A.watch(&jMin, 3);
+    std::atomic<ssize_t> kMin;
+    kMin.store(jMin);
+    A.watch(&kMin, 3);
 
     for (size_t i = 0; i < A.size()-1; ++i)
     {
         jMin = i;
+        kMin.store(jMin);
 
         for (size_t j = i+1; j < A.size(); ++j)
         {
             if (A[j] < A[jMin]) {
                 A.mark_swap(j, jMin);
                 jMin = j;
+                kMin.store(jMin);
             }
         }
 
@@ -949,21 +958,32 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
     ssize_t p = QuickSortSelectPivot(A, lo, hi + 1);
+    std::atomic<ssize_t> p1, i1, j1;
 
     value_type pivot = A[p];
-    A.watch(&p, 2);
+    p1.store(p);
+    A.watch(&p1, 2);
 
     ssize_t i = lo, j = hi;
-    A.watch(&i, 3);
-    A.watch(&j, 3);
+    i1.store(i);
+    j1.store(j);
+    A.watch(&i1, 3);
+    A.watch(&j1, 3);
 
     while (i <= j)
     {
         while (A[i] < pivot)
+        {
             i++;
+            i1.store(i);
+        }
+            
 
         while (A[j] > pivot)
+        {
             j--;
+            j1.store(j);
+        }
 
         if (i <= j)
         {
@@ -972,8 +992,11 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
             // follow pivot if it is swapped
             if (p == i) p = j;
             else if (p == j) p = i;
+            p1.store(p);
 
             i++, j--;
+            i1.store(i);
+            j1.store(j);
         }
     }
 
@@ -1006,13 +1029,16 @@ size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
     A.mark(hi - 1);
 
     ssize_t i = lo;
-    A.watch(&i, 3);
+    std::atomic<ssize_t> i1;
+    i1.store(i);
+    A.watch(&i1, 3);
 
     for (size_t j = lo; j < hi - 1; ++j)
     {
         if (A[j] <= pivot) {
             A.swap(i, j);
             ++i;
+            i1.store(i);
         }
     }
 
@@ -1060,9 +1086,11 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     // schema: |p ===  |i <<< | ??? |j >>> |q === |piv
     ssize_t i = lo, j = hi - 1;
     ssize_t p = lo, q = hi - 1;
-
-    A.watch(&i, 3);
-    A.watch(&j, 3);
+    std::atomic<ssize_t> i1, j1;
+    i1.store(i);
+    j1.store(j);
+    A.watch(&i1, 3);
+    A.watch(&j1, 3);
 
     for (;;)
     {
@@ -1074,6 +1102,7 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
                 A.swap(i, p++);
             }
             ++i;
+            i1.store(i);
         }
 
         // partition on right
@@ -1084,12 +1113,15 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
                 A.swap(j, q--);
             }
             --j;
+            j1.store(j);
         }
 
         if (i > j) break;
 
         // swap item between < > regions
         A.swap(i++, j--);
+        i1.store(i);
+        j1.store(j);
     }
 
     // swap pivot to right place
@@ -1101,15 +1133,19 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
 
     // swap equal ranges into center, but avoid swapping equal elements
     j = i - 1; i = i + 1;
+    i1.store(i);
+    j1.store(j);
 
     ssize_t pe = lo + std::min(p - lo, num_less);
     for (ssize_t k = lo; k < pe; k++, j--) {
+        j1.store(j);
         A.swap(k, j);
         A.mark_swap(k, j);
     }
 
     ssize_t qe = hi - 1 - std::min(hi - 1 - q, num_greater - 1); // one already greater at end
     for (ssize_t k = hi - 1; k > qe; k--, i++) {
+        i1.store(i);
         A.swap(i, k);
         A.mark_swap(i, k);
     }
@@ -1141,7 +1177,9 @@ std::pair<ssize_t, ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t
     A.mark(hi - 1);
 
     ssize_t i = lo, k = hi - 1;
-    A.watch(&i, 3);
+    std::atomic<ssize_t> i1;
+    i1.store(i);
+    A.watch(&i1, 3);
 
     for (ssize_t j = lo; j < k; ++j)
     {
@@ -1153,6 +1191,7 @@ std::pair<ssize_t, ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t
         }
         else if (cmp < 0) {
             A.swap(i++, j);
+            i1.store(i);
         }
     }
 
@@ -1209,31 +1248,44 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
         ssize_t l = left + 1;
         ssize_t g = right - 1;
         ssize_t k = l;
+        std::atomic<ssize_t> l1, g1, k1;
+        l1.store(l);
+        g1.store(g);
+        k1.store(k);
 
-        a.watch(&l, 3);
-        a.watch(&g, 3);
-        a.watch(&k, 3);
+        a.watch(&l1, 3);
+        a.watch(&g1, 3);
+        a.watch(&k1, 3);
 
         while (k <= g)
         {
             if (a[k] < p) {
                 a.swap(k, l);
                 ++l;
+                l1.store(l);
             }
             else if (a[k] >= q) {
-                while (a[g] > q && k < g)  --g;
+                while (a[g] > q && k < g)
+                {
+                    --g;
+                    g1.store(g);
+                }
                 a.swap(k, g);
-                --g;
-
+                --g;           
+                g1.store(g);
                 if (a[k] < p) {
                     a.swap(k, l);
                     ++l;
+                    l1.store(l);
                 }
             }
             ++k;
+            k1.store(k);
         }
         --l;
         ++g;
+        l1.store(l);
+        g1.store(g);
         a.swap(left, l);
         a.swap(right, g);
 
@@ -3246,47 +3298,56 @@ void SlowSort(SortArray& A)
 
 // Adapted from http://en.wikipedia.org/wiki/Cycle_sort
 
-void CycleSort(SortArray& array, ssize_t n)
+void CycleSort(SortArray& vec_arr, ssize_t n)
 {
+    std::atomic<ssize_t> cStart, cRank;
     ssize_t cycleStart = 0;
-    array.watch(&cycleStart, 16);
+    cStart.store(cycleStart);
+    vec_arr.watch(&cStart, 16);
 
     ssize_t rank = 0;
-    array.watch(&rank, 5);
+    cRank.store(rank);
+    vec_arr.watch(&cRank, 5);
 
     // Loop through the array to find cycles to rotate.
     for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
     {
-        value_type& item = array.get_mutable(cycleStart);
-
+        value_type& item = vec_arr.get_mutable(cycleStart);
+        cStart.store(cycleStart);
         do {
             // Find where to put the item.
             rank = cycleStart;
             for (ssize_t i = cycleStart + 1; i < n; ++i)
             {
-                if (array[i] < item)
+                if (vec_arr[i] < item)
+                {
                     rank++;
+                    cRank.store(rank);
+                }
             }
 
             // If the item is already there, this is a 1-cycle.
             if (rank == cycleStart) {
-                array.mark(rank, 2);
+                vec_arr.mark(rank, 2);
                 break;
             }
 
             // Otherwise, put the item after any duplicates.
-            while (item == array[rank])
+            while (item == vec_arr[rank])
+            {
                 rank++;
+                cRank.store(rank);
+            }
 
             // Put item into right place and colorize
-            counted_swap(array.get_mutable(rank), item);
-            array.mark(rank, 2);
+            counted_swap(vec_arr.get_mutable(rank), item);
+            vec_arr.mark(rank, 2);
 
             // Continue for rest of the cycle.
         } while (rank != cycleStart);
     }
 
-    array.unwatch_all();
+    vec_arr.unwatch_all();
 }
 
 void CycleSort(SortArray& A)
