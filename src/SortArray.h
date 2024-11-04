@@ -313,7 +313,7 @@ protected:
     std::vector<unsigned char>   m_mark;
 
     /// custom watched index pointers in the array, set by algorithm
-    std::vector< std::pair<volatile ssize_t*,unsigned char> > m_watch;
+    std::vector< std::pair<ssize_t*,unsigned char> > m_watch;
 
     /// flag for sorted array
     bool        m_is_sorted;
@@ -572,9 +572,8 @@ public:
         m_access_list.clear();
     }
 
-    /// Highly experimental method to _track_ array live indexes. For this, the
-    /// index must be marked volatile!.
-    void watch(volatile ssize_t* idxptr, unsigned char color = 2)
+    // Highly experimental method to _track_ array live indexes.
+    void watch(ssize_t* idxptr, unsigned char color = 2)
     {
         wxMutexLocker lock(m_mutex);
         ASSERT(lock.IsOk());

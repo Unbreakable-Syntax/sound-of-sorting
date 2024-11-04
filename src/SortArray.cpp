@@ -928,7 +928,8 @@ unsigned short SortArray::InWatchList(ssize_t idx) const
         if (m_watch[i].first == nullptr) continue;
 
         // compare watched value
-        if (*m_watch[i].first != idx) continue;
+        // std::atomic_ref(*m_watch[i].first).load() <-- C++20
+        if (*m_watch[i].first!= idx) continue;
 
         return m_watch[i].second;
     }

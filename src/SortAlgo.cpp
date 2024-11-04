@@ -206,8 +206,8 @@ void DoubleSelectionSort(SortArray& A)
 {
     size_t left = 0;
     size_t right = A.size() - 1, n = right;
-    volatile ssize_t max_idx = 0;
-    volatile ssize_t low_idx = 0;
+    ssize_t max_idx = 0;
+    ssize_t low_idx = 0;
     A.watch(&max_idx, 4);
     A.watch(&low_idx, 5);
     while (left < right)
@@ -242,7 +242,7 @@ void DoubleSelectionSort(SortArray& A)
 
 void SelectionSort(SortArray& A)
 {
-    volatile ssize_t jMin = 0;
+    ssize_t jMin = 0;
     A.watch(&jMin, 3);
 
     for (size_t i = 0; i < A.size()-1; ++i)
@@ -948,12 +948,12 @@ wxArrayString QuickSortPivotText()
 void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
-    volatile ssize_t p = QuickSortSelectPivot(A, lo, hi + 1);
+    ssize_t p = QuickSortSelectPivot(A, lo, hi + 1);
 
     value_type pivot = A[p];
     A.watch(&p, 2);
 
-    volatile ssize_t i = lo, j = hi;
+    ssize_t i = lo, j = hi;
     A.watch(&i, 3);
     A.watch(&j, 3);
 
@@ -1005,7 +1005,7 @@ size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
     A.swap(p, hi - 1);
     A.mark(hi - 1);
 
-    volatile ssize_t i = lo;
+    ssize_t i = lo;
     A.watch(&i, 3);
 
     for (size_t j = lo; j < hi - 1; ++j)
@@ -1058,8 +1058,8 @@ void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
     const value_type& pivot = A[hi];
 
     // schema: |p ===  |i <<< | ??? |j >>> |q === |piv
-    volatile ssize_t i = lo, j = hi - 1;
-    volatile ssize_t p = lo, q = hi - 1;
+    ssize_t i = lo, j = hi - 1;
+    ssize_t p = lo, q = hi - 1;
 
     A.watch(&i, 3);
     A.watch(&j, 3);
@@ -1140,7 +1140,7 @@ std::pair<ssize_t, ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t
     A.swap(p, hi - 1);
     A.mark(hi - 1);
 
-    volatile ssize_t i = lo, k = hi - 1;
+    ssize_t i = lo, k = hi - 1;
     A.watch(&i, 3);
 
     for (ssize_t j = lo; j < k; ++j)
@@ -1206,9 +1206,9 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
         a.mark(left);
         a.mark(right);
 
-        volatile ssize_t l = left + 1;
-        volatile ssize_t g = right - 1;
-        volatile ssize_t k = l;
+        ssize_t l = left + 1;
+        ssize_t g = right - 1;
+        ssize_t k = l;
 
         a.watch(&l, 3);
         a.watch(&g, 3);
@@ -3248,11 +3248,11 @@ void SlowSort(SortArray& A)
 
 void CycleSort(SortArray& array, ssize_t n)
 {
-    volatile ssize_t cycleStart = 0;
+    ssize_t cycleStart = 0;
     array.watch(&cycleStart, 16);
 
-    volatile ssize_t rank = 0;
-    array.watch(&rank, 3);
+    ssize_t rank = 0;
+    array.watch(&rank, 5);
 
     // Loop through the array to find cycles to rotate.
     for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
@@ -3279,7 +3279,7 @@ void CycleSort(SortArray& array, ssize_t n)
                 rank++;
 
             // Put item into right place and colorize
-            std::swap(array.get_mutable(rank), item);
+            counted_swap(array.get_mutable(rank), item);
             array.mark(rank, 2);
 
             // Continue for rest of the cycle.
