@@ -25,7 +25,6 @@
 #include <SDL.h>
 
 #include "wxg/WAbout_wxg.h"
-#include <wx/msgdlg.h> 
 
 WMain::WMain(wxWindow* parent)
     : WMain_wxg(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE)
@@ -323,13 +322,13 @@ void WMain::SetDelay(size_t pos)
     // 0.001 ms formula, tested on Windows
     // Warning! The slider will never go past 0.005 ms with this formula
     // g_delay = pow(base, pos / 15000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 800.0;
-    g_delay = pow(base, pos / 2200.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
+    g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
 #else
     // other systems probably have sucking real-time performance anyway
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
     
 #endif
-    if (pos == 0) g_delay = 0.0;
+    if (pos == 0) g_delay = 0.01;
 
     if (g_delay > 10)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
