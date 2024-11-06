@@ -171,15 +171,23 @@ void WMain::AbortAlgorithm()
     if (!m_thread) return;
     
     m_thread_terminate = true;
-    g_sound_on = false;
-    SDL_PauseAudio(1);
-    soundButton->SetValue(false);
+    if (soundButton->GetValue() == true)
+    {
+        SoundReset();
+        g_sound_on = false;
+        SDL_PauseAudio(1);
+    }
 
     if (m_thread->IsPaused()) { m_thread->Resume(); }
     sortview->SetStepwise(false);
 
     while (m_thread->IsAlive()) { wxMilliSleep(1); }
     g_algo_running = false;
+    if (soundButton->GetValue() == true)
+    {
+        g_sound_on = true;
+        SDL_PauseAudio(0);
+    }
 
     delete m_thread;
     m_thread = nullptr;
