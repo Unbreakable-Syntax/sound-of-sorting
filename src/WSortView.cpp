@@ -95,35 +95,68 @@ void WSortView::DoDelay(double delay)
         // else timeout, recheck m_stepwise and loop
         wxMilliSleep(1);
     }
-    double microDelay = delay * 1000.0, secs = 0;
+    double secs = 0;
     #if __WXGTK__
         // wxMicroSleep(delay * 1000.0);
-        while (secs <= microDelay)
+        if (delay < 1)
         {
-            wxMicroSleep(1);
-            secs += 1.0;
-            if (wmain->m_thread_terminate)
+            double microDelay = delay * 1000.0;
+            while (secs <= microDelay)
             {
-                wmain->m_thread->Exit();
-                return;
+                wxMicroSleep(1);
+                secs += 1.0;
+                if (wmain->m_thread_terminate)
+                {
+                    wmain->m_thread->Exit();
+                    return;
+                }
+            }
+        }
+        else
+        {
+            while (secs <= delay)
+            {
+                wxMilliSleep(1);
+                secs += 1.0;
+                if (wmain->m_thread_terminate)
+                {
+                    wmain->m_thread->Exit();
+                    return;
+                }
             }
         }
     #elif MSW_PERFORMANCECOUNTER
         // mswMicroSleep(delay * 1000.0);
-        while (secs <= microDelay)
+        if (delay < 1)
         {
-            mswMicroSleep(1);
-            secs += 1.0;
-            if (wmain->m_thread_terminate)
+            double microDelay = delay * 1000.0;
+            while (secs <= microDelay)
             {
-                wmain->m_thread->Exit();
-                return;
+                mswMicroSleep(1);
+                secs += 1.0;
+                if (wmain->m_thread_terminate)
+                {
+                    wmain->m_thread->Exit();
+                    return;
+                }
+            }
+        }
+        else
+        {
+            while (secs <= delay)
+            {
+                mswMicroSleep(1000);
+                secs += 1.0;
+                if (wmain->m_thread_terminate)
+                {
+                    wmain->m_thread->Exit();
+                    return;
+                }
             }
         }
     #else
         // wxMSW does not have a high resolution timer, maybe others do?
         // wxMilliSleep(delay);
-        wxMilliSleep(delay);
         while (secs <= delay)
         {
             wxMilliSleep(1);
