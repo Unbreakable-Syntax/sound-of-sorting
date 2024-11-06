@@ -25,6 +25,7 @@
 #include <SDL.h>
 
 #include "wxg/WAbout_wxg.h"
+#include <wx/msgdlg.h> 
 
 WMain::WMain(wxWindow* parent)
     : WMain_wxg(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE)
@@ -174,7 +175,7 @@ void WMain::AbortAlgorithm()
     if (m_thread->IsPaused()) { m_thread->Resume(); }
     sortview->SetStepwise(false);
 
-    m_thread->Wait();
+    while (m_thread->IsAlive()) { wxMilliSleep(1); }
     g_algo_running = false;
 
     delete m_thread;
@@ -186,9 +187,7 @@ void WMain::OnRunButton(wxCommandEvent &event)
     // join finished thread
     if (m_thread && !m_thread->IsAlive())
     {
-        m_thread->Wait();
         g_algo_running = false;
-
         delete m_thread;
         m_thread = nullptr;
     }
@@ -324,13 +323,13 @@ void WMain::SetDelay(size_t pos)
     // 0.001 ms formula, tested on Windows
     // Warning! The slider will never go past 0.005 ms with this formula
     // g_delay = pow(base, pos / 15000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 800.0;
-    g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
+    g_delay = pow(base, pos / 2200.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
 #else
     // other systems probably have sucking real-time performance anyway
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
     
 #endif
-    if (pos == 0) g_delay = 0.1;
+    if (pos == 0) g_delay = 0.0;
 
     if (g_delay > 10)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
