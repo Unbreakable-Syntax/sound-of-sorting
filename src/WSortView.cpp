@@ -95,15 +95,43 @@ void WSortView::DoDelay(double delay)
         // else timeout, recheck m_stepwise and loop
         wxMilliSleep(1);
     }
-
-#if __WXGTK__
-    wxMicroSleep(delay * 1000.0);
-#elif MSW_PERFORMANCECOUNTER
-    mswMicroSleep(delay * 1000.0);
-#else
-    // wxMSW does not have a high resolution timer, maybe others do?
-    wxMilliSleep(delay);
-#endif
+    double microDelay = delay * 1000.0, secs = 0;
+    #if __WXGTK__
+        while (secs <= microDelay)
+        {
+            wxMicroSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+    #elif MSW_PERFORMANCECOUNTER
+        while (secs <= microDelay)
+        {
+            mswMicroSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+    #else
+        // wxMSW does not have a high resolution timer, maybe others do?
+        wxMilliSleep(delay);
+        while (secs <= delay)
+        {
+            wxMilliSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+    #endif
 }
 
 void WSortView::OnAccess()
