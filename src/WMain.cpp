@@ -169,8 +169,11 @@ void WMain::OnDClick(wxSplitterEvent& event) { event.Veto(); }
 void WMain::AbortAlgorithm()
 {
     if (!m_thread) return;
-
+    
     m_thread_terminate = true;
+    SDL_PauseAudio(1);
+    soundButton->SetValue(false);
+
     if (m_thread->IsPaused()) { m_thread->Resume(); }
     sortview->SetStepwise(false);
 
