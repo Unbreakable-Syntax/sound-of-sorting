@@ -171,6 +171,7 @@ void WMain::AbortAlgorithm()
     if (!m_thread) return;
     
     m_thread_terminate = true;
+    g_sound_on = false;
     SDL_PauseAudio(1);
     soundButton->SetValue(false);
 
