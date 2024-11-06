@@ -97,6 +97,7 @@ void WSortView::DoDelay(double delay)
     }
     double microDelay = delay * 1000.0, secs = 0;
     #if __WXGTK__
+        // wxMicroSleep(delay * 1000.0);
         while (secs <= microDelay)
         {
             wxMicroSleep(1);
@@ -108,6 +109,7 @@ void WSortView::DoDelay(double delay)
             }
         }
     #elif MSW_PERFORMANCECOUNTER
+        // mswMicroSleep(delay * 1000.0);
         while (secs <= microDelay)
         {
             mswMicroSleep(1);
@@ -120,6 +122,7 @@ void WSortView::DoDelay(double delay)
         }
     #else
         // wxMSW does not have a high resolution timer, maybe others do?
+        // wxMilliSleep(delay);
         wxMilliSleep(delay);
         while (secs <= delay)
         {
