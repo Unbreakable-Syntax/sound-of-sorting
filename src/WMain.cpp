@@ -342,7 +342,7 @@ void WMain::SetDelay(size_t pos)
 #endif
     if (pos == 0) g_delay = 0.1;
 
-    if (g_delay > 1)
+    if (g_delay >= 1)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
     else
         labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
