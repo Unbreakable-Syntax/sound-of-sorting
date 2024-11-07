@@ -97,8 +97,8 @@ const struct AlgoEntry g_algolist[] =
       _("Dual pivot quick sort variant: partitions \"<1<2?>\" using three pointers, "
         "two at left and one at right.") },
     { _("PDQ Sort"), &PDQSort, UINT_MAX, inversion_count_instrumented,
-      _("Pattern-defeating quicksort (pdqsort) is a novel sorting algorithm that combines the fast average case of randomized quicksort"
-          "with the fast worst case of heapsort, while achieving linear time on inputs with certain patterns.") },
+      _("Pattern-defeating Quick Sort (pdqsort) is a novel sorting algorithm that combines the fast average case of randomized quicksort"
+          " with the fast worst case of heapsort, while achieving linear time on inputs with certain patterns.") },
     { _("Branchless PDQ Sort"), &PDQSortBranchless, UINT_MAX, inversion_count_instrumented,
       _("Provides potential speedup over default Pattern-Defeating Quick Sort for arithmetic data.") },
     { _("Flan Sort (Quick Library Sort)"), &QuickLibrarySort, UINT_MAX, inversion_count_instrumented,
