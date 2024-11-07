@@ -24,7 +24,7 @@
 #ifndef SORT_ARRAY_HEADER
 #define SORT_ARRAY_HEADER
 
-#include <vector>
+#include <array>
 #include <atomic>
 #include <algorithm>
 #include <stdlib.h>
@@ -106,7 +106,7 @@ constexpr
 void counted_reverse(BidirIt first, BidirIt last)
 {
     using iter_cat = typename std::iterator_traits<BidirIt>::iterator_category;
-    if constexpr (std::is_base_of_v<std::random_access_iterator_tag, iter_cat>)
+    if (std::is_base_of<std::random_access_iterator_tag, iter_cat>::value)
     {
         if (first == last) { return; }
         for (--last; first < last; (void)++first, --last)
@@ -119,7 +119,7 @@ void counted_reverse(BidirIt first, BidirIt last)
     }
 }
 
-template <typename RandomIt, typename Compare = std::less<>>
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
 void counted_make_heap(RandomIt first, RandomIt last, Compare comp = Compare())
 {
     if (last - first < 2) return;
@@ -155,7 +155,7 @@ void sift_down(RandomIt first, RandomIt last, std::size_t index, Compare comp)
     }
 }
 
-template <typename RandomIt, typename Compare = std::less<>>
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
 void counted_sort_heap(RandomIt first, RandomIt last, Compare comp = Compare())
 {
     while (last - first > 1)
