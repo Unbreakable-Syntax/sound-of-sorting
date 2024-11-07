@@ -749,7 +749,7 @@ static void PivotInsertionSort(SortArray& A, std::array<ssize_t, N>& arr)
     }
 }
 
-std::array<size_t, 3> gaps = { 8, 3, 1 };
+static std::array<size_t, 3> gaps = { 8, 3, 1 };
 template<size_t N>
 static void PivotShellSort(SortArray& A, std::array<ssize_t, N>& arr)
 {
