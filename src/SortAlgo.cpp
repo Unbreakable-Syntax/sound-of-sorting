@@ -749,9 +749,29 @@ static void PivotInsertionSort(SortArray& A, std::array<ssize_t, N>& arr)
     }
 }
 
+std::array<size_t, 3> gaps = { 8, 3, 1 };
+template<size_t N>
+static void PivotShellSort(SortArray& A, std::array<ssize_t, N>& arr)
+{
+    for (size_t k = 0; k < 3; ++k)
+    {
+        for (size_t h = gaps[k], i = h; i < N; ++i)
+        {
+            ssize_t key = arr[i];
+            size_t j = i;
+            while (j >= h && A[arr[j - h]] > A[key])
+            {
+                arr[j] = arr[j - h];
+                j -= h;
+            }
+            arr[j] = key;
+        }
+    }
+}
+
 static ssize_t MedianOfFive(SortArray& A, ssize_t lo, ssize_t hi)
 {
-    if (hi - lo < 5) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+    if (hi - lo < 10) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
     ssize_t segment = (hi - lo) / 5;
     std::array<ssize_t, 5> nums = { lo, lo + segment,  lo + 2 * segment, lo + 3 * segment, lo + 4 * segment };
     PivotInsertionSort(A, nums);
@@ -760,7 +780,7 @@ static ssize_t MedianOfFive(SortArray& A, ssize_t lo, ssize_t hi)
 
 static ssize_t NintherPivot(SortArray& A, ssize_t lo, ssize_t hi)
 {
-    if (hi - lo < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+    if (hi - lo < 18) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
     ssize_t segment_size = (hi - lo) / 9;
     ssize_t g1 = SingleMedianOfThree(A, lo, lo + segment_size, (lo + segment_size * 2) + 1);
     ssize_t g2 = SingleMedianOfThree(A, lo + 3 * segment_size, lo + 4 * segment_size, (lo + 5 * segment_size) + 1);
@@ -819,7 +839,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 hi = temp;
             }
             std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
-            if (hi - lo < 5)
+            if (hi - lo < 10)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
@@ -829,7 +849,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         }
         case PIVOT_MEDIAN7:
         {
-            if (hi - lo < 7) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+            if (hi - lo < 14) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
             ssize_t segment = (hi - lo) / 7;
             std::array<ssize_t, 7> samples = { lo, lo + segment, lo + segment * 2, lo + segment * 3, lo + segment * 4, lo + segment * 5, lo + segment * 6 };
             PivotInsertionSort(A, samples);
@@ -844,7 +864,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 hi = temp;
             }
             std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
-            if (hi - lo < 7)
+            if (hi - lo < 14)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
@@ -865,7 +885,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 hi = temp;
             }
             std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
-            if (hi - lo < 9)
+            if (hi - lo < 18)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
@@ -878,7 +898,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         }
         case PIVOT_MEDIAN9:
         {
-            if (hi - lo < 9) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+            if (hi - lo < 18) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
             ssize_t segment = (hi - lo) / 9;
             std::array<ssize_t, 9> samples = { lo, lo + segment, lo + segment * 2, lo + segment * 3, lo + segment * 4, lo + segment * 5, lo + segment * 6, lo + segment * 7, lo + segment * 8 };
             PivotInsertionSort(A, samples);
@@ -893,7 +913,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
                 hi = temp;
             }
             std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
-            if (hi - lo < 9)
+            if (hi - lo < 18)
             {
                 return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
             }
@@ -901,9 +921,36 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             PivotInsertionSort(A, samples);
             return samples[4];
         }
+        case PIVOT_MEDIAN11:
+        {
+            if (hi - lo < 22) { return SingleMedianOfThree(A, lo, (lo + hi) / 2, hi); }
+            ssize_t segment = (hi - lo) / 11;
+            std::array<ssize_t, 11> samples = {lo, lo + segment, lo + segment * 2, lo + segment * 3, lo + segment * 4, lo + segment * 5, lo + segment * 6, lo + segment * 7, lo + segment * 8, lo + segment * 9, lo + segment * 10 };
+            PivotShellSort(A, samples);
+            return samples[5];
+            break;
+        }
+        case PIVOT_MEDIAN11RANDOM:
+        {
+            if (lo > hi)
+            {
+                ssize_t temp = lo;
+                lo = hi;
+                hi = temp;
+            }
+            std::uniform_int_distribution<ssize_t> dist(lo, hi - 1);
+            if (hi - lo < 22)
+            {
+                return SingleMedianOfThree(A, dist(gen1), dist(gen1), dist(gen1) + 1);
+            }
+            std::array<ssize_t, 11> samples = { dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1), dist(gen1) };
+            PivotShellSort(A, samples);
+            return samples[5];
+            break;
+        }
         case PIVOT_MEDIAN15:
         {
-            if (hi - lo < 15) { return MedianOfFive(A, lo, hi); }
+            if (hi - lo < 30) { return MedianOfFive(A, lo, hi); }
             ssize_t segment = (hi - lo) / 3;
             ssize_t g1 = MedianOfFive(A, lo, lo + segment);
             ssize_t g2 = MedianOfFive(A, lo + segment, lo + segment * 2);
@@ -912,7 +959,7 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         }
         case PIVOT_THREENINTHER:
         {
-            if (hi - lo < 27) { return NintherPivot(A, lo, hi); }
+            if (hi - lo < 54) { return NintherPivot(A, lo, hi); }
             ssize_t segment = (hi - lo) / 3;
             ssize_t g1 = NintherPivot(A, lo, lo + segment);
             ssize_t g2 = NintherPivot(A, lo + segment, lo + segment * 2);
@@ -944,6 +991,8 @@ wxArrayString QuickSortPivotText()
     sl.Add(_("Random Ninther"));
     sl.Add(_("Median of Nine"));
     sl.Add(_("Random Median of Nine"));
+    sl.Add(_("Median of Eleven"));
+    sl.Add(_("Random Median of Eleven"));
     sl.Add(_("Median of Fifteen"));
     sl.Add(_("Median of Three Ninther"));
     return sl;
