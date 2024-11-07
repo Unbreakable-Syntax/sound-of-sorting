@@ -1297,7 +1297,7 @@ namespace grailsort_detail
 
 template<
     typename RandomAccessIterator,
-    typename Compare = std::less<>
+    typename Compare = std::less<typename std::iterator_traits<RandomAccessIterator>::value_type>
 >
 void grailsort(RandomAccessIterator first, RandomAccessIterator last, Compare comp = {})
 {
@@ -1312,7 +1312,7 @@ void grailsort(RandomAccessIterator first, RandomAccessIterator last, Compare co
 template<
     typename RandomAccessIterator1,
     typename RandomAccessIterator2,
-    typename Compare = std::less<>
+    typename Compare = std::less<typename std::iterator_traits<RandomAccessIterator1>::value_type>
 >
 void grailsort(RandomAccessIterator1 first, RandomAccessIterator1 last,
     RandomAccessIterator2 buff_first, RandomAccessIterator2 buff_last,
