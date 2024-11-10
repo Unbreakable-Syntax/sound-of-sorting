@@ -1042,7 +1042,6 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
             i1.store(i);
         }
             
-
         while (A[j] > pivot)
         {
             j--;
@@ -1271,7 +1270,7 @@ std::pair<ssize_t, ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t
     }
     A.unmark_all();
 
-    return std::make_pair((ssize_t)i, j);
+    return std::make_pair(i, j);
 }
 
 void QuickSortTernaryLL(SortArray& A, size_t lo, size_t hi)
