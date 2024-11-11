@@ -3356,51 +3356,40 @@ void SlowSort(SortArray& A)
 
 void CycleSort(SortArray& vec_arr, ssize_t n)
 {
-    std::atomic<ssize_t> cStart, cRank;
-    ssize_t cycleStart = 0;
-    cStart.store(cycleStart);
-    vec_arr.watch(&cStart, 16);
+    std::atomic<ssize_t> cycleStart, rank;
+    cycleStart.store(0);
+    vec_arr.watch(&cycleStart, 16);
 
-    ssize_t rank = 0;
-    cRank.store(rank);
-    vec_arr.watch(&cRank, 5);
+    rank.store(0);
+    vec_arr.watch(&rank, 5);
 
     // Loop through the array to find cycles to rotate.
-    for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
+    for (; cycleStart.load() < n - 1; ++cycleStart)
     {
-        value_type& item = vec_arr.get_mutable(cycleStart);
-        cStart.store(cycleStart);
+        value_type& item = vec_arr.get_mutable(cycleStart.load());
         do {
             // Find where to put the item.
-            rank = cycleStart;
-            for (ssize_t i = cycleStart + 1; i < n; ++i)
+            rank.store(cycleStart.load());
+            for (ssize_t i = cycleStart.load() + 1; i < n; ++i)
             {
-                if (vec_arr[i] < item)
-                {
-                    rank++;
-                    cRank.store(rank);
-                }
+                if (vec_arr[i] < item) { rank++; }
             }
 
             // If the item is already there, this is a 1-cycle.
-            if (rank == cycleStart) {
-                vec_arr.mark(rank, 2);
+            if (rank.load() == cycleStart.load()) {
+                vec_arr.mark(rank.load(), 2);
                 break;
             }
 
             // Otherwise, put the item after any duplicates.
-            while (item == vec_arr[rank])
-            {
-                rank++;
-                cRank.store(rank);
-            }
+            while (item == vec_arr[rank.load()]) { rank++; }
 
             // Put item into right place and colorize
-            counted_swap(vec_arr.get_mutable(rank), item);
-            vec_arr.mark(rank, 2);
+            counted_swap(vec_arr.get_mutable(rank.load()), item);
+            vec_arr.mark(rank.load(), 2);
 
             // Continue for rest of the cycle.
-        } while (rank != cycleStart);
+        } while (rank.load() != cycleStart.load());
     }
 
     vec_arr.unwatch_all();
