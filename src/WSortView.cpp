@@ -98,7 +98,7 @@ void WSortView::DoDelay(double delay)
     double secs = 0;
     #if __WXGTK__
         // wxMicroSleep(delay * 1000.0);
-        if (delay < 1)
+        if (delay < 1.0)
         {
             double microDelay = delay * 1000.0;
             while (secs <= microDelay)
@@ -127,7 +127,7 @@ void WSortView::DoDelay(double delay)
         }
     #elif MSW_PERFORMANCECOUNTER
         // mswMicroSleep(delay * 1000.0);
-        if (delay < 1)
+        if (delay < 1.0)
         {
             double microDelay = delay * 1000.0;
             while (secs <= microDelay)
