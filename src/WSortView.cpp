@@ -74,6 +74,8 @@ void mswMicroSleep(int microseconds)
 
 #endif // MSW_PERFORMANCECOUNTER
 
+static double returnFrac(double n) { return n - static_cast<int>(n); }
+
 void WSortView::DoDelay(double delay)
 {
     // must be called by the algorithm thread
@@ -95,12 +97,24 @@ void WSortView::DoDelay(double delay)
         // else timeout, recheck m_stepwise and loop
         wxMilliSleep(1);
     }
-    double secs = 0.0, microDelay = delay * 1000.0;
+    double secs = 0.0, microDelay = returnFrac(delay) * 1000.0;
+    delay = std::trunc(delay);
     if (microDelay == std::numeric_limits<double>::infinity() || microDelay == -std::numeric_limits<double>::infinity())
     { microDelay = std::numeric_limits<double>::max(); }
     #if __WXGTK__
         // wxMicroSleep(delay * 1000.0);
-        while (secs <= microDelay)
+        while (secs < delay)
+        {
+            wxMilliSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+        secs = 0;
+        while (secs < microDelay)
         {
             wxMicroSleep(1);
             secs += 1.0;
@@ -112,6 +126,17 @@ void WSortView::DoDelay(double delay)
         }
     #elif MSW_PERFORMANCECOUNTER
         // mswMicroSleep(delay * 1000.0);
+        while (secs < delay)
+        {
+            mswMicroSleep(1000);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+        secs = 0;
         while (secs <= microDelay)
         {
             mswMicroSleep(1);
