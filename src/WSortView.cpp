@@ -137,7 +137,7 @@ void WSortView::DoDelay(double delay)
             }
         }
         secs = 0;
-        while (secs <= microDelay)
+        while (secs < microDelay)
         {
             mswMicroSleep(1);
             secs += 1.0;
