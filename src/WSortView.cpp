@@ -95,63 +95,31 @@ void WSortView::DoDelay(double delay)
         // else timeout, recheck m_stepwise and loop
         wxMilliSleep(1);
     }
-    double secs = 0;
+    double secs = 0.0, microDelay = delay * 1000.0;
+    if (microDelay == std::numeric_limits<double>::infinity() || microDelay == -std::numeric_limits<double>::infinity())
+    { microDelay = std::numeric_limits<double>::max(); }
     #if __WXGTK__
         // wxMicroSleep(delay * 1000.0);
-        if (delay < 1.0)
+        while (secs <= microDelay)
         {
-            double microDelay = delay * 1000.0;
-            while (secs <= microDelay)
+            wxMicroSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
             {
-                wxMicroSleep(1);
-                secs += 1.0;
-                if (wmain->m_thread_terminate)
-                {
-                    wmain->m_thread->Exit();
-                    return;
-                }
-            }
-        }
-        else
-        {
-            while (secs <= delay)
-            {
-                wxMilliSleep(1);
-                secs += 1.0;
-                if (wmain->m_thread_terminate)
-                {
-                    wmain->m_thread->Exit();
-                    return;
-                }
+                wmain->m_thread->Exit();
+                return;
             }
         }
     #elif MSW_PERFORMANCECOUNTER
         // mswMicroSleep(delay * 1000.0);
-        if (delay < 1.0)
+        while (secs <= microDelay)
         {
-            double microDelay = delay * 1000.0;
-            while (secs <= microDelay)
+            mswMicroSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
             {
-                mswMicroSleep(1);
-                secs += 1.0;
-                if (wmain->m_thread_terminate)
-                {
-                    wmain->m_thread->Exit();
-                    return;
-                }
-            }
-        }
-        else
-        {
-            while (secs <= delay)
-            {
-                mswMicroSleep(1000);
-                secs += 1.0;
-                if (wmain->m_thread_terminate)
-                {
-                    wmain->m_thread->Exit();
-                    return;
-                }
+                wmain->m_thread->Exit();
+                return;
             }
         }
     #else
