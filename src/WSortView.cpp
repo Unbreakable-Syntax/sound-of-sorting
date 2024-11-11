@@ -113,7 +113,7 @@ void WSortView::DoDelay(double delay)
                 return;
             }
         }
-        secs = 0;
+        secs = 0.0;
         while (secs < microDelay)
         {
             wxMicroSleep(1);
@@ -136,7 +136,7 @@ void WSortView::DoDelay(double delay)
                 return;
             }
         }
-        secs = 0;
+        secs = 0.0;
         while (secs < microDelay)
         {
             mswMicroSleep(1);
@@ -150,7 +150,7 @@ void WSortView::DoDelay(double delay)
     #else
         // wxMSW does not have a high resolution timer, maybe others do?
         // wxMilliSleep(delay);
-        while (secs <= delay)
+        while (secs < delay)
         {
             wxMilliSleep(1);
             secs += 1.0;
