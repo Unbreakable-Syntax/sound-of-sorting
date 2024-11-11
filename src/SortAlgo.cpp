@@ -206,36 +206,32 @@ void DoubleSelectionSort(SortArray& A)
 {
     size_t left = 0;
     size_t right = A.size() - 1, n = right;
-    ssize_t max_idx = 0;
-    ssize_t low_idx = 0;
     std::atomic<ssize_t> max_i, low_i;
-    max_i.store(max_idx);
-    low_i.store(low_idx);
+    max_i.store(0);
+    low_i.store(0);
     A.watch(&max_i, 4);
     A.watch(&low_i, 5);
     while (left < right)
     {
-        max_idx = right;
-        low_idx = left;
+        max_i.store(right);
+        low_i.store(left);
         for (size_t i = left; i <= right; ++i)
         {
-            if (A[i] < A[low_idx])
+            if (A[i] < A[low_i.load()])
             { 
-                A.mark_swap(i, low_idx); 
-                low_idx = i; 
+                A.mark_swap(i, low_i.load()); 
                 low_i.store(i);
             }
-            else if (A[i] > A[max_idx])
+            else if (A[i] > A[max_i.load()])
             { 
-                A.mark_swap(i, max_idx);
-                max_idx = i;
+                A.mark_swap(i, max_i.load());
                 max_i.store(i);
             }
         }
-        A.swap(left, low_idx);
+        A.swap(left, low_i.load());
         ssize_t l = left;  // This removes comparison warning
-        if (max_idx == l) { max_idx = low_idx; }
-        A.swap(right, max_idx);
+        if (max_i.load() == l) { max_i.store(low_i.load()); }
+        A.swap(right, max_i.load());
         if (left > 0) { A.unmark(left - 1); }
         if (right < n) { A.unmark(right + 1); }
         A.mark(left);
@@ -247,26 +243,23 @@ void DoubleSelectionSort(SortArray& A)
 
 void SelectionSort(SortArray& A)
 {
-    ssize_t jMin = 0;
     std::atomic<ssize_t> kMin;
-    kMin.store(jMin);
+    kMin.store(0);
     A.watch(&kMin, 3);
 
     for (size_t i = 0; i < A.size()-1; ++i)
     {
-        jMin = i;
-        kMin.store(jMin);
+        kMin.store(i);
 
         for (size_t j = i+1; j < A.size(); ++j)
         {
-            if (A[j] < A[jMin]) {
-                A.mark_swap(j, jMin);
-                jMin = j;
-                kMin.store(jMin);
+            if (A[j] < A[kMin.load()]) {
+                A.mark_swap(j, kMin.load());
+                kMin.store(j);
             }
         }
 
-        A.swap(i, jMin);
+        A.swap(i, kMin.load());
 
         // mark the last good element
         if (i > 0) A.unmark(i-1);
