@@ -99,8 +99,6 @@ void WSortView::DoDelay(double delay)
     }
     double secs = 0.0, microDelay = returnFrac(delay) * 1000.0;
     delay = std::trunc(delay);
-    if (microDelay == std::numeric_limits<double>::infinity() || microDelay == -std::numeric_limits<double>::infinity())
-    { microDelay = std::numeric_limits<double>::max(); }
     #if __WXGTK__
         // wxMicroSleep(delay * 1000.0);
         while (secs < delay)
