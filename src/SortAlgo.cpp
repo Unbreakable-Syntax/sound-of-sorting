@@ -1011,55 +1011,39 @@ wxArrayString QuickSortPivotText()
 void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
-    ssize_t p = QuickSortSelectPivot(A, lo, hi + 1);
-    std::atomic<ssize_t> p1, i1, j1;
+    std::atomic<ssize_t> p{ QuickSortSelectPivot(A, lo, hi + 1) };
+    value_type pivot = A[p.load()];
+    A.watch(&p, 2);
 
-    value_type pivot = A[p];
-    p1.store(p);
-    A.watch(&p1, 2);
+    std::atomic<ssize_t> i{ lo }, j{ hi };
+    A.watch(&i, 3);
+    A.watch(&j, 3);
 
-    ssize_t i = lo, j = hi;
-    i1.store(i);
-    j1.store(j);
-    A.watch(&i1, 3);
-    A.watch(&j1, 3);
-
-    while (i <= j)
+    while (i.load() <= j.load())
     {
-        while (A[i] < pivot)
-        {
-            i++;
-            i1.store(i);
-        }
+        while (A[i.load()] < pivot) { i++; }
             
-        while (A[j] > pivot)
-        {
-            j--;
-            j1.store(j);
-        }
+        while (A[j.load()] > pivot) { j--; }
 
-        if (i <= j)
+        if (i.load() <= j.load())
         {
-            A.swap(i, j);
+            A.swap(i.load(), j.load());
 
             // follow pivot if it is swapped
-            if (p == i) p = j;
-            else if (p == j) p = i;
-            p1.store(p);
+            if (p.load() == i.load()) p.store(j.load());
+            else if (p.load() == j.load()) p.store(i.load());
 
             i++, j--;
-            i1.store(i);
-            j1.store(j);
         }
     }
 
     A.unwatch_all();
 
     if (lo < j)
-        QuickSortLR(A, lo, j);
+        QuickSortLR(A, lo, j.load());
 
     if (i < hi)
-        QuickSortLR(A, i, hi);
+        QuickSortLR(A, i.load(), hi);
 }
 
 void QuickSortLR(SortArray& A)
