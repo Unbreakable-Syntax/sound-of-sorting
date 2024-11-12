@@ -148,7 +148,7 @@ void WSortView::DoDelay(double delay)
     #else
         // wxMSW does not have a high resolution timer, maybe others do?
         // wxMilliSleep(delay);
-        if (delay < 1.0) { delay = 1; }
+        if (delay < 1.0) { delay = 1.0; }
         while (secs < delay)
         {
             wxMilliSleep(1);
